@@ -119,6 +119,5 @@ venv.bak/
 .DS_Store
 
 # Makefile
-Makefile
 .aws
 .dbt
