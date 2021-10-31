@@ -1,0 +1,31 @@
+team,team_acronym,conference,primary_color,secondary_color,third_color,previous_season_wins,previous_season_rank,team_logo
+Milwaukee Bucks,MIL,Eastern,#00471b,#f0ebd2,NA,46,7,https://stats.nba.com/media/img/teams/logos/MIL_logo.svg
+Toronto Raptors,TOR,Eastern,#ce1141,#061922,NA,27,24,https://stats.nba.com/media/img/teams/logos/TOR_logo.svg
+Boston Celtics,BOS,Eastern,#008348,#061922,#bb9753,36,16,https://stats.nba.com/media/img/teams/logos/BOS_logo.svg
+Indiana Pacers,IND,Eastern,#ffc633,#00275d,#bec0c2,34,17,https://stats.nba.com/media/img/teams/logos/IND_logo.svg
+Miami Heat,MIA,Eastern,#98002e,#f9a01b,NA,40,13,https://stats.nba.com/media/img/teams/logos/MIA_logo.svg
+Philadelphia 76ers,PHI,Eastern,#ed174c,#006bb6,NA,49,3,https://stats.nba.com/media/img/teams/logos/PHI_logo.svg
+Brooklyn Nets,BKN,Eastern,#061922,#061922,#bb9753,48,4,https://stats.nba.com/media/img/teams/logos/BKN_logo.svg
+Orlando Magic,ORL,Eastern,#007dc5,#c4ced3,NA,21,28,https://stats.nba.com/media/img/teams/logos/ORL_logo.svg
+Charlotte Hornets,CHA,Eastern,#1d1160,#008ca8,#a1a1a4,33,20,https://stats.nba.com/media/img/teams/logos/CHA_logo.svg
+Washington Wizards,WAS,Eastern,#002b5c,#e31837,NA,34,18,https://stats.nba.com/media/img/teams/logos/WAS_logo.svg
+Chicago Bulls,CHI,Eastern,#ce1141,#061922,NA,31,22,https://stats.nba.com/media/img/teams/logos/CHI_logo.svg
+New York Knicks,NYK,Eastern,#006bb6,#f58426,NA,41,12,https://stats.nba.com/media/img/teams/logos/NYK_logo.svg
+Detroit Pistons,DET,Eastern,#006bb6,#ed174c,#0f586c,20,29,https://stats.nba.com/media/img/teams/logos/DET_logo.svg
+Atlanta Hawks,ATL,Eastern,#e13a3e,#c4d600,#061922,41,11,https://stats.nba.com/media/img/teams/logos/ATL_logo.svg
+Cleveland Cavaliers,CLE,Eastern,#860038,#fdbb30,#002d62,22,26,https://stats.nba.com/media/img/teams/logos/CLE_logo.svg
+Los Angeles Lakers,LAL,Western,#fdb927,#552582,NA,42,8,https://stats.nba.com/media/img/teams/logos/LAL_logo.svg
+Los Angeles Clippers,LAC,Western,#ed174c,#006bb6,NA,47,5,https://stats.nba.com/media/img/teams/logos/LAC_logo.svg
+Denver Nuggets,DEN,Western,#4d90cd,#fdb927,NA,47,6,https://stats.nba.com/media/img/teams/logos/DEN_logo.svg
+Houston Rockets,HOU,Western,#ce1141,#c4ced3,#061922,17,30,https://stats.nba.com/media/img/teams/logos/HOU_logo.svg
+Oklahoma City Thunder,OKC,Western,#007dc3,#F05133,NA,22,27,https://stats.nba.com/media/img/teams/logos/OKC_logo.svg
+Utah Jazz,UTA,Western,#002b5c,#f9a01b,NA,52,1,https://stats.nba.com/media/img/teams/logos/UTA_logo.svg
+Dallas Mavericks,DAL,Western,#0064b1,#c4ced3,#061922,42,9,https://stats.nba.com/media/img/teams/logos/DAL_logo.svg
+Portland Trail Blazers,POR,Western,#061922,#e03a3e,NA,42,10,https://stats.nba.com/media/img/teams/logos/POR_logo.svg
+Memphis Grizzlies,MEM,Western,#7399c6,#bed4e9,#fdb927,38,15,https://stats.nba.com/media/img/teams/logos/MEM_logo.svg
+Phoenix Suns,PHX,Western,#e56020,#1d1160,NA,51,2,https://stats.nba.com/media/img/teams/logos/PHX_logo.svg
+San Antonio Spurs,SAS,Western,#061922,#bac3c9,NA,33,19,https://stats.nba.com/media/img/teams/logos/SAS_logo.svg
+Sacramento Kings,SAC,Western,#724c9f,#8e9090,NA,31,23,https://stats.nba.com/media/img/teams/logos/SAC_logo.svg
+New Orleans Pelicans,NOP,Western,#002b5c,#e31837,NA,31,21,https://stats.nba.com/media/img/teams/logos/NOP_logo.svg
+Minnesota Timberwolves,MIN,Western,#005083,#00a94f,NA,23,25,https://stats.nba.com/media/img/teams/logos/MIN_logo.svg
+Golden State Warriors,GSW,Western,#fdb927,#006bb6,NA,39,14,https://stats.nba.com/media/img/teams/logos/GSW_logo.svg

@@ -1,0 +1,49 @@
+version: 2
+
+models:
+    - name: staging_aws_adv_stats_table
+      description: Staging table for advanced stats
+      columns:
+        - name: team
+          tests:
+            - not_null
+            - dbt_expectations.expect_column_to_exist
+    - name: staging_aws_injury_data_table
+      description: Staging table for box scores
+      columns:
+        - name: player
+          tests:
+            - not_null
+        - name: team
+          tests:
+            - not_null
+        - name: injury
+          tests:
+            - not_null
+        - name: description
+          tests:
+            - not_null
+    - name: staging_aws_reddit_data_table
+      description: Staging table for box scores
+      columns:
+        - name: scrape_date
+          tests:
+            - not_null
+        - name: scrape_time
+          tests:
+            - not_null
+    - name: staging_aws_stats_table
+      description: Staging table for box scores
+      columns:
+        - name: player
+          tests:
+            - not_null
+    - name: staging_aws_transactions_table
+      description: Staging table for box scores
+      columns:
+        - name: date
+          tests:
+            - not_null
+        - name: transaction
+          tests:
+            - not_null
