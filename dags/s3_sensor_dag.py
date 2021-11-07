@@ -1,0 +1,37 @@
+from datetime import datetime, timedelta
+
+from airflow import DAG
+from airflow.operators.dummy_operator import DummyOperator
+from airflow.operators.email import EmailOperator
+from airflow.providers.amazon.aws.sensors.s3_key import S3KeySensor
+
+with DAG(
+    "s3_sensor",
+    schedule_interval='0 11 * * *',
+    start_date=datetime(2021, 11, 7),
+    dagrun_timeout=timedelta(minutes=60),
+    catchup=False
+) as dag:
+
+    sensor = S3KeySensor(
+        task_id='s3_sensor_test',
+        bucket_key='boxscores/boxscores-*',
+        wildcard_match=True,
+        bucket_name='jacobsbucket97',
+        timeout=18*60*60,
+        poke_interval=10)
+
+    dummy_task1 = DummyOperator(task_id="dummy_task1")
+
+    dummy_task2 = DummyOperator(task_id="dummy_task2")
+
+    dummy_task3 = DummyOperator(task_id="dummy_task3")
+
+    send_email_notification = EmailOperator(
+      task_id="send_email_notification",
+      to="jyablonski9@gmail.com",
+      subject="Airflow NBA S3 File SENSED",
+      html_content="<h3>Process Completed</h3>"
+    ) 
+
+    sensor >> [dummy_task1, dummy_task2, dummy_task3] >> send_email_notification
