@@ -5,6 +5,8 @@ from airflow.operators.dummy_operator import DummyOperator
 from airflow.operators.email import EmailOperator
 from airflow.providers.amazon.aws.sensors.s3_key import S3KeySensor
 
+# https://stackoverflow.com/questions/50591886/airflow-s3keysensor-how-to-make-it-continue-running
+# basically make a lambda function to call the trigger_dag whenever a file lands in s3 via the airflow rest api.
 with DAG(
     "s3_sensor",
     schedule_interval='0 11 * * *',
