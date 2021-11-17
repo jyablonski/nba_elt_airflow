@@ -121,3 +121,9 @@ venv.bak/
 # Makefile
 .aws
 .dbt
+
+# dbt stuff
+.dbt
+target/
+dbt_modules/
+logs/

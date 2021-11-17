@@ -3,7 +3,11 @@ from datetime import datetime, timedelta
 
 from airflow import DAG
 from airflow.operators.dummy_operator import DummyOperator
+from airflow.operators.bash_operator import BashOperator
 from airflow.operators.email import EmailOperator
+
+DBT_PROFILE_DIR = '~/.dbt/'
+DBT_PROJECT_DIR = '~/airflow/dags/dbt/'
 
 with DAG(
     "custom_operator_dag",
@@ -15,11 +19,9 @@ with DAG(
 
     dummy_task = DummyOperator(task_id="dummy_task")
 
-    send_email_notification = EmailOperator(
-    task_id="send_email_notification",
-    to="jyablonski9@gmail.com",
-    subject="Airflow NBA ELT Pipeline DAG Run",
-    html_content="<h3>Process Completed</h3>"
-    ) 
+    dbt_deps = BashOperator(
+      task_id="dbt_deps",
+      bash_command=f"dbt deps --profiles-dir {DBT_PROFILE_DIR} --project-dir {DBT_PROJECT_DIR}"
+    )
 
-    dummy_task >> send_email_notification
+    dummy_task >> dbt_deps
