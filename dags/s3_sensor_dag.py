@@ -5,6 +5,9 @@ from airflow.operators.dummy_operator import DummyOperator
 from airflow.operators.email import EmailOperator
 from airflow.providers.amazon.aws.sensors.s3_key import S3KeySensor
 
+# git remote add origin git@github.com:jyablonski/nba_elt_airflow.git
+# git push --set-upstream origin master
+
 # https://stackoverflow.com/questions/50591886/airflow-s3keysensor-how-to-make-it-continue-running
 # basically make a lambda function to call the trigger_dag whenever a file lands in s3 via the airflow rest api.
 with DAG(
