@@ -33,7 +33,17 @@ def jacobs_ecs_task(dag: DAG) -> ECSOperator:
       cluster="jacobs_fargate_cluster",
       task_definition="jacobs_task_airflow",
       launch_type="FARGATE",
-      overrides={},
+      overrides={
+          "containerOverrides": [
+      {
+          "name": "jacobs_container_airflow",
+          "environment": [
+              {"name": "dag_run_id", "value": "{{ run_id }}"}, # https://airflow.apache.org/docs/apache-airflow/stable/templates-ref.html
+              {"name": "myvar", "value": " {{ ds }}"},         # USE THESE TO CREATE IDEMPOTENT TASKS / DAGS
+          ]
+      }
+        ]
+      },
       network_configuration={
           "awsvpcConfiguration": {
               "securityGroups": ["sg-0e3e9289166404b84"],
@@ -94,7 +104,7 @@ def create_dag() -> DAG:
         catchup=False,
         default_args = JACOBS_DEFAULT_ARGS,
         schedule_interval=schedule_interval,
-        start_date=datetime(2021, 11, 15)
+        start_date=datetime(2021, 11, 19)
     )
     t1 = jacobs_dummy_task(dag, 1)
     t2 = jacobs_ecs_task(dag)
