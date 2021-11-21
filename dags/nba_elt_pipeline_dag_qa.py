@@ -38,8 +38,8 @@ def jacobs_ecs_task(dag: DAG) -> ECSOperator:
       {
           "name": "jacobs_container_airflow",
           "environment": [
-              {"name": "dag_run_id", "value": "{{ run_id }}"}, # https://airflow.apache.org/docs/apache-airflow/stable/templates-ref.html
-              {"name": "myvar", "value": " {{ ds }}"},         # USE THESE TO CREATE IDEMPOTENT TASKS / DAGS
+              {"name": "dag_run_ts", "value": "{{ ts }}"}, # https://airflow.apache.org/docs/apache-airflow/stable/templates-ref.html
+              {"name": "dag_run_date", "value": " {{ ds }}"},         # USE THESE TO CREATE IDEMPOTENT TASKS / DAGS
           ]
       }
         ]
@@ -104,7 +104,8 @@ def create_dag() -> DAG:
         catchup=False,
         default_args = JACOBS_DEFAULT_ARGS,
         schedule_interval=schedule_interval,
-        start_date=datetime(2021, 11, 19)
+        start_date=datetime(2021, 11, 20),
+        max_active_runs=1
     )
     t1 = jacobs_dummy_task(dag, 1)
     t2 = jacobs_ecs_task(dag)
