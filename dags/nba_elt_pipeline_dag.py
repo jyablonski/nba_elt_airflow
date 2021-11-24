@@ -18,7 +18,8 @@ with DAG(
     schedule_interval='0 11 * * *',
     start_date=datetime(2021, 10, 16),
     dagrun_timeout=timedelta(minutes=60),
-    catchup=False
+    catchup=False,
+    tags=["nba_elt_pipeline"]
 ) as dag:
 
     dummy_task = DummyOperator(task_id="dummy_task")

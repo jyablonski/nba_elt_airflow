@@ -7,13 +7,13 @@ from airflow.operators.dummy_operator import DummyOperator
 from airflow.providers.amazon.aws.operators.ecs import ECSOperator
 
 JACOBS_DEFAULT_ARGS = {
-    'owner': 'airflow',
+    'owner': 'jacob',
     'depends_on_past': False,
     'email': ['jyablonski9@gmail.com'],
     'email_on_failure': True,
     'email_on_retry': True,
     'retries': 1,
-    'retry_delay': timedelta(minutes=5)
+    'retry_delay': timedelta(minutes=30)
 }
 
 os.environ['AWS_DEFAULT_REGION'] = 'us-east-1'
@@ -38,8 +38,8 @@ def jacobs_ecs_task(dag: DAG) -> ECSOperator:
       {
           "name": "jacobs_container_airflow",
           "environment": [
-              {"name": "dag_run_ts", "value": "{{ ts }}"}, # https://airflow.apache.org/docs/apache-airflow/stable/templates-ref.html
-              {"name": "dag_run_date", "value": " {{ ds }}"},         # USE THESE TO CREATE IDEMPOTENT TASKS / DAGS
+              {"name": "dag_run_ts", "value": "{{ ts }}"},         # https://airflow.apache.org/docs/apache-airflow/stable/templates-ref.html
+              {"name": "dag_run_date", "value": " {{ ds }}"},      # USE THESE TO CREATE IDEMPOTENT TASKS / DAGS
           ]
       }
         ]
@@ -105,7 +105,8 @@ def create_dag() -> DAG:
         default_args = JACOBS_DEFAULT_ARGS,
         schedule_interval=schedule_interval,
         start_date=datetime(2021, 11, 20),
-        max_active_runs=1
+        max_active_runs=1,
+        tags=["nba_elt_pipeline", "qa"]
     )
     t1 = jacobs_dummy_task(dag, 1)
     t2 = jacobs_ecs_task(dag)

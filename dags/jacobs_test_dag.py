@@ -24,4 +24,11 @@ with DAG(
       bash_command=f"dbt deps --profiles-dir {DBT_PROFILE_DIR} --project-dir {DBT_PROJECT_DIR}"
     )
 
-    dummy_task >> dbt_deps
+    send_email_notification = EmailOperator(
+      task_id="send_email_notification",
+      to="jyablonski9@gmail.com",
+      subject="Test Dag run",
+      html_content="<h3>Process Completed</h3>"
+    ) 
+
+    dummy_task >> dbt_deps >> send_email_notification
