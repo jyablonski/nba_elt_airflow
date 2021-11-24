@@ -6,6 +6,7 @@ black
 pylint-airflow
 pylint
 pytest
+freezegun
 
 # Install custom plugins as an egg for linting & local development
 # These plugins are automatically installed as entrypoints to `airflow.plugins` by Airflow
