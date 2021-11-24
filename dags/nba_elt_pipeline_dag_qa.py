@@ -5,6 +5,15 @@ from airflow.operators.email import EmailOperator
 from airflow.operators.bash_operator import BashOperator
 from airflow.operators.dummy_operator import DummyOperator
 from airflow.providers.amazon.aws.operators.ecs import ECSOperator
+from utils import get_ssm_parameter
+
+jacobs_network_config = {
+          "awsvpcConfiguration": {
+              "securityGroups": [get_ssm_parameter('jacobs_ssm_sg_task')],
+              "subnets": [get_ssm_parameter('jacobs_ssm_subnet1'), get_ssm_parameter('jacobs_ssm_subnet2')],
+              "assignPublicIp": "ENABLED"
+          }
+      }
 
 JACOBS_DEFAULT_ARGS = {
     'owner': 'jacob',
@@ -44,13 +53,7 @@ def jacobs_ecs_task(dag: DAG) -> ECSOperator:
       }
         ]
       },
-      network_configuration={
-          "awsvpcConfiguration": {
-              "securityGroups": ["sg-0e3e9289166404b84"],
-              "subnets": ["subnet-0652b6b91d94ebcd0", "subnet-0047afa4a7e93ec89"],
-              "assignPublicIp": "ENABLED"
-          }
-      },
+      network_configuration=jacobs_network_config,
       awslogs_group="aws_ecs_logs"
     ) 
 
