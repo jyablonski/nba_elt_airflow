@@ -37,7 +37,7 @@ def jacobs_dummy_task(dag: DAG, task_id) -> DummyOperator:
 
 def jacobs_ecs_task(dag: DAG) -> ECSOperator:
     return ECSOperator(
-      task_id="jacobs_airflow_ecs_task_qa",
+      task_id="jacobs_airflow_ecs_task_prod",
       dag = dag,
       aws_conn_id="aws_ecs",
       cluster="jacobs_fargate_cluster",
@@ -59,7 +59,7 @@ def jacobs_ecs_task(dag: DAG) -> ECSOperator:
     ) 
 
 def jacobs_dbt_task1(dag: DAG) -> BashOperator:
-    task_id = "dbt_seed_qa"
+    task_id = "dbt_seed_prod"
 
     return BashOperator(
       task_id=task_id,
@@ -68,7 +68,7 @@ def jacobs_dbt_task1(dag: DAG) -> BashOperator:
     )
 
 def jacobs_dbt_task2(dag: DAG) -> BashOperator:
-    task_id = "dbt_run_qa"
+    task_id = "dbt_run_prod"
     
     return BashOperator(
       task_id=task_id,
@@ -77,7 +77,7 @@ def jacobs_dbt_task2(dag: DAG) -> BashOperator:
     )
 
 def jacobs_dbt_task3(dag: DAG) -> BashOperator:
-    task_id = "dbt_test_qa"
+    task_id = "dbt_test_prod"
     
     return BashOperator(
       task_id=task_id,
@@ -87,13 +87,13 @@ def jacobs_dbt_task3(dag: DAG) -> BashOperator:
 
 
 def jacobs_email_task(dag: DAG) -> EmailOperator:
-    task_id = "send_email_notification_qa"
+    task_id = "send_email_notification_prod"
 
     return EmailOperator(
       task_id=task_id,
       dag = dag,
       to="jyablonski9@gmail.com",
-      subject="Airflow NBA ELT Pipeline DAG Run",
+      subject="Airflow NBA ELT Pipeline PROD DAG Run",
       html_content="<h3>Process Completed</h3>"
     ) 
 
@@ -104,13 +104,13 @@ def create_dag() -> DAG:
     schedule_interval="0 11 * * *"
     
     dag = DAG(
-        "nba_elt_pipeline_dag_qa",
+        "nba_elt_pipeline_dag_prod",
         catchup=False,
         default_args = JACOBS_DEFAULT_ARGS,
         schedule_interval=schedule_interval,
         start_date=datetime(2021, 11, 20),
         max_active_runs=1,
-        tags=["nba_elt_pipeline", "qa"]
+        tags=["nba_elt_pipeline", "prod"]
     )
     t1 = jacobs_dummy_task(dag, 1)
     t2 = jacobs_ecs_task(dag)
@@ -128,12 +128,3 @@ def create_dag() -> DAG:
     return dag
 
 dag = create_dag()
-
-#     # jacobs_ge_task = GreatExpectationsOperator(
-    #     task_id='jacobs_ge_task',
-    #     expectation_suite_name='my_suite',
-    #     batch_kwargs={
-    #         'table': 'my_table',
-    #         'datasource': 'my_datasource'
-    #     }
-    # )
