@@ -25,6 +25,7 @@ WORKDIR /root
 
 COPY Makefile /root/Makefile
 COPY airflow.requirements.txt /root/airflow.requirements.txt
+# Custom credential files I've added - not in the git repo
 COPY .aws /root/.aws
 COPY .dbt /root/.dbt
 
