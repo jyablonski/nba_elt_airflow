@@ -42,3 +42,31 @@ def my_function():
            sg: {get_ssm_parameter('jacobs_ssm_sg_task')}
           """
     )
+
+def airflow_email_prac_function():
+    email = """
+      <h3>Process {{ ts }} Completed</h3>
+      <br>
+      ds start: {{ data_interval_start }}
+      <br>
+      ds end: {{ data_interval_end }}
+      <br>
+      ds: {{ ds }}
+      <br>
+      ds nodash: {{ ds_nodash }}
+      <br>
+      ts: {{ ts }}
+      <br>
+      ts nodash: {{ts_nodash }}
+      <br>
+      dag: {{ dag }}
+      <br>
+      task: {{ task }}
+      <br>
+      run_id: {{ run_id }}
+      <br>
+      dag run: {{ dag_run }}
+      <br>
+      owner: {{ task.owner}}
+      """
+    return email

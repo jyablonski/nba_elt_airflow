@@ -6,7 +6,7 @@ from airflow.operators.dummy_operator import DummyOperator
 from airflow.operators.bash_operator import BashOperator
 from airflow.operators.python_operator import PythonOperator
 from airflow.operators.email import EmailOperator
-from utils import my_function, get_ssm_parameter
+from utils import my_function, get_ssm_parameter, airflow_email_prac_function
 
 JACOBS_DEFAULT_ARGS = {
     'owner': 'jacob',
@@ -74,6 +74,13 @@ with DAG(
       """
     ) 
 
+    send_email_notification_custom = EmailOperator(
+      task_id="send_email_notification_custom",
+      to="jyablonski9@gmail.com",
+      subject="Airflow Test Dag run on {{ ds }}",
+      html_content=airflow_email_prac_function()
+    ) 
+
     # dummy_task >> [python_dummy_task, dbt_deps] >> send_email_notification
 
-    dummy_task >> send_email_notification
+    dummy_task >> send_email_notification >> send_email_notification_custom
