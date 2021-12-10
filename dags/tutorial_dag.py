@@ -30,6 +30,7 @@ from airflow import DAG
 
 # Operators; we need this to operate!
 from airflow.operators.bash import BashOperator
+
 # [END import_module]
 
 # [START default_args]
@@ -65,7 +66,7 @@ dag = DAG(
     catchup=False,
     default_args=default_args,
     description="A simple tutorial DAG",
-    schedule_interval= '0 11 * * *',
+    schedule_interval="0 11 * * *",
     start_date=datetime(2021, 10, 1),
     tags=["example"],
 )

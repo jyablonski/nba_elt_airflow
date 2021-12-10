@@ -21,7 +21,7 @@ endif
 # Lints all python files
 .PHONY: lint
 lint: venv
-	venv/bin/python3 -m black dags plugins tests --check
+	venv/bin/python3 -m black dags plugins tests
 	venv/bin/python3 -m pylint dags --load-plugins=pylint_airflow
 	venv/bin/python3 -m pylint dags/modules --load-plugins=pylint_airflow
 	venv/bin/python3 -m pylint plugins
