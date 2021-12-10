@@ -23,15 +23,13 @@ Documentation that goes along with the Airflow tutorial located
 """
 # [START tutorial]
 # [START import_module]
-from datetime import timedelta
+from datetime import datetime, timedelta
 
 # The DAG object; we'll need this to instantiate a DAG
 from airflow import DAG
 
 # Operators; we need this to operate!
 from airflow.operators.bash import BashOperator
-from airflow.utils.dates import days_ago
-
 # [END import_module]
 
 # [START default_args]
@@ -44,7 +42,7 @@ default_args = {
     "email_on_failure": False,
     "email_on_retry": False,
     "retries": 1,
-    "retry_delay": timedelta(minutes=5),
+    "retry_delay": timedelta(minutes=1),
     # 'queue': 'bash_queue',
     # 'pool': 'backfill',
     # 'priority_weight': 10,
@@ -64,10 +62,11 @@ default_args = {
 # [START instantiate_dag]
 dag = DAG(
     "tutorial_dag",
+    catchup=False,
     default_args=default_args,
     description="A simple tutorial DAG",
     schedule_interval= '0 11 * * *',
-    start_date=days_ago(2),
+    start_date=datetime(2021, 10, 1),
     tags=["example"],
 )
 # [END instantiate_dag]
