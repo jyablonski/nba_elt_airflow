@@ -29,8 +29,7 @@ with DAG(
     dagrun_timeout=timedelta(minutes=60),
     default_args=JACOBS_DEFAULT_ARGS,
     catchup=False,
-    tags=["test", "qa"],
-) as dag:
+    tags=["test", "qa"],) as dag:
 
     dummy_task = DummyOperator(task_id="dummy_task")
 

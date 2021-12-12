@@ -29,4 +29,10 @@ jobs:
         uses: wearerequired/lint-action@v1
         with:
           black: true
+
+      - name: Lint Apply
+        if: github.ref == 'refs/heads/master' && github.event_name == 'push'
+        uses: wearerequired/lint-action@v1
+        with:
+          black: true
           auto_fix: true
