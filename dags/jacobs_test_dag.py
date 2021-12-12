@@ -32,7 +32,7 @@ with DAG(
     tags=["test", "qa"],
 ) as dag:
 
-# fk
+    # fk
 
     dummy_task = DummyOperator(task_id="dummy_task")
 
