@@ -68,7 +68,8 @@ dag = DAG(
     description="A simple tutorial DAG",
     schedule_interval="0 11 * * *",
     start_date=datetime(2021, 10, 1),
-    tags=["example"],)
+    tags=["example"],
+)
 # [END instantiate_dag]
 
 # t1, t2 and t3 are examples of tasks created by instantiating operators
