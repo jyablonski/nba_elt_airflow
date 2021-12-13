@@ -76,6 +76,11 @@ reset-airflow:
 rebuild-airflow:
 	@docker-compose build
 
+# use this when on feature_integration to rebase feature integration w/ the lint changes applied to master after accepting a mr
+PHONY: git-rebase
+git-rebase:
+	git rebase origin/master
+
 ### DO NOT RUN THESE STEPS BY HAND
 ### The below steps are used inside the Dockerfile and/or docker-compose, they are not meant to be run locally
 internal-install-airflow:
