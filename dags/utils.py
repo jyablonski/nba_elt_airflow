@@ -3,6 +3,9 @@ import boto3
 
 # accessed via systems manager -> parameter store
 
+def practice_xcom_function(number: int = 5):
+    print(f"the number is {number}!")
+    return number
 
 def get_owner(parameter: str) -> str:
     print(f"The owner is {parameter}!")
