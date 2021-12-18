@@ -5,7 +5,7 @@ The template I used to get started is available [here](https://github.com/soggyc
 
 * Links to other Repos providing infrastructure for this Project
 
-	* [Python Web Scrape Script](https://github.com/jyablonski/python_docker)
-	* [Terraform](https://github.com/jyablonski/aws_terraform/tree/master/prod)
+	* [Python Web Scrape](https://github.com/jyablonski/python_docker)
+	* [Terraform](https://github.com/jyablonski/aws_terraform/)
 	* [dbt](https://github.com/jyablonski/nba_elt_dbt)
 	* [Shiny Server](https://github.com/jyablonski/NBA-Dashboard)
