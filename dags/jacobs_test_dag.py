@@ -91,13 +91,10 @@ with DAG(
             ]
         },
         network_configuration=jacobs_network_config,
-        awslogs_group="aws_ecs_logs",
-        awslogs_stream_prefix="jacobs_container_airflow",
-        do_xcom_push=True,
+        awslogs_group="jacobs_ecs_logs_airflow",
+        awslogs_stream_prefix="ecs/jacobs_container_airflow", # THIS WILL ALLOW YOU TO START STREAMING THE ECS LOGS IN CLOUDWATCH -TO- THE AIRFLOW LOGS
+        do_xcom_push=True, # This pushes the last line of code in the script as an xcom return value.  can just push S3 file path instead.
     ) # this works, basic idea is xcom push True means that it will grab the last event logged in the ecs logs and send that as an xcom
-      # maybe try xcom = s3 file path and see if that gets pushed
-      # getting an error that my airflow credentials dont have access to get log events, will fix in terraform tmmw.
-
 
     jacobs_xcom_function = PythonOperator(
         task_id="jacobs_xcom_function",
