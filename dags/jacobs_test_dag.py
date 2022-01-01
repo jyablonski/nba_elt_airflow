@@ -121,10 +121,10 @@ with DAG(
       <br>
       ds start: {{ data_interval_start }}
       <br>
-      ds end: {{ data_interval_end }}
+      ds end: {{ data_interval_end }} 
       <br>
       ds: {{ ds }}
-      <br>
+      <br> 
       ds nodash: {{ ds_nodash }}
       <br>
       ts: {{ ts }}custom
@@ -137,9 +137,9 @@ with DAG(
       <br>
       run_id: {{ run_id }}
       <br>    # 
-      dag run: {{ dag_run }}
+      dag run ❌: {{ dag_run }} ❌
       <br>
-      owner: {{ task.owner}}
+      owner ✅: {{ task.owner}} ✅
       <br>
       xcom value manual: {{ ti.xcom_pull(key="manually_pushed_key", task_ids='bash_push') }}
       <br>
@@ -157,4 +157,4 @@ with DAG(
 
     # dummy_task >> [python_dummy_task, dbt_deps] >> send_email_notification
 
-    dummy_task >> bash_push >> jacobs_ecs_task >> jacobs_xcom_function >> send_email_notification
+    dummy_task >> bash_push >> jacobs_xcom_function >> send_email_notification
