@@ -70,6 +70,15 @@ def jacobs_ecs_task(dag: DAG) -> ECSOperator:
 
 
 def jacobs_dbt_task1(dag: DAG) -> BashOperator:
+    task_id = "dbt_deps_qa"
+
+    return BashOperator(
+        task_id=task_id,
+        dag=dag,
+        bash_command=f"dbt deps --profiles-dir {DBT_PROFILE_DIR} --project-dir {DBT_PROJECT_DIR}",
+    )
+
+def jacobs_dbt_task2(dag: DAG) -> BashOperator:
     task_id = "dbt_seed_qa"
 
     return BashOperator(
@@ -78,8 +87,7 @@ def jacobs_dbt_task1(dag: DAG) -> BashOperator:
         bash_command=f"dbt seed --profiles-dir {DBT_PROFILE_DIR} --project-dir {DBT_PROJECT_DIR}",
     )
 
-
-def jacobs_dbt_task2(dag: DAG) -> BashOperator:
+def jacobs_dbt_task3(dag: DAG) -> BashOperator:
     task_id = "dbt_run_qa"
 
     return BashOperator(
@@ -89,7 +97,7 @@ def jacobs_dbt_task2(dag: DAG) -> BashOperator:
     )
 
 
-def jacobs_dbt_task3(dag: DAG) -> BashOperator:
+def jacobs_dbt_task4(dag: DAG) -> BashOperator:
     task_id = "dbt_test_qa"
 
     return BashOperator(
@@ -134,10 +142,11 @@ def create_dag() -> DAG:
     t6 = jacobs_dbt_task1(dag)
     t7 = jacobs_dbt_task2(dag)
     t8 = jacobs_dbt_task3(dag)
-    t9 = jacobs_email_task(dag)
-    t10 = jacobs_dummy_task(dag, 5)
+    t9 = jacobs_dbt_task4(dag)
+    t10 = jacobs_email_task(dag)
+    t11 = jacobs_dummy_task(dag, 5)
 
-    t1 >> t2 >> [t3, t4, t5] >> t6 >> t7 >> t8 >> t9 >> t10
+    t1 >> t2 >> [t3, t4, t5] >> t6 >> t7 >> t8 >> t9 >> [t10, t11]
 
     return dag
 
