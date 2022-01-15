@@ -67,40 +67,40 @@ with DAG(
     #     'echo "finished"',
     #     do_xcom_push=False,
     # )
-    jacobs_ecs_task = ECSOperator(
-        task_id="jacobs_airflow_ecs_task_test",
-        aws_conn_id="aws_ecs",
-        cluster="jacobs_fargate_cluster",
-        task_definition="jacobs_task_airflow",
-        launch_type="FARGATE",
-        overrides={
-            "containerOverrides": [
-                {
-                    "name": "jacobs_container_airflow",
-                    "environment": [
-                        {
-                            "name": "dag_run_ts",
-                            "value": "{{ ts }}",
-                        },  # https://airflow.apache.org/docs/apache-airflow/stable/templates-ref.html
-                        {
-                            "name": "dag_run_date",
-                            "value": " {{ ds }}",
-                        },  # USE THESE TO CREATE IDEMPOTENT TASKS / DAGS
-                    ],
-                }
-            ]
-        },
-        network_configuration=jacobs_network_config,
-        awslogs_group="jacobs_ecs_logs_airflow",
-        awslogs_stream_prefix="ecs/jacobs_container_airflow", # THIS WILL ALLOW YOU TO START STREAMING THE ECS LOGS IN CLOUDWATCH -TO- THE AIRFLOW LOGS
-        # in terraform the stream prefix is just ecs, in airflow here u have to include ecs/<container_name> aka the whole thing
-        do_xcom_push=True, # This pushes the last line of code in the script as an xcom return value.  can just push S3 file path instead.
-    ) # this works, basic idea is xcom push True means that it will grab the last event logged in the ecs logs and send that as an xcom
+    # jacobs_ecs_task = ECSOperator(
+    #     task_id="jacobs_airflow_ecs_task_test",
+    #     aws_conn_id="aws_ecs",
+    #     cluster="jacobs_fargate_cluster",
+    #     task_definition="jacobs_task_airflow",
+    #     launch_type="FARGATE",
+    #     overrides={
+    #         "containerOverrides": [
+    #             {
+    #                 "name": "jacobs_container_airflow",
+    #                 "environment": [
+    #                     {
+    #                         "name": "dag_run_ts",
+    #                         "value": "{{ ts }}",
+    #                     },  # https://airflow.apache.org/docs/apache-airflow/stable/templates-ref.html
+    #                     {
+    #                         "name": "dag_run_date",
+    #                         "value": " {{ ds }}",
+    #                     },  # USE THESE TO CREATE IDEMPOTENT TASKS / DAGS
+    #                 ],
+    #             }
+    #         ]
+    #     },
+    #     network_configuration=jacobs_network_config,
+    #     awslogs_group="jacobs_ecs_logs_airflow",
+    #     awslogs_stream_prefix="ecs/jacobs_container_airflow", # THIS WILL ALLOW YOU TO START STREAMING THE ECS LOGS IN CLOUDWATCH -TO- THE AIRFLOW LOGS
+    #     # in terraform the stream prefix is just ecs, in airflow here u have to include ecs/<container_name> aka the whole thing
+    #     do_xcom_push=True, # This pushes the last line of code in the script as an xcom return value.  can just push S3 file path instead.
+    # ) # this works, basic idea is xcom push True means that it will grab the last event logged in the ecs logs and send that as an xcom
 
-    jacobs_xcom_function = PythonOperator(
-        task_id="jacobs_xcom_function",
-        python_callable = practice_xcom_function
-    )
+    # jacobs_xcom_function = PythonOperator(
+    #     task_id="jacobs_xcom_function",
+    #     python_callable = practice_xcom_function
+    # )
 
     # dbt_deps = BashOperator(
     #   task_id="dbt_deps",
@@ -157,4 +157,4 @@ with DAG(
 
     # dummy_task >> [python_dummy_task, dbt_deps] >> send_email_notification
 
-    dummy_task >> bash_push >> jacobs_xcom_function >> send_email_notification
+    dummy_task >> bash_push >>  send_email_notification

@@ -14,9 +14,13 @@ boto3 = "==1.18.27"
 SQLAlchemy = "==1.4.22"
 awswrangler = "==2.12.1"
 nltk = "*"
+twint = {ref = "fix/RefreshTokenException", git = "https://github.com/Museum-Barberini/twint.git"}
 
 [dev-packages]
-ipykernel = "*"
+black = "==19.10b0"
+pytest = "==6.2.3"
+pytest-mock = "==3.6.1"
+flake8-black = "==0.2.3"
 
 [requires]
 python_version = "3.8"
