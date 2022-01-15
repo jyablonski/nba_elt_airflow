@@ -11,7 +11,11 @@ import boto3
 import awswrangler as wr
 from botocore.exceptions import ClientError
 from utils import aws_connection
+import twint
+import nltk
+from nltk.sentiment import SentimentIntensityAnalyzer
 
+# pip3 install git+https://github.com/Museum-Barberini/twint.git@fix/RefreshTokenException#egg=twint
 new_day_test = pd.to_datetime(os.getenv('dag_run_date'), format = '%Y-%m-%d').date() - timedelta(days = 1)
 print(new_day_test)
 
@@ -630,6 +634,44 @@ def get_pbp_data(df):
         print("PBP Function No Data Yesterday")
         return df
 
+# cant use it for now, twint is broken, i dont wanna refactor entire dockerfile to install a random PR from git
+def scrape_tweets(search_term: str):
+    try:
+        c = twint.Config()
+        c.Search = search_term
+        c.Limit = 2500      # number of Tweets to scrape
+        c.Store_csv = True       # store tweets in a csv file
+        c.Output = f"{search_term}_tweets.csv"     # path to csv file
+        c.Hide_output = True
+
+        twint.run.Search(c)
+        df = pd.read_csv(f"{search_term}_tweets.csv")
+        df = df[['id', 'created_at', 'date', 'username', 'tweet', 'language', 'link', 'likes_count', 'retweets_count', 'replies_count']].drop_duplicates()
+        df['scrape_date'] = datetime.now().date()
+        df['scrape_ts'] = datetime.now()
+        df = df.query('language=="en"').groupby('id').agg('last') 
+
+        analyzer = SentimentIntensityAnalyzer()
+        df["compound"] = [
+            analyzer.polarity_scores(x)["compound"] for x in df["tweet"]
+        ]
+        df["neg"] = [analyzer.polarity_scores(x)["neg"] for x in df["tweet"]]
+        df["neu"] = [analyzer.polarity_scores(x)["neu"] for x in df["tweet"]]
+        df["pos"] = [analyzer.polarity_scores(x)["pos"] for x in df["tweet"]]
+        df["sentiment"] = np.where(df["compound"] > 0, 1, 0)
+        print(
+            f"Twitter Tweet Extraction Success, retrieving {len(df)} total comments"
+        )
+        logging.info(
+            f"Twitter Tweet Extraction Success, retrieving {len(df)} total comments"
+        )
+        return df
+    except BaseException as e:
+        print(f"Twitter Tweet Extraction Failed, {e}")
+        logging.info(f"Twitter Tweet Extraction Failed, {e}")
+        df = []
+        return df
+
 
 # PBP NOTES
 # Grabbing all current games from the Box Scores function, and then it uses the home teams to generate urls to the endpoints that hold the pbp data.
@@ -759,6 +801,7 @@ adv_stats = get_advanced_stats()
 reddit_data = scrape_subreddit("nba")
 # pbp_data = get_pbp_data(boxscores)
 opp_stats = get_opp_stats()
+twitter_data = scrape_tweets('nba')
 
 print("FINISHED WEB SCRAPE")
 logging.info("FINISHED WEB SCRAPE")
@@ -777,6 +820,7 @@ write_to_sql(adv_stats, "append")
 write_to_sql(reddit_data, "append")
 # write_to_sql(pbp_data, "append")
 write_to_sql(opp_stats, "append")
+write_to_sql(twitter_data, "append")
 
 # storing all data to s3 
 write_to_s3(file_type = 'stats', df = stats)
@@ -786,6 +830,7 @@ write_to_s3(file_type = 'transactions', df = transactions)
 write_to_s3(file_type = 'adv_stats', df = adv_stats)
 write_to_s3(file_type = 'reddit_data', df = reddit_data)
 write_to_s3(file_type = 'opp_stats', df = opp_stats)
+write_to_s3(file_type = 'twitter_data', df = twitter_data)
 
 write_to_s3(file_type = os.getenv('dag_run_date'), df = opp_stats)
 
