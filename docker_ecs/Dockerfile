@@ -11,10 +11,8 @@ FROM base AS python-deps
 
 # Install pipenv and compilation dependencies
 # git is also installed bc i need to install twint from github pr and not pypi
-RUN apt-get update \
-&& apt-get install -y --no-install-recommends git
-RUN pip install pipenv
-RUN apt-get update && apt-get install -y --no-install-recommends gcc
+COPY install_packages.sh .
+RUN ./install_packages.sh
 
 # Install python dependencies in /.venv
 COPY Pipfile .
