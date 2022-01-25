@@ -129,7 +129,7 @@ def create_dag() -> DAG:
         "nba_elt_pipeline_dag_qa",
         catchup=False,
         default_args=JACOBS_DEFAULT_ARGS,
-        schedule_interval=schedule_interval,  # change to none when testing
+        schedule_interval=None,  # change to none when testing / schedule_interval | None
         start_date=datetime(2021, 11, 20),
         max_active_runs=1,
         tags=["nba_elt_pipeline", "qa"],
