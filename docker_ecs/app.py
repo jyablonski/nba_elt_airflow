@@ -765,16 +765,15 @@ def send_email_function():
         print("oof")
 
 def write_to_s3(file_type, df, bucket = os.environ.get('S3_BUCKET')):
-    date = datetime.now().date()
     # the date of the data, not the current date
     try:
         wr.s3.to_parquet(
             df = df,
-            path = f"s3://{bucket}/{file_type}/{file_type}-{date}.parquet",
+            path = f"s3://{bucket}/{file_type}/{file_type}-{today}.parquet",
             index = False
         )
-        print(f"Storing {len(df)} {file_type} rows to S3 (s3://{bucket}/{file_type}/{file_type}-{date}.parquet)")
-        logging.info(f"Storing {len(df)} {file_type} rows to S3 (s3://{bucket}/{file_type}/{file_type}-{date}.parquet)")
+        print(f"Storing {len(df)} {file_type} rows to S3 (s3://{bucket}/{file_type}/{file_type}-{today}.parquet)")
+        logging.info(f"Storing {len(df)} {file_type} rows to S3 (s3://{bucket}/{file_type}/{file_type}-{today}.parquet)")
         pass
     except BaseException as error:
         logging.info(f"S3 Storage Function Failed {file_type}, {error}")
@@ -832,7 +831,7 @@ write_to_s3(file_type = 'reddit_data', df = reddit_data)
 write_to_s3(file_type = 'opp_stats', df = opp_stats)
 write_to_s3(file_type = 'twitter_data', df = twitter_data)
 
-write_to_s3(file_type = os.getenv('dag_run_date'), df = opp_stats)
+# write_to_s3(file_type = os.getenv('dag_run_date'), df = opp_stats)
 
 logs = pd.read_csv("example.log", sep=r"\\t", engine="python", header=None)
 logs = logs.rename(columns={0: "errors"})
@@ -842,9 +841,3 @@ if __name__ == "__main__":
     send_email_function()
 
 print("WOOT FINISHED")
-
-# docker build -t nba_airflow .
-# aws ecr get-login-password --region us-east-1 | docker login --username AWS --password-stdin 324816727452.dkr.ecr.us-east-1.amazonaws.com
-# docker tag nba_airflow:latest 324816727452.dkr.ecr.us-east-1.amazonaws.com/jacobs_repo:nba_airflow
-# docker push 324816727452.dkr.ecr.us-east-1.amazonaws.com/jacobs_repo:nba_airflow
-# aws wrangler added 25 mbs jesus
