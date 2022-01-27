@@ -127,3 +127,4 @@ venv.bak/
 target/
 dbt_modules/
 logs/
+dbt_packages/
