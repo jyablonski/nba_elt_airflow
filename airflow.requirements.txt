@@ -1,4 +1,5 @@
 # Add any additional Python dependencies below:
 airflow-dbt==0.4.0
 airflow-provider-great-expectations==0.0.8
-dbt==0.21.0
+dbt-core==1.0.0
+dbt-postgres==1.0.1
