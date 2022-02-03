@@ -1,12 +1,15 @@
 """ Example Airflow DAG with custom plugin"""
 from datetime import datetime, timedelta
+import http
+import os
 
 from airflow import DAG
-from airflow.operators.dummy_operator import DummyOperator
 from airflow.providers.amazon.aws.operators.ecs import ECSOperator
 from airflow.operators.bash_operator import BashOperator
-from airflow.operators.python_operator import PythonOperator
+from airflow.operators.dummy_operator import DummyOperator
 from airflow.operators.email import EmailOperator
+from airflow.operators.python_operator import PythonOperator
+from airflow.providers.slack.operators.slack_webhook import SlackWebhookOperator
 from utils import my_function, get_ssm_parameter, airflow_email_prac_function, practice_xcom_function
 
 # https://stackoverflow.com/questions/46059161/airflow-how-to-pass-xcom-variable-into-python-function
@@ -102,10 +105,10 @@ with DAG(
     #     python_callable = practice_xcom_function
     # )
 
-    dbt_deps = BashOperator(
-      task_id="dbt_deps",
-      bash_command=f"dbt deps --profiles-dir {DBT_PROFILE_DIR} --project-dir {DBT_PROJECT_DIR}"
-    )
+    # dbt_deps = BashOperator(
+    #   task_id="dbt_deps",
+    #   bash_command=f"dbt deps --profiles-dir {DBT_PROFILE_DIR} --project-dir {DBT_PROJECT_DIR}"
+    # )
 
     # python_dummy_task = PythonOperator(
     #   task_id="python_dummy_task",
@@ -148,13 +151,20 @@ with DAG(
     # )
     
 
-    send_email_notification_custom = EmailOperator(
-        task_id="send_email_notification_custom",
-        to="jyablonski9@gmail.com",
-        subject="Airflow Test Dag run on {{ ds }}",
-        html_content=airflow_email_prac_function(),
+    # send_email_notification_custom = EmailOperator(
+    #     task_id="send_email_notification_custom",
+    #     to="jyablonski9@gmail.com",
+    #     subject="Airflow Test Dag run on {{ ds }}",
+    #     html_content=airflow_email_prac_function(),
+    # )
+
+    send_slack_notification = SlackWebhookOperator(
+        task_id="send_slack_notification",
+        http_conn_id="slack",
+        message="Dag run {{ dag_run }} completed on {{ ds }} from owner ✅: {{ task.owner}} ✅",
+        channel="#airflow-channel",
     )
 
     # dummy_task >> [python_dummy_task, dbt_deps] >> send_email_notification
 
-    dummy_task >> bash_push >> dbt_deps >> send_email_notification_custom
+    dummy_task >> bash_push >> send_slack_notification
