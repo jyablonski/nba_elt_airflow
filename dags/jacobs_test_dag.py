@@ -10,7 +10,13 @@ from airflow.operators.dummy_operator import DummyOperator
 from airflow.operators.email import EmailOperator
 from airflow.operators.python_operator import PythonOperator
 from airflow.providers.slack.operators.slack_webhook import SlackWebhookOperator
-from utils import my_function, get_ssm_parameter, airflow_email_prac_function, practice_xcom_function
+from utils import (
+    my_function,
+    get_ssm_parameter,
+    airflow_email_prac_function,
+    practice_xcom_function,
+    jacobs_slack_alert,
+)
 
 # https://stackoverflow.com/questions/46059161/airflow-how-to-pass-xcom-variable-into-python-function
 
@@ -25,6 +31,7 @@ jacobs_network_config = {
     }
 }
 
+# send both an email alert + a slack alert to specified channel on any task failure
 JACOBS_DEFAULT_ARGS = {
     "owner": "jacob",
     "depends_on_past": False,
@@ -32,6 +39,7 @@ JACOBS_DEFAULT_ARGS = {
     "email_on_failure": True,
     "email_on_retry": False,
     "retries": 0,
+    "on_failure_callback": jacobs_slack_alert,
 }
 
 # my_function()
@@ -47,7 +55,7 @@ with DAG(
     dagrun_timeout=timedelta(minutes=60),
     default_args=JACOBS_DEFAULT_ARGS,
     catchup=False,
-    tags=["test", "qa"],
+    tags=["test", "qa", "slack", "TEAM A"],
 ) as dag:
 
     # fk
@@ -55,7 +63,7 @@ with DAG(
     dummy_task = DummyOperator(task_id="dummy_task")
 
     bash_push = BashOperator(
-        task_id='bash_push',
+        task_id="bash_push",
         bash_command='echo "bash_push demo"  && '
         'echo "Manually set xcom value '
         '{{ ti.xcom_push(key="manually_pushed_key", value="manually_pushed_value") }}" && '
@@ -124,10 +132,10 @@ with DAG(
     #   <br>
     #   ds start: {{ data_interval_start }}
     #   <br>
-    #   ds end: {{ data_interval_end }} 
+    #   ds end: {{ data_interval_end }}
     #   <br>
     #   ds: {{ ds }}
-    #   <br> 
+    #   <br>
     #   ds nodash: {{ ds_nodash }}
     #   <br>
     #   ts: {{ ts }}custom
@@ -139,7 +147,7 @@ with DAG(
     #   task: {{ task }}
     #   <br>
     #   run_id: {{ run_id }}
-    #   <br>    # 
+    #   <br>    #
     #   dag run ❌: {{ dag_run }} ❌
     #   <br>
     #   owner ✅: {{ task.owner}} ✅
@@ -149,7 +157,6 @@ with DAG(
     #   xcom value return: {{ ti.xcom_pull(key="return_value", task_ids='bash_push') }}
     #   """
     # )
-    
 
     # send_email_notification_custom = EmailOperator(
     #     task_id="send_email_notification_custom",
@@ -158,11 +165,27 @@ with DAG(
     #     html_content=airflow_email_prac_function(),
     # )
 
+    # send_slack_notification_failure_test = SlackWebhookOperator(
+    #     task_id="send_slack_notification_failure_test",
+    #     http_conn_id = "https://hooks.slack.com/services",
+    #     webhook_token="/T02MXLF5XL2/B031T8G8VS5/z4bsKEc5pLPSHE8womRJFdqF",
+    #     # http_conn_id=os.environ.get("CONNECTION_ID"),
+    #     message="Dag run NEW {{ dag_run }} completed on {{ ds }} from owner ✅: {{ task.owner}} ✅",
+    #     channel="#airflow-channel",
+    # )
+
     send_slack_notification = SlackWebhookOperator(
         task_id="send_slack_notification",
         http_conn_id="slack",
-        message="Dag run {{ dag_run }} completed on {{ ds }} from owner ✅: {{ task.owner}} ✅",
-        channel="#airflow-channel",
+        message="""
+            :large_green_circle: Task Success
+            *Task*: {{ task }}
+            *DAG*: {{ dag }}
+            *Execution Time*: {{ ts }}
+            *Owner*: {{ task.owner }}
+            ✅✅"
+            """,
+            channel="#airflow-channel",
     )
 
     # dummy_task >> [python_dummy_task, dbt_deps] >> send_email_notification

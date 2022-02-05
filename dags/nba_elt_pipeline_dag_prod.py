@@ -78,6 +78,7 @@ def jacobs_dbt_task1(dag: DAG) -> BashOperator:
         bash_command=f"dbt deps --profiles-dir {DBT_PROFILE_DIR} --project-dir {DBT_PROJECT_DIR}",
     )
 
+
 def jacobs_dbt_task2(dag: DAG) -> BashOperator:
     task_id = "dbt_seed_prod"
 
