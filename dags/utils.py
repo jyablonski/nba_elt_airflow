@@ -1,11 +1,19 @@
 import os
 import boto3
 
+
+from airflow.hooks.base_hook import BaseHook
+from airflow.contrib.operators.slack_webhook_operator import SlackWebhookOperator
+
+SLACK_CONN_ID = "slack"
+
 # accessed via systems manager -> parameter store
+
 
 def practice_xcom_function(number: int = 5):
     print(f"the number is {number}!")
     return number
+
 
 def get_owner(parameter: str) -> str:
     print(f"The owner is {parameter}!")
@@ -75,3 +83,24 @@ def airflow_email_prac_function():
       owner: {{ task.owner}}
       """
     return email
+
+def jacobs_slack_alert(context):
+    # the context houses all of the metadata for the task instance currently being ran, and the dag it's connected to.
+    # slack_webhook_token = BaseHook.get_connection(SLACK_CONN_ID).password
+    ti = context["task_instance"]
+    slack_msg = f"""
+            :red_circle: Task Failed. 
+            *Task*: {ti.task_id}
+            *Task Type*: Jacob's Slack Alert
+            *Dag*: {ti.dag_id} 
+            *Execution Time*: {context["execution_date"]}  
+            *Log Url*: {ti.log_url} 
+            """
+            #  *context*: {context} for the exhaustive list
+    failed_alert = SlackWebhookOperator(
+        task_id="slack_test",
+        http_conn_id="slack",
+        message=slack_msg,
+        channel="#airflow-channel",
+    )
+    return failed_alert.execute(context=context)
