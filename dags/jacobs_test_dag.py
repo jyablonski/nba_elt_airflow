@@ -31,7 +31,7 @@ jacobs_network_config = {
     }
 }
 
-# send both an email alert to specified channel + email alert on any task failure.
+# send both an email alert + a slack alert to specified channel on any task failure
 JACOBS_DEFAULT_ARGS = {
     "owner": "jacob",
     "depends_on_past": False,
@@ -180,7 +180,7 @@ with DAG(
         message="""
             :large_green_circle: Task Success
             *Task*: {{ task }}
-            *DAG*: {{ dag_id }}
+            *DAG*: {{ dag }}
             *Execution Time*: {{ ts }}
             *Owner*: {{ task.owner }}
             ✅✅"
