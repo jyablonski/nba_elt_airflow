@@ -113,4 +113,3 @@ bump-minor:
 .PHONY: bump-major
 bump-major:
         @bump2version major
-                              
