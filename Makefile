@@ -104,12 +104,12 @@ internal-lint: internal-install-local-deps
 
 .PHONY: bump-patch
 bump-patch:
-        @bump2version patch
+	@bump2version patch
 
 .PHONY: bump-minor
 bump-minor:
-        @bump2version minor
+	@bump2version minor
 
 .PHONY: bump-major
 bump-major:
-        @bump2version major
+	@bump2version major
