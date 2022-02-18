@@ -4,6 +4,7 @@ import boto3
 
 from airflow.hooks.base_hook import BaseHook
 from airflow.contrib.operators.slack_webhook_operator import SlackWebhookOperator
+from airflow.providers.discord.operators.discord_webhook import DiscordWebhookOperator
 
 SLACK_CONN_ID = "slack"
 
@@ -91,7 +92,6 @@ def jacobs_slack_alert(context):
     slack_msg = f"""
             :red_circle: Task Failed. 
             *Task*: {ti.task_id}
-            *Task Type*: Jacob's Slack Alert
             *Dag*: {ti.dag_id} 
             *Execution Time*: {context["execution_date"]}  
             *Log Url*: {ti.log_url} 
@@ -102,5 +102,25 @@ def jacobs_slack_alert(context):
         http_conn_id="slack",
         message=slack_msg,
         channel="#airflow-channel",
+    )
+    return failed_alert.execute(context=context)
+
+
+def jacobs_discord_alert(context):
+    # https://github.com/apache/airflow/blob/main/airflow/providers/discord/operators/discord_webhook.py
+    # just make a discord connection with host as https://discord.com/api/ and extra as {"webhook_endpoint": "webhooks/000/xxx-xxx"}
+    ti = context["task_instance"]
+    discord_msg = f"""
+            :red_circle: Task Failed. 
+            *Task*: {ti.task_id}
+            *Dag*: {ti.dag_id} 
+            *Execution Time*: {context["execution_date"]}  
+            *Log Url*: {ti.log_url} 
+            """
+            #  *context*: {context} for the exhaustive list
+    failed_alert = DiscordWebhookOperator(
+        task_id="discord_failure_callback_test",
+        http_conn_id="discord",
+        message=discord_msg,
     )
     return failed_alert.execute(context=context)
