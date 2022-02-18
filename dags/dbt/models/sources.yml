@@ -25,6 +25,7 @@ sources:
           - name: date
             tests:
               - not_null
+              # - unique  # do this to see what happens if the test fails in airflow logs
           - name: transaction
             tests:
               - not_null
