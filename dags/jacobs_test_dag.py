@@ -10,12 +10,14 @@ from airflow.operators.dummy_operator import DummyOperator
 from airflow.operators.email import EmailOperator
 from airflow.operators.python_operator import PythonOperator
 from airflow.providers.slack.operators.slack_webhook import SlackWebhookOperator
+from airflow.providers.discord.operators.discord_webhook import DiscordWebhookOperator
 from utils import (
     my_function,
     get_ssm_parameter,
     airflow_email_prac_function,
     practice_xcom_function,
     jacobs_slack_alert,
+    jacobs_discord_alert,
 )
 
 # https://stackoverflow.com/questions/46059161/airflow-how-to-pass-xcom-variable-into-python-function
@@ -39,7 +41,8 @@ JACOBS_DEFAULT_ARGS = {
     "email_on_failure": True,
     "email_on_retry": False,
     "retries": 0,
-    "on_failure_callback": jacobs_slack_alert,
+    "on_failure_callback": jacobs_slack_alert # jacobs_discord_alert - apparently dont work at the same time together
+                                              # [jacobs_slack_alert, jacobs_discord_alert]
 }
 
 # my_function()
@@ -158,12 +161,12 @@ with DAG(
     #   """
     # )
 
-    # send_email_notification_custom = EmailOperator(
-    #     task_id="send_email_notification_custom",
-    #     to="jyablonski9@gmail.com",
-    #     subject="Airflow Test Dag run on {{ ds }}",
-    #     html_content=airflow_email_prac_function(),
-    # )
+    send_email_notification_custom = EmailOperator(
+        task_id="send_email_notification_custom",
+        to="jyablonski9@gmail.com",
+        subject="Airflow Test Dag run on {{ ds }}",
+        html_content=airflow_email_prac_function(),
+    )
 
     # send_slack_notification_failure_test = SlackWebhookOperator(
     #     task_id="send_slack_notification_failure_test",
@@ -176,7 +179,8 @@ with DAG(
 
     send_slack_notification = SlackWebhookOperator(
         task_id="send_slack_notification",
-        http_conn_id="slack",
+        # http_conn_id="slack",
+        http_conn_id="slack_PRACTICE_FAILURE",
         message="""
             :large_green_circle: Task Success
             *Task*: {{ task }}
@@ -188,6 +192,19 @@ with DAG(
             channel="#airflow-channel",
     )
 
+    send_discord_notification = DiscordWebhookOperator(
+        task_id="send_discord_notification",
+        http_conn_id="discord",
+        message="""
+            :large_green_circle: Task Success
+            *Task*: {{ task }}
+            *DAG*: {{ dag }}
+            *Execution Time*: {{ ts }}
+            *Owner*: {{ task.owner }}
+            ✅✅"
+            """
+    )
+
     # dummy_task >> [python_dummy_task, dbt_deps] >> send_email_notification
 
-    dummy_task >> bash_push >> send_slack_notification
+    dummy_task >> bash_push >> send_slack_notification >> send_discord_notification

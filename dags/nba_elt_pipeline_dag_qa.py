@@ -8,6 +8,8 @@ from airflow.operators.dummy_operator import DummyOperator
 from airflow.providers.amazon.aws.operators.ecs import ECSOperator
 from utils import get_ssm_parameter
 
+# dbt test failure WILL fail the task, and fail the dag.
+
 jacobs_network_config = {
     "awsvpcConfiguration": {
         "securityGroups": [get_ssm_parameter("jacobs_ssm_sg_task")],

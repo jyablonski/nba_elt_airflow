@@ -1,7 +1,7 @@
 PYTHON_VERSION := 3.8
 AIRFLOW_VERSION := 2.2.3
 # Must be comma-separated, no spaces
-AIRFLOW_EXTRAS := postgres,amazon,slack,http
+AIRFLOW_EXTRAS := postgres,amazon,slack,http,discord
 CONSTRAINT := https://raw.githubusercontent.com/apache/airflow/constraints-${AIRFLOW_VERSION}/constraints-${PYTHON_VERSION}.txt
 
 # https://github.com/soggycactus/airflow-repo-template
@@ -105,11 +105,17 @@ internal-lint: internal-install-local-deps
 .PHONY: bump-patch
 bump-patch:
 	@bump2version patch
+	@git push --tags
+	@git push
 
 .PHONY: bump-minor
 bump-minor:
 	@bump2version minor
+	@git push --tags
+	@git push
 
 .PHONY: bump-major
 bump-major:
 	@bump2version major
+	@git push --tags
+	@git push
