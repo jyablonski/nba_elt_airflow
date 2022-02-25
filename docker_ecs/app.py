@@ -840,4 +840,4 @@ logs = logs.query("errors.str.contains('Failed')", engine="python")
 if __name__ == "__main__":
     send_email_function()
 
-print("WOOT FINISHED")
+print(f"{os.environ.get('run_type')}")

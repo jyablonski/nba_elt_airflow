@@ -6,7 +6,7 @@ from airflow.operators.email import EmailOperator
 from airflow.operators.bash_operator import BashOperator
 from airflow.operators.dummy_operator import DummyOperator
 from airflow.providers.amazon.aws.operators.ecs import ECSOperator
-from utils import get_ssm_parameter
+from utils import get_ssm_parameter, jacobs_slack_alert
 
 # dbt test failure WILL fail the task, and fail the dag.
 
@@ -29,6 +29,7 @@ JACOBS_DEFAULT_ARGS = {
     "email_on_retry": True,
     "retries": 1,
     "retry_delay": timedelta(minutes=30),
+    "on_failure_callback": jacobs_slack_alert,
 }
 
 os.environ["AWS_DEFAULT_REGION"] = "us-east-1"
@@ -62,12 +63,18 @@ def jacobs_ecs_task(dag: DAG) -> ECSOperator:
                             "name": "dag_run_date",
                             "value": " {{ ds }}",
                         },  # USE THESE TO CREATE IDEMPOTENT TASKS / DAGS
+                        {
+                            "name": "run_type",
+                            "value": "qa",
+                        },
                     ],
                 }
             ]
         },
         network_configuration=jacobs_network_config,
-        awslogs_group="aws_ecs_logs",
+        awslogs_group="jacobs_ecs_logs_airflow",
+        awslogs_stream_prefix="ecs/jacobs_container_airflow",
+        do_xcom_push=True,
     )
 
 
@@ -119,8 +126,12 @@ def jacobs_email_task(dag: DAG) -> EmailOperator:
         dag=dag,
         to="jyablonski9@gmail.com",
         subject="Airflow NBA ELT Pipeline DAG Run",
-        html_content="<h3>Process Completed</h3>",
+        html_content="""<h3>Process Completed</h3> <br>
+        XCOM VAlue in ECS Task: {{ ti.xcom_pull(key="return_value", task_ids='jacobs_airflow_ecs_task_qa') }}
+
+        """,
     )
+
 
 
 def create_dag() -> DAG:
