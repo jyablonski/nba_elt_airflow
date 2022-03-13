@@ -8,6 +8,9 @@ from airflow.providers.discord.operators.discord_webhook import DiscordWebhookOp
 
 SLACK_CONN_ID = "slack"
 
+# when making a new aws account, make a jacobs_airflow_user with
+# s3, ec2, ses, cloudwatch logs, ecs, ssm, ecstaskexecution, ec2container service policies
+# and t hen create access key / secret pair and store them in ~/.aws
 # accessed via systems manager -> parameter store
 
 
@@ -21,6 +24,8 @@ def get_owner(parameter: str) -> str:
     return parameter
 
 
+# to use this you have to store the raw values in systems secure manager first
+# accessed via systems manager -> parameter store
 def get_ssm_parameter(parameter_name: str, decryption: bool = True) -> str:
     """
     Function to grab parameters from SSM

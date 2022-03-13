@@ -77,7 +77,9 @@ def jacobs_ecs_task(dag: DAG) -> ECSOperator:
         do_xcom_push=True,
     )
 
-
+# 2 ways of doing dbt as far as i know:
+# 1) you put the entire dbt project locally in the airflow server somewhere and run it like below, and keep it updated on your own
+# 2) you have a paid dbt cloud plan and use the api to call & run the job from there, which just pulls from a git repo automatically
 def jacobs_dbt_task1(dag: DAG) -> BashOperator:
     task_id = "dbt_deps_qa"
 
@@ -117,6 +119,45 @@ def jacobs_dbt_task4(dag: DAG) -> BashOperator:
         bash_command=f"dbt test --profiles-dir {DBT_PROFILE_DIR} --project-dir {DBT_PROJECT_DIR}",
     )
 
+# adding in framework for adding the ml pipeline in after dbt runs
+# def jacobs_ecs_task_ml(dag: DAG) -> ECSOperator:
+#     return ECSOperator(
+#         task_id="jacobs_airflow_ecs_task_ml_qa",
+#         dag=dag,
+#         aws_conn_id="aws_ecs",
+#         cluster="jacobs_fargate_cluster",
+#         task_definition="jacobs_task_ml",
+#         launch_type="FARGATE",
+#         overrides={
+#             "containerOverrides": [
+#                 {
+#                     "name": "jacobs_container_airflow",
+#                     "environment": [
+#                         {
+#                             "name": "dag_run_ts",
+#                             "value": "{{ ts }}",
+#                         },  # https://airflow.apache.org/docs/apache-airflow/stable/templates-ref.html
+#                         {
+#                             "name": "dag_run_date",
+#                             "value": " {{ ds }}",
+#                         },  # USE THESE TO CREATE IDEMPOTENT TASKS / DAGS
+#                         {
+#                             "name": "run_type",
+#                             "value": "qa",
+#                         },
+#                         {
+#                             "name": "RDS_SCHEMA",
+#                             "value": "ml_models_airflow",
+#                         },
+#                     ],
+#                 }
+#             ]
+#         },
+#         network_configuration=jacobs_network_config,
+#         awslogs_group="jacobs_ecs_logs_airflow_ml",
+#         awslogs_stream_prefix="ecs/jacobs_container_ml",
+#         do_xcom_push=True,
+#     )
 
 def jacobs_email_task(dag: DAG) -> EmailOperator:
     task_id = "send_email_notification_qa"
@@ -147,7 +188,7 @@ def create_dag() -> DAG:
         schedule_interval=None,  # change to none when testing / schedule_interval | None
         start_date=datetime(2021, 11, 20),
         max_active_runs=1,
-        tags=["nba_elt_pipeline", "qa"],
+        tags=["nba_elt_pipeline", "qa", "ml"],
     )
     t1 = jacobs_dummy_task(dag, 1)
     t2 = jacobs_ecs_task(dag)
@@ -158,6 +199,7 @@ def create_dag() -> DAG:
     t7 = jacobs_dbt_task2(dag)
     t8 = jacobs_dbt_task3(dag)
     t9 = jacobs_dbt_task4(dag)
+    # t10 = jacobs_ecs_task_ml(dag)
     t10 = jacobs_email_task(dag)
     t11 = jacobs_dummy_task(dag, 5)
 
