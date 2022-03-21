@@ -1,0 +1,55 @@
+version: 1
+project_id: 3dd35b6c-67d9-4a20-ab9b-dc04fb89cff6
+plugins:
+  extractors:
+  - name: tap-gitlab
+    variant: meltanolabs
+    pip_url: git+https://github.com/MeltanoLabs/tap-gitlab.git
+  - name: tap-covid-19
+    namespace: tap_covid_19
+    pip_url: tap-covid-19
+    executable: tap-covid-19
+    capabilities:
+    - catalog
+    - discover
+    - state
+    settings:
+    - name: api_token
+    - name: user_agent
+    - name: start_date
+  loaders:
+  - name: target-postgres
+    variant: transferwise
+    pip_url: pipelinewise-target-postgres
+schedules:
+- name: gitlab-to-postgres
+  extractor: tap-gitlab
+  loader: target-postgres
+  transform: skip
+  interval: '@daily'
+  start_date: 2022-03-01 00:00:00
+environments:
+- name: dev
+  config:
+    plugins:
+      extractors:
+      - name: tap-gitlab
+        config:
+          projects: meltano/meltano meltano/tap-gitlab
+          start_date: '2022-03-01T00:00:00Z'
+        select:
+        - commits.id
+        - commits.project_id
+        - commits.created_at
+        - commits.author_name
+        - commits.message
+        - tags.*
+        - '!*.*_url'
+      loaders:
+      - name: target-postgres
+        config:
+          host: jacobs-rds-server.cdtvrcly92cn.us-east-1.rds.amazonaws.com
+          user: jacob1
+          dbname: jacob_db
+          default_target_schema: meltano_dev
+- name: prod
