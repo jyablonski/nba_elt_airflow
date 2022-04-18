@@ -36,12 +36,6 @@ os.environ["AWS_DEFAULT_REGION"] = "us-east-1"
 DBT_PROFILE_DIR = "~/.dbt/"
 DBT_PROJECT_DIR = "~/airflow/dags/dbt/"
 
-
-def jacobs_dummy_task(dag: DAG, task_id) -> DummyOperator:
-    task_id = "dummy_task_dev" + str(task_id)
-    return DummyOperator(task_id=task_id, dag=dag)
-
-
 def jacobs_ecs_task(dag: DAG) -> ECSOperator:
     return ECSOperator(
         task_id="jacobs_airflow_ecs_task_dev",
@@ -77,9 +71,11 @@ def jacobs_ecs_task(dag: DAG) -> ECSOperator:
         do_xcom_push=True,
     )
 
-# 2 ways of doing dbt as far as i know:
+# 3 ways of doing dbt as far as i know:
 # 1) you put the entire dbt project locally in the airflow server somewhere and run it like below, and keep it updated on your own
-# 2) you have a paid dbt cloud plan and use dbt airflow provider to call the api & run the job from there, which just pulls from the git repo automatically
+# 2) run it as an ecs operator and keep a docker image in ecr to run the dbt build job
+# 3) you have a paid dbt cloud plan and use dbt airflow provider to call the api & run the job from there, which just pulls from the git repo automatically
+
 def jacobs_dbt_task1(dag: DAG) -> BashOperator:
     task_id = "dbt_deps_dev"
 
@@ -190,20 +186,15 @@ def create_dag() -> DAG:
         max_active_runs=1,
         tags=["nba_elt_pipeline", "dev", "ml"],
     )
-    t1 = jacobs_dummy_task(dag, 1)
-    t2 = jacobs_ecs_task(dag)
-    t3 = jacobs_dummy_task(dag, 2)
-    t4 = jacobs_dummy_task(dag, 3)
-    t5 = jacobs_dummy_task(dag, 4)
-    t6 = jacobs_dbt_task1(dag)
-    t7 = jacobs_dbt_task2(dag)
-    t8 = jacobs_dbt_task3(dag)
-    t9 = jacobs_dbt_task4(dag)
-    # t10 = jacobs_ecs_task_ml(dag)
-    t10 = jacobs_email_task(dag)
-    t11 = jacobs_dummy_task(dag, 5)
+    t1 = jacobs_ecs_task(dag)
+    t2 = jacobs_dbt_task1(dag)
+    t3 = jacobs_dbt_task2(dag)
+    t4 = jacobs_dbt_task3(dag)
+    t5 = jacobs_dbt_task4(dag)
+    # t6 = jacobs_ecs_task_ml(dag)
+    t7 = jacobs_email_task(dag)
 
-    t1 >> t2 >> [t3, t4, t5] >> t6 >> t7 >> t8 >> t9 >> [t10, t11]
+    t1 >> t2 >> t3 >> t4 >> t5 >> t7
 
     return dag
 
