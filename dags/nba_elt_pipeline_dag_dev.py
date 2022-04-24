@@ -56,10 +56,18 @@ def jacobs_ecs_task(dag: DAG) -> ECSOperator:
                         {
                             "name": "dag_run_date",
                             "value": " {{ ds }}",
-                        },  # USE THESE TO CREATE IDEMPOTENT TASKS / DAGS
+                        },  # USE THESE TEMPLATE VARIABLES TO CREATE IDEMPOTENT TASKS / DAGS
                         {
                             "name": "run_type",
-                            "value": "dev",
+                            "value": "dev",                # you can do like if run_type == 'dev': S3_BUCKET=xxx_dev, RDS_SCHEMA=xxx_dev
+                        },
+                        {
+                            "name": "S3_BUCKET",
+                            "value": "jacobsbucket97_dev", # you can dynamically change this for dev/prod
+                        },
+                        {
+                            "name": "RDS_SCHEMA",
+                            "value": "nba_source_dev",     # you can dynamically change this for dev/prod
                         },
                     ],
                 }
