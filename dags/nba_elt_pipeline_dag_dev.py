@@ -32,6 +32,8 @@ JACOBS_DEFAULT_ARGS = {
     "on_failure_callback": jacobs_slack_alert,
 }
 
+jacobs_tags = ["nba_elt_pipeline", "dev", "ml"]
+
 os.environ["AWS_DEFAULT_REGION"] = "us-east-1"
 DBT_PROFILE_DIR = "~/.dbt/"
 DBT_PROJECT_DIR = "~/airflow/dags/dbt/"
@@ -192,7 +194,7 @@ def create_dag() -> DAG:
         schedule_interval=None,  # change to none when testing / schedule_interval | None
         start_date=datetime(2021, 11, 20),
         max_active_runs=1,
-        tags=["nba_elt_pipeline", "dev", "ml"],
+        tags=jacobs_tags,
     )
     t1 = jacobs_ecs_task(dag)
     t2 = jacobs_dbt_task1(dag)

@@ -1,28 +1,23 @@
 from datetime import datetime, timedelta
 from airflow import DAG
 from unittest.mock import patch, call
+import pytest
 from freezegun import freeze_time
 from dags.nba_elt_pipeline_dag_dev import (
     jacobs_ecs_task,
-    jacobs_dummy_task,
     JACOBS_DEFAULT_ARGS,
     create_dag,
+    jacobs_tags
 )
 
-
-class test_nba_elt_pipeline_dag:
-    @freeze_time("2021-11-01")
-    @patch("dags.nba_elt_pipeline_dag_dev.jacobs_ecs_task")
-    def test_dag_argument(self, mock_jacobs_ecs_task):
-        dag = create_dag()
-        assert dag.schedule_interval == "0 11 * * *"
-        assert dag.catchup is False
-        assert dag.default_args == JACOBS_DEFAULT_ARGS
-        assert mock_jacobs_ecs_task.mock_calls[0] == call(dag, "2021-11-01")
+from dags.utils import jacobs_slack_alert
 
 
-def test_nba_elt_pipeline_dag_dev_dag():
-    test_dag = DAG("jacobs_test_dag", default_args={}, start_date=datetime(2021, 11, 1))
-    jacobs_ecs_task(test_dag)
-    assert len(test_dag.tasks) == 1
-    assert test_dag.tasks[0].task_id == "jacobs_airflow_ecs_task_dev"
+def test_nba_elt_pipeline_dag(nba_elt_pipeline_dag):
+    jacobs_ecs_task(nba_elt_pipeline_dag)
+    assert len(nba_elt_pipeline_dag.tasks) == 1
+    assert nba_elt_pipeline_dag.catchup is False
+    assert nba_elt_pipeline_dag.tasks[0].task_id == "jacobs_airflow_ecs_task_dev"
+    assert nba_elt_pipeline_dag.schedule_interval == None
+    assert nba_elt_pipeline_dag.tags == jacobs_tags
+    # assert nba_elt_pipeline_dag.default_args['on_failure_callback'] == jacobs_slack_alert
