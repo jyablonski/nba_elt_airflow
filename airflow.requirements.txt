@@ -1,5 +1,3 @@
 # Add any additional Python dependencies below: - meltano doesnt work as of 2022-03-21 there's a gunicorn dependency issue
-airflow-dbt==0.4.0
-airflow-provider-great-expectations==0.0.8
-dbt-core==1.0.0
-dbt-postgres==1.0.1
+dbt-core==1.1.0
+dbt-postgres==1.1.0
