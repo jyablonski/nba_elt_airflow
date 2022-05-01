@@ -10,7 +10,7 @@ SLACK_CONN_ID = "slack"
 
 # when making a new aws account, make a jacobs_airflow_user with
 # s3, ec2, ses, cloudwatch logs, ecs, ssm, ecstaskexecution, ec2container service policies
-# and t hen create access key / secret pair and store them in ~/.aws
+# and then create access key / secret pair and store them in ~/.aws
 # accessed via systems manager -> parameter store
 
 
@@ -89,6 +89,9 @@ def airflow_email_prac_function():
       owner: {{ task.owner}}
       """
     return email
+
+# these are task / dag failure alert webhooks for slack + discord
+# you have to set both of them up in admin -> connections
 
 def jacobs_slack_alert(context):
     # the context houses all of the metadata for the task instance currently being ran, and the dag it's connected to.
