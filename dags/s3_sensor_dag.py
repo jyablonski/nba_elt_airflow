@@ -18,6 +18,7 @@ with DAG(
     catchup=False,
 ) as dag:
 
+    # shouldnt rly ever use this - do this instead https://stackoverflow.com/questions/50591886/airflow-s3keysensor-how-to-make-it-continue-running
     sensor = S3KeySensor(
         task_id="s3_sensor_test",
         bucket_key="boxscores/boxscores-*",

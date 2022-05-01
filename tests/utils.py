@@ -1,7 +1,22 @@
 import os
 import boto3
 
+
+from airflow.hooks.base_hook import BaseHook
+from airflow.contrib.operators.slack_webhook_operator import SlackWebhookOperator
+from airflow.providers.discord.operators.discord_webhook import DiscordWebhookOperator
+
+SLACK_CONN_ID = "slack"
+
+# when making a new aws account, make a jacobs_airflow_user with
+# s3, ec2, ses, cloudwatch logs, ecs, ssm, ecstaskexecution, ec2container service policies
+# and then create access key / secret pair and store them in ~/.aws
 # accessed via systems manager -> parameter store
+
+
+def practice_xcom_function(number: int = 5):
+    print(f"the number is {number}!")
+    return number
 
 
 def get_owner(parameter: str) -> str:
@@ -9,6 +24,8 @@ def get_owner(parameter: str) -> str:
     return parameter
 
 
+# to use this you have to store the raw values in systems secure manager first
+# accessed via systems manager -> parameter store
 def get_ssm_parameter(parameter_name: str, decryption: bool = True) -> str:
     """
     Function to grab parameters from SSM
@@ -72,3 +89,48 @@ def airflow_email_prac_function():
       owner: {{ task.owner}}
       """
     return email
+
+
+# these are task / dag failure alert webhooks for slack + discord
+# you have to set both of them up in admin -> connections
+
+
+def jacobs_slack_alert(context):
+    # the context houses all of the metadata for the task instance currently being ran, and the dag it's connected to.
+    # slack_webhook_token = BaseHook.get_connection(SLACK_CONN_ID).password
+    ti = context["task_instance"]
+    slack_msg = f"""
+            :red_circle: Task Failed. 
+            *Task*: {ti.task_id}
+            *Dag*: {ti.dag_id} 
+            *Execution Time*: {context["execution_date"]}  
+            *Log Url*: {ti.log_url} 
+            """
+    #  *context*: {context} for the exhaustive list
+    failed_alert = SlackWebhookOperator(
+        task_id="slack_test",
+        http_conn_id="slack",
+        message=slack_msg,
+        channel="#airflow-channel",
+    )
+    return failed_alert.execute(context=context)
+
+
+def jacobs_discord_alert(context):
+    # https://github.com/apache/airflow/blob/main/airflow/providers/discord/operators/discord_webhook.py
+    # just make a discord connection with host as https://discord.com/api/ and extra as {"webhook_endpoint": "webhooks/000/xxx-xxx"}
+    ti = context["task_instance"]
+    discord_msg = f"""
+            :red_circle: Task Failed. 
+            *Task*: {ti.task_id}
+            *Dag*: {ti.dag_id} 
+            *Execution Time*: {context["execution_date"]}  
+            *Log Url*: {ti.log_url} 
+            """
+    #  *context*: {context} for the exhaustive list
+    failed_alert = DiscordWebhookOperator(
+        task_id="discord_failure_callback_test",
+        http_conn_id="discord",
+        message=discord_msg,
+    )
+    return failed_alert.execute(context=context)
