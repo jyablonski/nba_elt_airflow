@@ -15,6 +15,7 @@ jobs:
           python-version: 3.8
       - name: Install dependencies
         run: |
+          python3 -m pip install virtualenv
           make venv
       - name: Run Tests with pytest
         run: venv/bin/python3 -m pytest
