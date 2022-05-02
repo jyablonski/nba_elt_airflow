@@ -1,8 +1,7 @@
 from datetime import datetime, timedelta
 from airflow import DAG
-from unittest.mock import patch, call
+
 import pytest
-from freezegun import freeze_time
 from dags.nba_elt_pipeline_dag_dev import (
     jacobs_ecs_task,
     JACOBS_DEFAULT_ARGS,
