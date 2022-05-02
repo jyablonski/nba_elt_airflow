@@ -1,0 +1,21 @@
+name: Tests
+
+on:
+  pull_request:
+
+jobs:
+  pytest_build:
+    name: Pytest 
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - name: Install Python 3
+        uses: actions/setup-python@v1
+        with:
+          python-version: 3.8
+        shell: bash
+      - name: Install dependencies
+        run: |
+          make venv
+      - name: Run Tests with pytest
+        run: venv/bin/python3 -m pytest
