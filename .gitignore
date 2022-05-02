@@ -128,3 +128,5 @@ target/
 dbt_modules/
 logs/
 dbt_packages/
+plugins/
+docker_ecs/
