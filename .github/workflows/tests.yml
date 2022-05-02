@@ -18,4 +18,4 @@ jobs:
           python3 -m pip install virtualenv
           make venv
       - name: Run Tests with pytest
-        run: venv/bin/python3 -m pytest
+        run: venv/bin/python3 -m pytest -v
