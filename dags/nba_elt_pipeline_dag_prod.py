@@ -5,7 +5,7 @@ from airflow import DAG
 from airflow.operators.email import EmailOperator
 from airflow.operators.bash_operator import BashOperator
 from airflow.operators.dummy_operator import DummyOperator
-from airflow.providers.amazon.aws.operators.ecs import ECSOperator
+from airflow.providers.amazon.aws.operators.ecs import EcsOperator
 from utils import get_ssm_parameter, jacobs_slack_alert
 
 jacobs_network_config = {
@@ -40,8 +40,8 @@ def jacobs_dummy_task(dag: DAG, task_id) -> DummyOperator:
     return DummyOperator(task_id=task_id, dag=dag)
 
 
-def jacobs_ecs_task(dag: DAG) -> ECSOperator:
-    return ECSOperator(
+def jacobs_ecs_task(dag: DAG) -> EcsOperator:
+    return EcsOperator(
         task_id="jacobs_airflow_ecs_task_prod",
         dag=dag,
         aws_conn_id="aws_ecs",
@@ -124,8 +124,8 @@ def jacobs_dbt_task4(dag: DAG) -> BashOperator:
     )
 
 # adding in framework for adding the ml pipeline in after dbt runs
-# def jacobs_ecs_task_ml(dag: DAG) -> ECSOperator:
-#     return ECSOperator(
+# def jacobs_ecs_task_ml(dag: DAG) -> EcsOperator:
+#     return EcsOperator(
 #         task_id="jacobs_airflow_ecs_task_ml_prod",
 #         dag=dag,
 #         aws_conn_id="aws_ecs",
