@@ -5,7 +5,7 @@ from airflow import DAG
 from airflow.operators.email import EmailOperator
 from airflow.operators.bash_operator import BashOperator
 from airflow.operators.dummy_operator import DummyOperator
-from airflow.providers.amazon.aws.operators.ecs import ECSOperator
+from airflow.providers.amazon.aws.operators.ecs import EcsOperator
 from utils import get_ssm_parameter, jacobs_slack_alert
 
 # dbt test failure WILL fail the task, and fail the dag.
@@ -38,8 +38,8 @@ os.environ["AWS_DEFAULT_REGION"] = "us-east-1"
 DBT_PROFILE_DIR = "~/.dbt/"
 DBT_PROJECT_DIR = "~/airflow/dags/dbt/"
 
-def jacobs_ecs_task(dag: DAG) -> ECSOperator:
-    return ECSOperator(
+def jacobs_ecs_task(dag: DAG) -> EcsOperator:
+    return EcsOperator(
         task_id="jacobs_airflow_ecs_task_dev",
         dag=dag,
         aws_conn_id="aws_ecs",
@@ -49,7 +49,7 @@ def jacobs_ecs_task(dag: DAG) -> ECSOperator:
         overrides={
             "containerOverrides": [
                 {
-                    "name": "jacobs_container_airflow",
+                    "name": "jacobs_container_airflow", # change this to any of the task_definitons created in ecs
                     "environment": [
                         {
                             "name": "dag_run_ts",
@@ -126,8 +126,8 @@ def jacobs_dbt_task4(dag: DAG) -> BashOperator:
     )
 
 # adding in framework for adding the ml pipeline in after dbt runs
-# def jacobs_ecs_task_ml(dag: DAG) -> ECSOperator:
-#     return ECSOperator(
+# def jacobs_ecs_task_ml(dag: DAG) -> EcsOperator:
+#     return EcsOperator(
 #         task_id="jacobs_airflow_ecs_task_ml_dev",
 #         dag=dag,
 #         aws_conn_id="aws_ecs",
