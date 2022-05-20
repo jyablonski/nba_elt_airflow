@@ -68,7 +68,7 @@ def create_dag() -> DAG:
         schedule_interval=None,  # change to none when testing / schedule_interval | None
         start_date=datetime(2022, 3, 21),
         max_active_runs=1,
-        tags=["qa", "meltano", "practice"],
+        tags=["qa", "meltano", "practice", "airflow_test"],
     )
     t1 = jacobs_dummy_task(dag, 1)
     t2 = jacobs_meltano_task(dag)
