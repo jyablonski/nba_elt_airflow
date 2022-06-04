@@ -90,8 +90,10 @@ def airflow_email_prac_function():
       """
     return email
 
+
 # these are task / dag failure alert webhooks for slack + discord
 # you have to set both of them up in admin -> connections
+
 
 def jacobs_slack_alert(context):
     # the context houses all of the metadata for the task instance currently being ran, and the dag it's connected to.
@@ -104,7 +106,7 @@ def jacobs_slack_alert(context):
             *Execution Time*: {context["execution_date"]}  
             *Log Url*: {ti.log_url} 
             """
-            #  *context*: {context} for the exhaustive list
+    #  *context*: {context} for the exhaustive list
     failed_alert = SlackWebhookOperator(
         task_id="slack_test",
         http_conn_id="slack",
@@ -125,7 +127,7 @@ def jacobs_discord_alert(context):
             *Execution Time*: {context["execution_date"]}  
             *Log Url*: {ti.log_url} 
             """
-            #  *context*: {context} for the exhaustive list
+    #  *context*: {context} for the exhaustive list
     failed_alert = DiscordWebhookOperator(
         task_id="discord_failure_callback_test",
         http_conn_id="discord",
