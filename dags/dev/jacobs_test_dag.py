@@ -14,7 +14,7 @@ from airflow.providers.discord.operators.discord_webhook import DiscordWebhookOp
 from utils import (
     my_function,
     get_ssm_parameter,
-    airflow_email_prac_function,
+    jacobs_airflow_email,
     practice_xcom_function,
     jacobs_slack_alert,
     jacobs_discord_alert,
@@ -41,8 +41,8 @@ JACOBS_DEFAULT_ARGS = {
     "email_on_failure": True,
     "email_on_retry": False,
     "retries": 0,
-    "on_failure_callback": jacobs_slack_alert # jacobs_discord_alert - apparently dont work at the same time together
-                                              # [jacobs_slack_alert, jacobs_discord_alert]
+    "on_failure_callback": jacobs_slack_alert  # jacobs_discord_alert - apparently dont work at the same time together
+    # [jacobs_slack_alert, jacobs_discord_alert]
 }
 
 # my_function()
@@ -165,7 +165,7 @@ with DAG(
         task_id="send_email_notification_custom",
         to="jyablonski9@gmail.com",
         subject="Airflow Test Dag run on {{ ds }}",
-        html_content=airflow_email_prac_function(),
+        html_content=jacobs_airflow_email(),
     )
 
     # send_slack_notification_failure_test = SlackWebhookOperator(
@@ -189,7 +189,7 @@ with DAG(
             *Owner*: {{ task.owner }}
             ✅✅"
             """,
-            channel="#airflow-channel",
+        channel="#airflow-channel",
     )
 
     send_discord_notification = DiscordWebhookOperator(
@@ -202,7 +202,7 @@ with DAG(
             *Execution Time*: {{ ts }}
             *Owner*: {{ task.owner }}
             ✅✅"
-            """
+            """,
     )
 
     # dummy_task >> [python_dummy_task, dbt_deps] >> send_email_notification

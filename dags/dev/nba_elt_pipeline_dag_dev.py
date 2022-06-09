@@ -8,6 +8,8 @@ from airflow.operators.dummy_operator import DummyOperator
 from airflow.providers.amazon.aws.operators.ecs import EcsOperator
 from utils import get_ssm_parameter, jacobs_slack_alert
 
+# dbt test failure WILL fail the task, and fail the dag.
+
 jacobs_network_config = {
     "awsvpcConfiguration": {
         "securityGroups": [get_ssm_parameter("jacobs_ssm_sg_task")],
@@ -30,19 +32,16 @@ JACOBS_DEFAULT_ARGS = {
     "on_failure_callback": jacobs_slack_alert,
 }
 
+jacobs_tags = ["nba_elt_pipeline", "dev", "ml"]
+
 os.environ["AWS_DEFAULT_REGION"] = "us-east-1"
 DBT_PROFILE_DIR = "~/.dbt/"
 DBT_PROJECT_DIR = "~/airflow/dags/dbt/"
 
 
-def jacobs_dummy_task(dag: DAG, task_id) -> DummyOperator:
-    task_id = "dummy_task_qa" + str(task_id)
-    return DummyOperator(task_id=task_id, dag=dag)
-
-
 def jacobs_ecs_task(dag: DAG) -> EcsOperator:
     return EcsOperator(
-        task_id="jacobs_airflow_ecs_task_prod",
+        task_id="jacobs_airflow_ecs_task_dev",
         dag=dag,
         aws_conn_id="aws_ecs",
         cluster="jacobs_fargate_cluster",
@@ -51,7 +50,7 @@ def jacobs_ecs_task(dag: DAG) -> EcsOperator:
         overrides={
             "containerOverrides": [
                 {
-                    "name": "jacobs_container_airflow",
+                    "name": "jacobs_container_airflow",  # change this to any of the task_definitons created in ecs
                     "environment": [
                         {
                             "name": "dag_run_ts",
@@ -60,18 +59,18 @@ def jacobs_ecs_task(dag: DAG) -> EcsOperator:
                         {
                             "name": "dag_run_date",
                             "value": " {{ ds }}",
-                        },  # USE THESE TO CREATE IDEMPOTENT TASKS / DAGS
+                        },  # USE THESE TEMPLATE VARIABLES TO CREATE IDEMPOTENT TASKS / DAGS
                         {
                             "name": "run_type",
-                            "value": "prod",                # you can do like if run_type == 'dev': S3_BUCKET=xxx_dev, RDS_SCHEMA=xxx_dev
+                            "value": "dev",  # you can do like if run_type == 'dev': S3_BUCKET=xxx_dev, RDS_SCHEMA=xxx_dev
                         },
                         {
                             "name": "S3_BUCKET",
-                            "value": "jacobsbucket97_prod", # you can dynamically change this for dev/prod
+                            "value": "jacobsbucket97_dev",  # you can dynamically change this for dev/prod
                         },
                         {
                             "name": "RDS_SCHEMA",
-                            "value": "nba_source_prod",     # you can dynamically change this for dev/prod
+                            "value": "nba_source_dev",  # you can dynamically change this for dev/prod
                         },
                     ],
                 }
@@ -84,8 +83,15 @@ def jacobs_ecs_task(dag: DAG) -> EcsOperator:
     )
 
 
+# 4 ways of doing dbt as far as i know:
+# 1) you put the entire dbt project locally in the airflow server somewhere and run it like below, and keep it updated on your own
+# 2) run it as an ecs operator and keep a docker image in ecr to run the dbt build job
+# 3) you have a paid dbt cloud plan and use dbt airflow provider to call the api & run the job from there, which just pulls from the git repo automatically
+# 4) you run the project in gitlab ci or github actions and can trigger it vs requests.post()
+
+
 def jacobs_dbt_task1(dag: DAG) -> BashOperator:
-    task_id = "dbt_deps_prod"
+    task_id = "dbt_deps_dev"
 
     return BashOperator(
         task_id=task_id,
@@ -95,7 +101,7 @@ def jacobs_dbt_task1(dag: DAG) -> BashOperator:
 
 
 def jacobs_dbt_task2(dag: DAG) -> BashOperator:
-    task_id = "dbt_seed_prod"
+    task_id = "dbt_seed_dev"
 
     return BashOperator(
         task_id=task_id,
@@ -105,7 +111,7 @@ def jacobs_dbt_task2(dag: DAG) -> BashOperator:
 
 
 def jacobs_dbt_task3(dag: DAG) -> BashOperator:
-    task_id = "dbt_run_prod"
+    task_id = "dbt_run_dev"
 
     return BashOperator(
         task_id=task_id,
@@ -115,7 +121,7 @@ def jacobs_dbt_task3(dag: DAG) -> BashOperator:
 
 
 def jacobs_dbt_task4(dag: DAG) -> BashOperator:
-    task_id = "dbt_test_prod"
+    task_id = "dbt_test_dev"
 
     return BashOperator(
         task_id=task_id,
@@ -123,10 +129,11 @@ def jacobs_dbt_task4(dag: DAG) -> BashOperator:
         bash_command=f"dbt test --profiles-dir {DBT_PROFILE_DIR} --project-dir {DBT_PROJECT_DIR}",
     )
 
+
 # adding in framework for adding the ml pipeline in after dbt runs
 # def jacobs_ecs_task_ml(dag: DAG) -> EcsOperator:
 #     return EcsOperator(
-#         task_id="jacobs_airflow_ecs_task_ml_prod",
+#         task_id="jacobs_airflow_ecs_task_ml_dev",
 #         dag=dag,
 #         aws_conn_id="aws_ecs",
 #         cluster="jacobs_fargate_cluster",
@@ -147,7 +154,7 @@ def jacobs_dbt_task4(dag: DAG) -> BashOperator:
 #                         },  # USE THESE TO CREATE IDEMPOTENT TASKS / DAGS
 #                         {
 #                             "name": "run_type",
-#                             "value": "prod",
+#                             "value": "dev",
 #                         },
 #                         {
 #                             "name": "RDS_SCHEMA",
@@ -165,14 +172,17 @@ def jacobs_dbt_task4(dag: DAG) -> BashOperator:
 
 
 def jacobs_email_task(dag: DAG) -> EmailOperator:
-    task_id = "send_email_notification_prod"
+    task_id = "send_email_notification_dev"
 
     return EmailOperator(
         task_id=task_id,
         dag=dag,
         to="jyablonski9@gmail.com",
-        subject="Airflow NBA ELT Pipeline PROD DAG Run",
-        html_content="<h3>Process Completed</h3>",
+        subject="Airflow NBA ELT Pipeline DAG Run",
+        html_content="""<h3>Process Completed</h3> <br>
+        XCOM VAlue in ECS Task: {{ ti.xcom_pull(key="return_value", task_ids='jacobs_airflow_ecs_task_dev') }}
+
+        """,
     )
 
 
@@ -183,28 +193,23 @@ def create_dag() -> DAG:
     schedule_interval = "0 11 * * *"
 
     dag = DAG(
-        "nba_elt_pipeline_dag_prod",
+        "nba_elt_pipeline_dag_dev",
         catchup=False,
         default_args=JACOBS_DEFAULT_ARGS,
-        schedule_interval=schedule_interval,
+        schedule_interval=None,  # change to none when testing / schedule_interval | None
         start_date=datetime(2021, 11, 20),
         max_active_runs=1,
-        tags=["nba_elt_pipeline", "prod", "ml"],
+        tags=jacobs_tags,
     )
-    t1 = jacobs_dummy_task(dag, 1)
-    t2 = jacobs_ecs_task(dag)
-    t3 = jacobs_dummy_task(dag, 2)
-    t4 = jacobs_dummy_task(dag, 3)
-    t5 = jacobs_dummy_task(dag, 4)
-    t6 = jacobs_dbt_task1(dag)
-    t7 = jacobs_dbt_task2(dag)
-    t8 = jacobs_dbt_task3(dag)
-    t9 = jacobs_dbt_task4(dag)
-    # t10 = jacobs_ecs_task_ml(dag)
-    t10 = jacobs_email_task(dag)
-    t11 = jacobs_dummy_task(dag, 5)
+    t1 = jacobs_ecs_task(dag)
+    t2 = jacobs_dbt_task1(dag)
+    t3 = jacobs_dbt_task2(dag)
+    t4 = jacobs_dbt_task3(dag)
+    t5 = jacobs_dbt_task4(dag)
+    # t6 = jacobs_ecs_task_ml(dag)
+    t7 = jacobs_email_task(dag)
 
-    t1 >> t2 >> [t3, t4, t5] >> t6 >> t7 >> t8 >> t9 >> [t10, t11]
+    t1 >> t2 >> t3 >> t4 >> t5 >> t7
 
     return dag
 

@@ -23,9 +23,11 @@ JACOBS_DEFAULT_ARGS = {
 
 os.environ["AWS_DEFAULT_REGION"] = "us-east-1"
 
+
 def jacobs_dummy_task(dag: DAG, task_id) -> DummyOperator:
     task_id = "dummy_task_qa" + str(task_id)
     return DummyOperator(task_id=task_id, dag=dag)
+
 
 # having problems installing meltano on airflow, gunicorn dependency issue as of 2022-03-21
 def jacobs_meltano_task(dag: DAG) -> BashOperator:
@@ -37,7 +39,9 @@ def jacobs_meltano_task(dag: DAG) -> BashOperator:
         bash_command=f"meltano elt tap-gitlab target-postgres --job_id=gitlab-to-postgres",
     )
 
+
 ### jacobs_dbt_task - do some dbt stuff here after meltano extracts the data and loads it into postgres
+
 
 def jacobs_email_task(dag: DAG) -> EmailOperator:
     task_id = "send_email_notification_qa"
@@ -52,7 +56,6 @@ def jacobs_email_task(dag: DAG) -> EmailOperator:
 
         """,
     )
-
 
 
 def create_dag() -> DAG:
