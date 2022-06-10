@@ -1,4 +1,4 @@
-from datetime import datetime
+from datetime import datetime, timedelta
 import json
 import logging
 from typing import Dict
@@ -9,6 +9,19 @@ from airflow.operators.python_operator import PythonOperator
 from airflow.operators.email_operator import EmailOperator
 import boto3
 import requests
+
+from utils import jacobs_airflow_email, jacobs_discord_alert, jacobs_slack_alert
+
+JACOBS_DEFAULT_ARGS = {
+    "owner": "jacob",
+    "depends_on_past": False,
+    "email": ["jyablonski9@gmail.com"],
+    "email_on_failure": True,
+    "email_on_retry": True,
+    "retries": 0,
+    "retry_delay": timedelta(minutes=5),
+    "on_failure_callback": jacobs_discord_alert,
+}
 
 api = 'https://jyablonski_graphql.deta.dev/graphql'
 table = 'allTeams'
@@ -37,7 +50,8 @@ def graphql_query():
     schedule_interval="@daily",
     start_date=datetime(2022, 6, 1),
     catchup=False,
-    tags=["test", "graphql"],
+    tags=["test", "graphql", "dev", "JACOB"],
+    default_args=JACOBS_DEFAULT_ARGS,
 )
 
 # you have to return json for xcoms to work.
@@ -59,7 +73,7 @@ def taskflow():
         task_id="email_notification",
         to="jyablonski9@gmail.com",
         subject="graphql dag completed",
-        html_content="the dag has finished",
+        html_content=jacobs_airflow_email(),
     )
 
     write_to_s3(api_trigger()) >> email_notification

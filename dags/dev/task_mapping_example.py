@@ -17,6 +17,7 @@ default_args = {
     "on_failure_callback": jacobs_slack_alert,
 }
 
+
 @task
 def make_list():
     # This can also be from an API call, checking a database, -- almost anything you like, as long as the
@@ -28,6 +29,7 @@ def make_list():
 def consumer(arg):
     print(list(arg))
 
+
 with DAG(
     "jacobs_dynamic_task_dag",
     # schedule_interval="0 11 * * *",
@@ -38,7 +40,6 @@ with DAG(
     catchup=False,
     tags=["test", "qa", "slack", "dynamic_tasks"],
 ) as dag:
-
 
     @task
     def add_one(x: int):
@@ -52,8 +53,13 @@ with DAG(
     # added_values = add_one.expand(x=[1, 2, 3])
     # sum_it(added_values)
 
-    first = add_one.expand(x=[1, 2, 3])
-    second = add_one.expand(x=first)
+    # you're calling the add_one task on each input you give it.
+    # so here, 8 subtasks are actually getting created.
+    first = add_one.expand(x=[1, 2, 3, 4, 5, 6, 7, 8])
+
+    # and then you store that value into first and sum it.
+    second = sum_it(first)
+
     # added_values >> sum_it
     # consumer.expand(arg=make_list())
     first >> second
