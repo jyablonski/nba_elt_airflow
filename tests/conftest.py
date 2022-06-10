@@ -4,7 +4,7 @@ import pytest
 from airflow import DAG
 # from unittest.mock import patch, call
 # from freezegun import freeze_time
-from dags.nba_elt_pipeline_dag_dev import (
+from dags.dev.nba_elt_pipeline_dag_dev import (
     jacobs_ecs_task,
     JACOBS_DEFAULT_ARGS,
     create_dag,
