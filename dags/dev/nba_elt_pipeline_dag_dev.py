@@ -90,7 +90,7 @@ def jacobs_ecs_task(dag: DAG) -> EcsOperator:
 # 4) you run the project in gitlab ci or github actions and can trigger it vs requests.post()
 
 
-def jacobs_dbt_task1(dag: DAG) -> BashOperator:
+def jacobs_dbt_deps(dag: DAG) -> BashOperator:
     task_id = "dbt_deps_dev"
 
     return BashOperator(
@@ -100,7 +100,7 @@ def jacobs_dbt_task1(dag: DAG) -> BashOperator:
     )
 
 
-def jacobs_dbt_task2(dag: DAG) -> BashOperator:
+def jacobs_dbt_seed(dag: DAG) -> BashOperator:
     task_id = "dbt_seed_dev"
 
     return BashOperator(
@@ -110,7 +110,7 @@ def jacobs_dbt_task2(dag: DAG) -> BashOperator:
     )
 
 
-def jacobs_dbt_task3(dag: DAG) -> BashOperator:
+def jacobs_dbt_run(dag: DAG) -> BashOperator:
     task_id = "dbt_run_dev"
 
     return BashOperator(
@@ -120,7 +120,7 @@ def jacobs_dbt_task3(dag: DAG) -> BashOperator:
     )
 
 
-def jacobs_dbt_task4(dag: DAG) -> BashOperator:
+def jacobs_dbt_test(dag: DAG) -> BashOperator:
     task_id = "dbt_test_dev"
 
     return BashOperator(
@@ -202,10 +202,10 @@ def create_dag() -> DAG:
         tags=jacobs_tags,
     )
     t1 = jacobs_ecs_task(dag)
-    t2 = jacobs_dbt_task1(dag)
-    t3 = jacobs_dbt_task2(dag)
-    t4 = jacobs_dbt_task3(dag)
-    t5 = jacobs_dbt_task4(dag)
+    t2 = jacobs_dbt_deps(dag)
+    t3 = jacobs_dbt_seed(dag)
+    t4 = jacobs_dbt_run(dag)
+    t5 = jacobs_dbt_test(dag)
     # t6 = jacobs_ecs_task_ml(dag)
     t7 = jacobs_email_task(dag)
 

@@ -1,7 +1,7 @@
 PYTHON_VERSION := 3.8
-AIRFLOW_VERSION := 2.3.0
+AIRFLOW_VERSION := 2.3.2
 # Must be comma-separated, no spaces
-AIRFLOW_EXTRAS := postgres,amazon,slack,http,discord
+AIRFLOW_EXTRAS := postgres,amazon,slack,http,discord,airbyte
 CONSTRAINT := https://raw.githubusercontent.com/apache/airflow/constraints-${AIRFLOW_VERSION}/constraints-${PYTHON_VERSION}.txt
 
 # https://github.com/soggycactus/airflow-repo-template

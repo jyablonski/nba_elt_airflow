@@ -84,7 +84,7 @@ def jacobs_ecs_task(dag: DAG) -> EcsOperator:
     )
 
 
-def jacobs_dbt_task1(dag: DAG) -> BashOperator:
+def jacobs_dbt_deps(dag: DAG) -> BashOperator:
     task_id = "dbt_deps_prod"
 
     return BashOperator(
@@ -94,7 +94,7 @@ def jacobs_dbt_task1(dag: DAG) -> BashOperator:
     )
 
 
-def jacobs_dbt_task2(dag: DAG) -> BashOperator:
+def jacobs_dbt_seed(dag: DAG) -> BashOperator:
     task_id = "dbt_seed_prod"
 
     return BashOperator(
@@ -104,7 +104,7 @@ def jacobs_dbt_task2(dag: DAG) -> BashOperator:
     )
 
 
-def jacobs_dbt_task3(dag: DAG) -> BashOperator:
+def jacobs_dbt_run(dag: DAG) -> BashOperator:
     task_id = "dbt_run_prod"
 
     return BashOperator(
@@ -114,7 +114,7 @@ def jacobs_dbt_task3(dag: DAG) -> BashOperator:
     )
 
 
-def jacobs_dbt_task4(dag: DAG) -> BashOperator:
+def jacobs_dbt_test(dag: DAG) -> BashOperator:
     task_id = "dbt_test_prod"
 
     return BashOperator(
@@ -197,10 +197,10 @@ def create_dag() -> DAG:
     t3 = jacobs_dummy_task(dag, 2)
     t4 = jacobs_dummy_task(dag, 3)
     t5 = jacobs_dummy_task(dag, 4)
-    t6 = jacobs_dbt_task1(dag)
-    t7 = jacobs_dbt_task2(dag)
-    t8 = jacobs_dbt_task3(dag)
-    t9 = jacobs_dbt_task4(dag)
+    t6 = jacobs_dbt_deps(dag)
+    t7 = jacobs_dbt_seed(dag)
+    t8 = jacobs_dbt_run(dag)
+    t9 = jacobs_dbt_test(dag)
     # t10 = jacobs_ecs_task_ml(dag)
     t10 = jacobs_email_task(dag)
     t11 = jacobs_dummy_task(dag, 5)
