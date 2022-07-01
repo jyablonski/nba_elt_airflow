@@ -1,7 +1,7 @@
 # Airflow Project Version: 1.1.7
 This Repo is a local Airflow Deployment for my [NBA Project](https://github.com/jyablonski/NBA-Dashboard), with functional `EcsOperator` and `dbt run` tasks for the project workflow.  This is not currently used for the production ELT, as I cannot host Airflow on any Cloud provider for free.  
 
-![NBA ELT Pipeline Data Flow 2 (1)](https://user-images.githubusercontent.com/16946556/161156854-9ba5583e-94ed-4c80-9699-c2c50f41ed1c.jpg)
+![airflow_workflow](https://user-images.githubusercontent.com/16946556/176963452-8621f4c1-cf8e-4124-a1f2-ab7d28b99069.jpg)
 
 The template I used to get started is available [here](https://github.com/soggycactus/airflow-repo-template).
 
