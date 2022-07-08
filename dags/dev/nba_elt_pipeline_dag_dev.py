@@ -54,7 +54,7 @@ def jacobs_ecs_task(dag: DAG) -> EcsOperator:
         dag=dag,
         aws_conn_id="aws_ecs",
         cluster="jacobs_fargate_cluster",
-        task_definition="jacobs_task",
+        task_definition="jacobs_webscrape_task",
         launch_type="FARGATE",
         overrides={
             "containerOverrides": [
@@ -105,7 +105,7 @@ def jacobs_ecs_task_dbt(dag: DAG) -> EcsOperator:
         dag=dag,
         aws_conn_id="aws_ecs",
         cluster="jacobs_fargate_cluster",
-        task_definition="jacobs_task_dbt",
+        task_definition="jacobs_dbt_task",
         launch_type="FARGATE",
         overrides={
             "containerOverrides": [
@@ -165,7 +165,7 @@ def jacobs_ecs_task_ml(dag: DAG) -> EcsOperator:
         dag=dag,
         aws_conn_id="aws_ecs",
         cluster="jacobs_fargate_cluster",
-        task_definition="jacobs_task_ml",
+        task_definition="jacobs_ml_task",
         launch_type="FARGATE",
         overrides={
             "containerOverrides": [
