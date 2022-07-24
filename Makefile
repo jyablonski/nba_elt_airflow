@@ -32,12 +32,8 @@ lint-docker:
 
 # Runs all tests
 .PHONY: test
-test: venv
-	@( \
-		export AIRFLOW_HOME=${PWD}; \
-		source venv/bin/activate; \
-		pytest tests --log-cli-level=info --disable-warnings; \
-	)
+test: 
+	@venv/bin/python3 -m pytest -v --disable-warnings
 
 test-docker:
 	@docker-compose up test
