@@ -13,20 +13,21 @@ JACOBS_DEFAULT_ARGS = {
     "email_on_failure": True,
     "email_on_retry": False,
     "retries": 0,
-    "on_failure_callback": jacobs_discord_alert
+    "on_failure_callback": jacobs_discord_alert,
 }
 
-with DAG(dag_id='trigger_airbyte_job_example',
-         default_args=JACOBS_DEFAULT_ARGS,
-         schedule_interval='@daily',
-         start_date=datetime(2022, 6, 6),
-    ) as dag:
+with DAG(
+    dag_id="trigger_airbyte_job_example",
+    default_args=JACOBS_DEFAULT_ARGS,
+    schedule_interval="@daily",
+    start_date=datetime(2022, 6, 6),
+) as dag:
 
     money_to_json = AirbyteTriggerSyncOperator(
-        task_id='airbyte_money_json_example',
-        airbyte_conn_id='airbyte_conn_example',
-        connection_id='1e3b5a72-7bfd-4808-a13c-204505490110',
+        task_id="airbyte_money_json_example",
+        airbyte_conn_id="airbyte_conn_example",
+        connection_id="1e3b5a72-7bfd-4808-a13c-204505490110",
         asynchronous=False,
         timeout=3600,
-        wait_seconds=3
+        wait_seconds=3,
     )

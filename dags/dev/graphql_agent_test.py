@@ -23,8 +23,9 @@ JACOBS_DEFAULT_ARGS = {
     "on_failure_callback": jacobs_discord_alert,
 }
 
-api = 'https://jyablonski_graphql.deta.dev/graphql'
-table = 'allTeams'
+api = "https://jyablonski_graphql.deta.dev/graphql"
+table = "allTeams"
+
 
 def graphql_query():
     query = """
@@ -45,6 +46,7 @@ def graphql_query():
     """
     return query
 
+
 @dag(
     "graphql_agent_test",
     schedule_interval="@daily",
@@ -58,15 +60,15 @@ def graphql_query():
 def taskflow():
     @task(task_id="api_trigger", retries=0)
     def api_trigger() -> Dict[str, str]:
-        return requests.post(api, json={'query': graphql_query()}).json()
+        return requests.post(api, json={"query": graphql_query()}).json()
 
     @task
     def write_to_s3(data: Dict[str, str]):
-        s3 = boto3.client('s3')
+        s3 = boto3.client("s3")
         s3.put_object(
-            Body=json.dumps(data['data']['allTeams']),
-            Bucket='jacobsbucket97-dev',
-            Key=f'json_test/graphql_{table}_{datetime.now().date()}.json'
+            Body=json.dumps(data["data"]["allTeams"]),
+            Bucket="jacobsbucket97-dev",
+            Key=f"json_test/graphql_{table}_{datetime.now().date()}.json",
         )
 
     email_notification = EmailOperator(
@@ -80,7 +82,6 @@ def taskflow():
 
 
 dag = taskflow()
-
 
 
 ### THE OLD WAY
