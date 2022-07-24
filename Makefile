@@ -1,5 +1,5 @@
 PYTHON_VERSION := 3.8
-AIRFLOW_VERSION := 2.3.2
+AIRFLOW_VERSION := 2.3.3
 # Must be comma-separated, no spaces
 AIRFLOW_EXTRAS := postgres,amazon,slack,http,discord,airbyte
 CONSTRAINT := https://raw.githubusercontent.com/apache/airflow/constraints-${AIRFLOW_VERSION}/constraints-${PYTHON_VERSION}.txt
@@ -32,12 +32,8 @@ lint-docker:
 
 # Runs all tests
 .PHONY: test
-test: venv
-	@( \
-		export AIRFLOW_HOME=${PWD}; \
-		source venv/bin/activate; \
-		pytest tests --log-cli-level=info --disable-warnings; \
-	)
+test: 
+	@venv/bin/python3 -m pytest -v --disable-warnings
 
 test-docker:
 	@docker-compose up test

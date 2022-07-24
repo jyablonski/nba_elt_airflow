@@ -61,6 +61,7 @@ def my_function():
           """
     )
 
+
 def jacobs_airflow_email():
     email = """
       <h3>Process {{ ts }} Completed</h3>

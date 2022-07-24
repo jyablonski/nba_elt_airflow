@@ -2,13 +2,14 @@ from datetime import datetime, timedelta
 
 import pytest
 from airflow import DAG
+
 # from unittest.mock import patch, call
 # from freezegun import freeze_time
 from dags.dev.nba_elt_pipeline_dag_dev import (
     jacobs_ecs_task,
-    JACOBS_DEFAULT_ARGS,
+    jacobs_default_args,
     create_dag,
-    jacobs_tags
+    jacobs_tags,
 )
 
 from dags.utils import jacobs_slack_alert
@@ -29,7 +30,7 @@ from dags.utils import jacobs_slack_alert
 def nba_elt_pipeline_dag():
     test_dag = DAG(
         "jacobs_test_dag",
-        default_args=JACOBS_DEFAULT_ARGS,
+        default_args=jacobs_default_args,
         start_date=datetime(2021, 11, 1),
         catchup=False,
         schedule_interval=None,

@@ -124,30 +124,30 @@ def jacobs_ecs_task_dbt(dag: DAG) -> EcsOperator:
                             "name": "run_type",
                             "value": "prod",
                         },
-                        {   
+                        {
                             "name": "DBT_DBNAME",
-                            "value": jacobs_env_vars['DBT_DBNAME'],
+                            "value": jacobs_env_vars["DBT_DBNAME"],
                         },
-                        {   
+                        {
                             "name": "DBT_HOST",
-                            "value": jacobs_env_vars['DBT_HOST'],
+                            "value": jacobs_env_vars["DBT_HOST"],
                         },
                         {
                             "name": "DBT_USER",
-                            "value": jacobs_env_vars['DBT_USER'],
+                            "value": jacobs_env_vars["DBT_USER"],
                         },
                         {
                             "name": "DBT_PASS",
-                            "value": jacobs_env_vars['DBT_PASS'],
+                            "value": jacobs_env_vars["DBT_PASS"],
                         },
                         {
                             "name": "DBT_SCHEMA",
-                            "value": jacobs_env_vars['DBT_SCHEMA'],
+                            "value": jacobs_env_vars["DBT_SCHEMA"],
                         },
                         {
                             "name": "DBT_PRAC_KEY",
-                            "value": jacobs_env_vars['DBT_PRAC_KEY'],
-                        }
+                            "value": jacobs_env_vars["DBT_PRAC_KEY"],
+                        },
                     ],
                 }
             ]
@@ -157,6 +157,7 @@ def jacobs_ecs_task_dbt(dag: DAG) -> EcsOperator:
         awslogs_stream_prefix="ecs/jacobs_container_dbt",
         do_xcom_push=True,
     )
+
 
 # adding in framework for adding the ml pipeline in after dbt runs
 def jacobs_ecs_task_ml(dag: DAG) -> EcsOperator:
