@@ -130,3 +130,4 @@ logs/
 dbt_packages/
 plugins/
 docker_ecs/
+jacobs_notes.md
