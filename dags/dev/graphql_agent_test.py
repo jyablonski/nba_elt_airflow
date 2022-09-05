@@ -2,9 +2,11 @@ from datetime import datetime, timedelta
 import json
 import logging
 from typing import Dict
+import sys
 
 from airflow import DAG
 from airflow.decorators import dag, task
+from airflow.exceptions import AirflowException
 from airflow.operators.python_operator import PythonOperator
 from airflow.operators.email_operator import EmailOperator
 import boto3
@@ -12,7 +14,7 @@ import requests
 
 from utils import jacobs_airflow_email, jacobs_discord_alert, jacobs_slack_alert
 
-JACOBS_DEFAULT_ARGS = {
+jacobs_default_args = {
     "owner": "jacob",
     "depends_on_past": False,
     "email": ["jyablonski9@gmail.com"],
@@ -23,24 +25,24 @@ JACOBS_DEFAULT_ARGS = {
     "on_failure_callback": jacobs_discord_alert,
 }
 
-api = "https://jyablonski_graphql.deta.dev/graphql"
-table = "allTeams"
+api = "https://ye6iogcwjiifung7em6kezj4ky0xyqik.lambda-url.us-east-1.on.aws/graphql"
+table = "redditComments"
 
 
 def graphql_query():
     query = """
-    query {
-    allTeams {
-        activeInjuries
-        activeProtocols
-        conference
-        last10
-        rank
-        losses
-        teamFull
-        wins
-        winPct
-        team
+    {
+    redditComments {
+        scrapeDate
+        author
+        comment
+        flair
+        score
+        url
+        compound
+        neg
+        neu
+        pos
     }
     }
     """
@@ -52,8 +54,8 @@ def graphql_query():
     schedule_interval="@daily",
     start_date=datetime(2022, 6, 1),
     catchup=False,
-    tags=["test", "graphql", "dev", "JACOB"],
-    default_args=JACOBS_DEFAULT_ARGS,
+    tags=["test", "graphql", "dev", "jacob"],
+    default_args=jacobs_default_args,
 )
 
 # you have to return json for xcoms to work.
@@ -65,11 +67,14 @@ def taskflow():
     @task
     def write_to_s3(data: Dict[str, str]):
         s3 = boto3.client("s3")
+        if data is None:
+            raise AirflowException("S3 Task Failed")
         s3.put_object(
-            Body=json.dumps(data["data"]["allTeams"]),
+            Body=json.dumps(data["data"][table]),
             Bucket="jacobsbucket97-dev",
             Key=f"json_test/graphql_{table}_{datetime.now().date()}.json",
         )
+        pass
 
     email_notification = EmailOperator(
         task_id="email_notification",
