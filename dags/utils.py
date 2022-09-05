@@ -101,8 +101,10 @@ def jacobs_slack_alert(context):
     ti = context["task_instance"]
     slack_msg = f"""
             :red_circle: Task Failed. 
+            *Exception*: {context['exception']}
             *Task*: {ti.task_id}
             *Dag*: {ti.dag_id} 
+            *Owner*: {ti.task.owner}
             *Execution Time*: {context["execution_date"]}  
             *Log Url*: {ti.log_url} 
             """
@@ -115,15 +117,24 @@ def jacobs_slack_alert(context):
     )
     return failed_alert.execute(context=context)
 
+# if you have multiple people you can ping 1 user or multiple users like below
+def discord_owner_ping(task_owner: str):
+    if task_owner == 'jacob':
+        return '<@95723063835885568> <@995779012347572334>'
+    else:
+        return task_owner
 
 def jacobs_discord_alert(context):
     # https://github.com/apache/airflow/blob/main/airflow/providers/discord/operators/discord_webhook.py
     # just make a discord connection with host as https://discord.com/api/ and extra as {"webhook_endpoint": "webhooks/000/xxx-xxx"}
     ti = context["task_instance"]
+    # print(ti)
     discord_msg = f"""
             :red_circle: Task Failed. 
+            *Exception*: {context['exception']}
             *Task*: {ti.task_id}
             *Dag*: {ti.dag_id} 
+            *Owner*: {discord_owner_ping(ti.task.owner)}
             *Execution Time*: {context["execution_date"]}  
             *Log Url*: {ti.log_url} 
             """
@@ -132,5 +143,6 @@ def jacobs_discord_alert(context):
         task_id="discord_failure_callback_test",
         http_conn_id="discord",
         message=discord_msg,
+        # avatar_url='https://a0.awsstatic.com/libra-css/images/logos/aws_logo_smile_1200x630.png', can change avatar this way
     )
     return failed_alert.execute(context=context)
