@@ -3,7 +3,7 @@ from datetime import datetime, timedelta
 from airflow import DAG
 from airflow.operators.dummy_operator import DummyOperator
 from airflow.operators.email import EmailOperator
-from airflow.providers.amazon.aws.sensors.s3_key import S3KeySensor
+from airflow.providers.amazon.aws.sensors.s3 import S3KeySensor
 
 # git remote add origin git@github.com:jyablonski/nba_elt_airflow.git
 # git push --set-upstream origin master

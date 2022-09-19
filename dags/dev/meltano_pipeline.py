@@ -5,7 +5,7 @@ from airflow import DAG
 from airflow.operators.email import EmailOperator
 from airflow.operators.bash_operator import BashOperator
 from airflow.operators.dummy_operator import DummyOperator
-from airflow.providers.amazon.aws.operators.ecs import ECSOperator
+from airflow.providers.amazon.aws.operators.ecs import EcsRunTaskOperator
 from utils import get_ssm_parameter, jacobs_slack_alert
 
 # dbt test failure WILL fail the task, and fail the dag.

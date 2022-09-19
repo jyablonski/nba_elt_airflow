@@ -74,18 +74,10 @@ dag = DAG(
 
 # t1, t2 and t3 are examples of tasks created by instantiating operators
 # [START basic_task]
-t1 = BashOperator(
-    task_id="t1",
-    bash_command="date",
-    dag=dag,
-)
+t1 = BashOperator(task_id="t1", bash_command="date", dag=dag,)
 
 t2 = BashOperator(
-    task_id="t2",
-    depends_on_past=False,
-    bash_command="sleep 5",
-    retries=3,
-    dag=dag,
+    task_id="t2", depends_on_past=False, bash_command="sleep 5", retries=3, dag=dag,
 )
 # [END basic_task]
 
