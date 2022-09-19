@@ -4,7 +4,7 @@ import http
 import os
 
 from airflow import DAG
-from airflow.providers.amazon.aws.operators.ecs import ECSOperator
+from airflow.providers.amazon.aws.operators.ecs import EcsRunTaskOperator
 from airflow.operators.bash_operator import BashOperator
 from airflow.operators.dummy_operator import DummyOperator
 from airflow.operators.email import EmailOperator
@@ -81,7 +81,7 @@ with DAG(
     #     'echo "finished"',
     #     do_xcom_push=False,
     # )
-    # jacobs_ecs_task = ECSOperator(
+    # jacobs_ecs_task = EcsRunTaskOperator(
     #     task_id="jacobs_airflow_ecs_task_test",
     #     aws_conn_id="aws_ecs",
     #     cluster="jacobs_fargate_cluster",

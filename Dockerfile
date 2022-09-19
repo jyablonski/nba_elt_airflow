@@ -1,4 +1,4 @@
-FROM python:3.8-slim-buster
+FROM python:3.9-slim-buster
 
 
 RUN apt update
@@ -11,6 +11,7 @@ RUN apt-get install -y --no-install-recommends \
     ldap-utils \
     libffi6 \
     libkrb5-dev \
+    libpq-dev \
     libsasl2-2 \
     libsasl2-modules \
     libssl1.1 \

@@ -5,7 +5,7 @@ from airflow import DAG
 from airflow.operators.email import EmailOperator
 from airflow.operators.bash_operator import BashOperator
 from airflow.operators.dummy_operator import DummyOperator
-from airflow.providers.amazon.aws.operators.ecs import EcsOperator
+from airflow.providers.amazon.aws.operators.ecs import EcsRunTaskOperator
 from utils import get_ssm_parameter, jacobs_slack_alert
 
 # dbt test failure WILL fail the task, and fail the dag.
@@ -48,8 +48,8 @@ DBT_PROFILE_DIR = "~/.dbt/"
 DBT_PROJECT_DIR = "~/airflow/dags/dbt/"
 
 
-def jacobs_ecs_task(dag: DAG) -> EcsOperator:
-    return EcsOperator(
+def jacobs_ecs_task(dag: DAG) -> EcsRunTaskOperator:
+    return EcsRunTaskOperator(
         task_id="jacobs_airflow_ecs_task_dev",
         dag=dag,
         aws_conn_id="aws_ecs",
@@ -99,8 +99,8 @@ def jacobs_ecs_task(dag: DAG) -> EcsOperator:
 # 4) you run the project in gitlab ci or github actions and can trigger it vs requests.post()
 
 
-def jacobs_ecs_task_dbt(dag: DAG) -> EcsOperator:
-    return EcsOperator(
+def jacobs_ecs_task_dbt(dag: DAG) -> EcsRunTaskOperator:
+    return EcsRunTaskOperator(
         task_id="jacobs_airflow_dbt_task_dev",
         dag=dag,
         aws_conn_id="aws_ecs",
@@ -120,30 +120,12 @@ def jacobs_ecs_task_dbt(dag: DAG) -> EcsOperator:
                             "name": "dag_run_date",
                             "value": " {{ ds }}",
                         },  # USE THESE TO CREATE IDEMPOTENT TASKS / DAGS
-                        {
-                            "name": "run_type",
-                            "value": "dev",
-                        },
-                        {
-                            "name": "DBT_DBNAME",
-                            "value": jacobs_env_vars["DBT_DBNAME"],
-                        },
-                        {
-                            "name": "DBT_HOST",
-                            "value": jacobs_env_vars["DBT_HOST"],
-                        },
-                        {
-                            "name": "DBT_USER",
-                            "value": jacobs_env_vars["DBT_USER"],
-                        },
-                        {
-                            "name": "DBT_PASS",
-                            "value": jacobs_env_vars["DBT_PASS"],
-                        },
-                        {
-                            "name": "DBT_SCHEMA",
-                            "value": jacobs_env_vars["DBT_SCHEMA"],
-                        },
+                        {"name": "run_type", "value": "dev",},
+                        {"name": "DBT_DBNAME", "value": jacobs_env_vars["DBT_DBNAME"],},
+                        {"name": "DBT_HOST", "value": jacobs_env_vars["DBT_HOST"],},
+                        {"name": "DBT_USER", "value": jacobs_env_vars["DBT_USER"],},
+                        {"name": "DBT_PASS", "value": jacobs_env_vars["DBT_PASS"],},
+                        {"name": "DBT_SCHEMA", "value": jacobs_env_vars["DBT_SCHEMA"],},
                         {
                             "name": "DBT_PRAC_KEY",
                             "value": jacobs_env_vars["DBT_PRAC_KEY"],
@@ -160,8 +142,8 @@ def jacobs_ecs_task_dbt(dag: DAG) -> EcsOperator:
 
 
 # adding in framework for adding the ml pipeline in after dbt runs
-def jacobs_ecs_task_ml(dag: DAG) -> EcsOperator:
-    return EcsOperator(
+def jacobs_ecs_task_ml(dag: DAG) -> EcsRunTaskOperator:
+    return EcsRunTaskOperator(
         task_id="jacobs_airflow_ecs_task_ml_dev",
         dag=dag,
         aws_conn_id="aws_ecs",
@@ -181,14 +163,8 @@ def jacobs_ecs_task_ml(dag: DAG) -> EcsOperator:
                             "name": "dag_run_date",
                             "value": " {{ ds }}",
                         },  # USE THESE TO CREATE IDEMPOTENT TASKS / DAGS
-                        {
-                            "name": "run_type",
-                            "value": "dev",
-                        },
-                        {
-                            "name": "RDS_SCHEMA",
-                            "value": "ml_models",
-                        },
+                        {"name": "run_type", "value": "dev",},
+                        {"name": "RDS_SCHEMA", "value": "ml_models",},
                     ],
                 }
             ]

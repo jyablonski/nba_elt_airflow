@@ -25,7 +25,7 @@ jacobs_default_args = {
     "on_failure_callback": jacobs_discord_alert,
 }
 
-api = "https://ye6iogcwjiifung7em6kezj4ky0xyqik.lambda-url.us-east-1.on.aws/graphql"
+api = "https://graphql.jyablonski.dev/graphql"
 table = "redditComments"
 
 
