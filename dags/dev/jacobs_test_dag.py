@@ -5,12 +5,13 @@ import os
 
 from airflow import DAG
 from airflow.providers.amazon.aws.operators.ecs import EcsRunTaskOperator
-from airflow.operators.bash_operator import BashOperator
-from airflow.operators.dummy_operator import DummyOperator
+from airflow.operators.bash import BashOperator
+from airflow.operators.empty import EmptyOperator
 from airflow.operators.email import EmailOperator
-from airflow.operators.python_operator import PythonOperator
+from airflow.operators.python import PythonOperator
 from airflow.providers.slack.operators.slack_webhook import SlackWebhookOperator
 from airflow.providers.discord.operators.discord_webhook import DiscordWebhookOperator
+
 from utils import (
     my_function,
     get_ssm_parameter,
@@ -63,7 +64,7 @@ with DAG(
 
     # fk
 
-    dummy_task = DummyOperator(task_id="dummy_task")
+    dummy_task = EmptyOperator(task_id="dummy_task")
 
     bash_push = BashOperator(
         task_id="bash_push",

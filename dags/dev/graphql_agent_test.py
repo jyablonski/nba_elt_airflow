@@ -1,14 +1,16 @@
 from datetime import datetime, timedelta
 import json
 import logging
+import os
 from typing import Dict
 import sys
 
 from airflow import DAG
+from airflow.hooks.base import BaseHook
 from airflow.decorators import dag, task
 from airflow.exceptions import AirflowException
-from airflow.operators.python_operator import PythonOperator
-from airflow.operators.email_operator import EmailOperator
+from airflow.operators.python import PythonOperator
+from airflow.operators.email import EmailOperator
 import boto3
 import requests
 
@@ -18,14 +20,14 @@ jacobs_default_args = {
     "owner": "jacob",
     "depends_on_past": False,
     "email": ["jyablonski9@gmail.com"],
-    "email_on_failure": True,
-    "email_on_retry": True,
+    "email_on_failure": False,
+    "email_on_retry": False,
     "retries": 0,
     "retry_delay": timedelta(minutes=5),
-    "on_failure_callback": jacobs_discord_alert,
+    "on_failure_callback": jacobs_slack_alert,
 }
 
-api = "https://graphql.jyablonski.dev/graphql"
+api = "https://graphql.jyablonski.dev/graphqlzz"
 table = "redditComments"
 
 
@@ -62,6 +64,10 @@ def graphql_query():
 def taskflow():
     @task(task_id="api_trigger", retries=0)
     def api_trigger() -> Dict[str, str]:
+        # bb = BaseHook.get_connection('slack').get_uri()
+        print('hello world')
+        # print(bb)
+        print(os.environ)
         return requests.post(api, json={"query": graphql_query()}).json()
 
     @task

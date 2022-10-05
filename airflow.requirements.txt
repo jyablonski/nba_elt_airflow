@@ -1,4 +1,0 @@
-# Add any additional Python dependencies below: - meltano doesnt work as of 2022-03-21 there's a gunicorn dependency issue
-psycopg2-binary
-dbt-core==1.1.0
-dbt-postgres==1.1.0

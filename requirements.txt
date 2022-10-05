@@ -1,0 +1,6 @@
+# psycopg2-binary
+# dbt-core==1.1.0
+# dbt-postgres==1.1.0
+apache-airflow-providers-slack
+apache-airflow-providers-discord
+apache-airflow-providers-amazon

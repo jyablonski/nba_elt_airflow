@@ -115,3 +115,11 @@ bump-major:
 	@bump2version major
 	@git push --tags
 	@git push
+
+.PHONY: start-astro
+start-astro:
+	@astro dev start
+
+.PHONY: stop-astro
+stop-astro:
+	@astro dev stop
