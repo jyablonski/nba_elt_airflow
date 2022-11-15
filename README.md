@@ -1,4 +1,4 @@
-# Airflow Project Version: 2.0.0
+# Airflow Project Version: 2.0.1
 This Repo is a local Airflow Deployment for my [NBA Project](https://github.com/jyablonski/NBA-Dashboard), with functional `EcsRunTaskOperator` tasks for the Web Scrape, dbt, and ML Jobs in my ELT Pipeline. 
 
 * Discord and Slack webhooks are both available and will execute in the event of a Task Fail during a DAG run.
