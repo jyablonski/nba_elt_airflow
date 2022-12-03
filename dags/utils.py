@@ -1,10 +1,12 @@
 import os
 import boto3
 
-
-from airflow.hooks.base_hook import BaseHook
+from airflow.settings import Session
+from airflow.models.connection import Connection
 from airflow.contrib.operators.slack_webhook_operator import SlackWebhookOperator
 from airflow.providers.discord.operators.discord_webhook import DiscordWebhookOperator
+
+from exceptions import NoConnectionExists
 
 SLACK_CONN_ID = "slack"
 
@@ -148,3 +150,13 @@ def jacobs_discord_alert(context):
         # avatar_url='https://a0.awsstatic.com/libra-css/images/logos/aws_logo_smile_1200x630.png', can change avatar this way
     )
     return failed_alert.execute(context=context)
+
+def check_connections(conn: str, **context):
+    session = Session()
+    conns = session.query(Connection).all()
+
+    # conns is a list of airflow connections, have to turn them into raw strings to do comparison
+    conns = [str(x) for x in conns]
+    if conn not in conns:
+        raise NoConnectionExists(f"Requested Connection {conn} is not in Airflow Connections")
+    return 1

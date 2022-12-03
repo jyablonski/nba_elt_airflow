@@ -1,0 +1,18 @@
+[[source]]
+url = "https://pypi.org/simple"
+verify_ssl = true
+name = "pypi"
+
+[packages]
+apache-airflow = "*"
+pandas = "*"
+numpy = "*"
+requests = "*"
+boto3 = "*"
+
+[dev-packages]
+black = "==22.3.0"
+pytest = "*"
+
+[requires]
+python_version = "3.9"
