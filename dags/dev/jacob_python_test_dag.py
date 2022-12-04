@@ -10,7 +10,8 @@ from airflow.decorators import dag, task
 from airflow.operators.python import PythonOperator
 from utils import (
     jacobs_slack_alert,
-    check_connections
+    check_connections,
+    get_ssm_parameter
 )
 
 # send both an email alert + a slack alert to specified channel on any task failure
@@ -41,6 +42,10 @@ def my_practice_dag():
     @task
     def check_for_connection():
         check_connections("warehaus")
+        test1 = get_ssm_parameter("jacobs_ssm_test")
+        print(test1)
+        test2 = get_ssm_parameter("jacobs_ssm_sg_task")
+        print(test2)
         return 1
 
     practice()
