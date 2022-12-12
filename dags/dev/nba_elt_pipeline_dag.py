@@ -50,7 +50,7 @@ DBT_PROJECT_DIR = "~/airflow/dags/dbt/"
 
 def jacobs_ecs_task(dag: DAG) -> EcsRunTaskOperator:
     return EcsRunTaskOperator(
-        task_id="jacobs_airflow_ecs_task_dev",
+        task_id="jacobs_airflow_ecs_task",
         dag=dag,
         aws_conn_id="aws_ecs",
         cluster="jacobs_fargate_cluster",
@@ -71,15 +71,15 @@ def jacobs_ecs_task(dag: DAG) -> EcsRunTaskOperator:
                         },  # USE THESE TEMPLATE VARIABLES TO CREATE IDEMPOTENT TASKS / DAGS
                         {
                             "name": "run_type",
-                            "value": "dev",  # you can do like if run_type == 'dev': S3_BUCKET=xxx_dev, RDS_SCHEMA=xxx_dev
+                            "value": "dev",  # you can do like if run_type == 'dev': S3_BUCKET=xxx, RDS_SCHEMA=xxx
                         },
                         {
                             "name": "S3_BUCKET",
-                            "value": "jacobsbucket97_dev",  # you can dynamically change this for dev/prod
+                            "value": "jacobsbucket97",  # you can dynamically change this for dev/prod
                         },
                         {
                             "name": "RDS_SCHEMA",
-                            "value": "nba_source_dev",  # you can dynamically change this for dev/prod
+                            "value": "nba_source",  # you can dynamically change this for dev/prod
                         },
                     ],
                 }
@@ -101,7 +101,7 @@ def jacobs_ecs_task(dag: DAG) -> EcsRunTaskOperator:
 
 def jacobs_ecs_task_dbt(dag: DAG) -> EcsRunTaskOperator:
     return EcsRunTaskOperator(
-        task_id="jacobs_airflow_dbt_task_dev",
+        task_id="jacobs_airflow_dbt_task",
         dag=dag,
         aws_conn_id="aws_ecs",
         cluster="jacobs_fargate_cluster",
@@ -144,7 +144,7 @@ def jacobs_ecs_task_dbt(dag: DAG) -> EcsRunTaskOperator:
 # adding in framework for adding the ml pipeline in after dbt runs
 def jacobs_ecs_task_ml(dag: DAG) -> EcsRunTaskOperator:
     return EcsRunTaskOperator(
-        task_id="jacobs_airflow_ecs_task_ml_dev",
+        task_id="jacobs_airflow_ecs_task_ml",
         dag=dag,
         aws_conn_id="aws_ecs",
         cluster="jacobs_fargate_cluster",
@@ -177,7 +177,7 @@ def jacobs_ecs_task_ml(dag: DAG) -> EcsRunTaskOperator:
 
 
 def jacobs_email_task(dag: DAG) -> EmailOperator:
-    task_id = "send_email_notification_dev"
+    task_id = "send_email_notification"
 
     return EmailOperator(
         task_id=task_id,
@@ -185,7 +185,7 @@ def jacobs_email_task(dag: DAG) -> EmailOperator:
         to="jyablonski9@gmail.com",
         subject="Airflow NBA ELT Pipeline DAG Run",
         html_content="""<h3>Process Completed</h3> <br>
-        XCOM VAlue in ECS Task: {{ ti.xcom_pull(key="return_value", task_ids='jacobs_airflow_ecs_task_dev') }}
+        XCOM VAlue in ECS Task: {{ ti.xcom_pull(key="return_value", task_ids='jacobs_airflow_ecs_task') }}
 
         """,
     )
@@ -198,7 +198,7 @@ def create_dag() -> DAG:
     schedule_interval = "0 11 * * *"
 
     dag = DAG(
-        "nba_elt_pipeline_dag_dev",
+        "nba_elt_pipeline_dag",
         catchup=False,
         default_args=jacobs_default_args,
         schedule_interval=None,  # change to none when testing / schedule_interval | None

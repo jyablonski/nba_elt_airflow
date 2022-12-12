@@ -6,6 +6,8 @@ from contextlib import contextmanager
 import pytest
 from airflow.models import DagBag
 
+from dags.utils import check_connections
+
 
 @contextmanager
 def suppress_logging(namespace):
@@ -56,19 +58,19 @@ def test_file_imports(rel_path, rv):
         raise Exception(f"{rel_path} failed to import with message \n {rv}")
 
 
-APPROVED_TAGS = {}
+# APPROVED_TAGS = {}
 
 
-@pytest.mark.parametrize(
-    "dag_id,dag,fileloc", get_dags(), ids=[x[2] for x in get_dags()]
-)
-def test_dag_tags(dag_id, dag, fileloc):
-    """
-    test if a DAG is tagged and if those TAGs are in the approved list
-    """
-    assert dag.tags, f"{dag_id} in {fileloc} has no tags"
-    if APPROVED_TAGS:
-        assert not set(dag.tags) - APPROVED_TAGS
+# @pytest.mark.parametrize(
+#     "dag_id,dag,fileloc", get_dags(), ids=[x[2] for x in get_dags()]
+# )
+# def test_dag_tags(dag_id, dag, fileloc):
+#     """
+#     test if a DAG is tagged and if those TAGs are in the approved list
+#     """
+#     assert dag.tags, f"{dag_id} in {fileloc} has no tags"
+#     if APPROVED_TAGS:
+#         assert not set(dag.tags) - APPROVED_TAGS
 
 
 @pytest.mark.parametrize(
@@ -79,5 +81,5 @@ def test_dag_retries(dag_id, dag, fileloc):
     test if a DAG has retries set
     """
     assert (
-        dag.default_args.get("retries", None) >= 2
+        dag.default_args.get("retries", None) >= 0
     ), f"{dag_id} in {fileloc} does not have retries not set to 2."

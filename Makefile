@@ -33,7 +33,7 @@ lint-docker:
 # Runs all tests
 .PHONY: test
 test: 
-	@venv/bin/python3 -m pytest -v --disable-warnings
+	@astro dev pytest
 
 test-docker:
 	@docker-compose up test

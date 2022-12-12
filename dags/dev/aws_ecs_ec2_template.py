@@ -17,40 +17,36 @@ jacobs_network_config = {
             get_ssm_parameter("jacobs_ssm_subnet1"),
             get_ssm_parameter("jacobs_ssm_subnet2"),
         ],
-        "assignPublicIp": "ENABLED",
-    } # has to be enabled otherwise it cant pull image from ecr??
+        "assignPublicIp": "DISABLED",
+    }
 }
-
-# ECR is a service that exists outside your VPC, so (when using fargate) you need one of the following for the network connection to ECR to be established:
-# Public IP.
-# NAT Gateway, with a route to the NAT Gateway in the subnet.
-# ECR Interface VPC Endpoint, with a route to the endpoint in the subnet.
 
 jacobs_default_args = {
     "owner": "jacob",
     "depends_on_past": False,
     "email": ["jyablonski9@gmail.com"],
-    "email_on_failure": True,
-    "email_on_retry": True,
+    "email_on_failure": False,
+    "email_on_retry": False,
     "retries": 1,
     "retry_delay": timedelta(minutes=30),
-    "on_failure_callback": jacobs_slack_alert,
+    # "on_failure_callback": jacobs_slack_alert,
 }
 
 os.environ["AWS_DEFAULT_REGION"] = "us-east-1"
 
-def jacobs_ecs_task(dag: DAG) -> EcsRunTaskOperator:
+def jacobs_ecs_ec2_task(dag: DAG) -> EcsRunTaskOperator:
     return EcsRunTaskOperator(
-        task_id="jacobs_airflow_ecs_task_dev",
+        task_id="jacobs_airflow_ecs_ec2_task_dev",
         dag=dag,
-        aws_conn_id="aws_ecs",
-        cluster="jacobs_fargate_cluster",
-        task_definition="hello-world-test",
-        launch_type="FARGATE",
+        aws_conn_id="aws_ecs_ec2",
+        cluster="jacobs-ecs-ec2-cluster",
+        task_definition="hello-world-ec2",
+        launch_type="EC2",
+        # launch_type="FARGATE",
         overrides={
             "containerOverrides": [
-                {
-                    "name": "jacobs_hello_world_container",  # change this to any of the task_definitons created in ecs
+                {  # change this to any of the task_definitons created in ecs
+                    "name": "hello-world-ec2",
                     "environment": [
                         {
                             "name": "dag_run_ts",
@@ -62,11 +58,13 @@ def jacobs_ecs_task(dag: DAG) -> EcsRunTaskOperator:
                         }
                     ],
                 }
-            ]
+            ],
+            "executionRoleArn": "arn:aws:iam::288364792694:role/jacobs_ecs_role",
+            "taskRoleArn": "arn:aws:iam::288364792694:role/jacobs_ecs_role",
         },
         network_configuration=jacobs_network_config,
-        awslogs_group="/ecs/hello-world-test",
-        awslogs_stream_prefix="ecs/jacobs_hello_world_container",
+        awslogs_group="/ecs/hello-world-ec2",
+        awslogs_stream_prefix="ecs/hello-world-ec2",
         # this ^ stream prefix shit is prefixed with ecs/ followed by the container name which comes from line 48.
         do_xcom_push=True,
     )
@@ -79,7 +77,7 @@ def create_dag() -> DAG:
     schedule_interval = "0 11 * * *"
 
     dag = DAG(
-        "aws_ecs_template",
+        "aws_ecs_ec2_template",
         catchup=False,
         default_args=jacobs_default_args,
         schedule_interval=None,  # change to none when testing / schedule_interval | None
@@ -87,9 +85,8 @@ def create_dag() -> DAG:
         max_active_runs=1,
         tags=["dev", "ecs", "template"],
     )
-    t1 = jacobs_ecs_task(dag)
 
-    t1
+    jacobs_ecs_ec2_task(dag)
 
     return dag
 
