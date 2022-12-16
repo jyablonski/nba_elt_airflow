@@ -10,17 +10,6 @@ from utils import get_ssm_parameter, jacobs_slack_alert
 
 # dbt test failure WILL fail the task, and fail the dag.
 
-jacobs_network_config = {
-    "awsvpcConfiguration": {
-        "securityGroups": [get_ssm_parameter("jacobs_ssm_sg_task")],
-        "subnets": [
-            get_ssm_parameter("jacobs_ssm_subnet1"),
-            get_ssm_parameter("jacobs_ssm_subnet2"),
-        ],
-        "assignPublicIp": "ENABLED",
-    }
-}
-
 jacobs_default_args = {
     "owner": "jacob",
     "depends_on_past": False,
@@ -32,15 +21,14 @@ jacobs_default_args = {
     # "on_failure_callback": jacobs_slack_alert,
 }
 
-os.environ["AWS_DEFAULT_REGION"] = "us-east-1"
-
 def jacobs_ecs_task(dag: DAG) -> BatchOperator:
+
     return BatchOperator(
         task_id='submit_batch_job',
         dag=dag,
-        job_name="jacobs-batch-job",              # can be named anything
+        job_name="jacobs-job2",              # can be named anything
         job_queue="jacobs-batch-queue",           # has to be setup in aws batch
-        job_definition="jacobs-batch-definition", # has to be setup in aws batch
+        job_definition="jacobs-job-definition", # has to be setup in aws batch
         overrides={
         'environment': [
             {

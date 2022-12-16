@@ -8,19 +8,6 @@ from airflow.operators.empty import EmptyOperator
 from airflow.providers.amazon.aws.operators.ecs import EcsRunTaskOperator
 from utils import get_ssm_parameter, jacobs_slack_alert
 
-# dbt test failure WILL fail the task, and fail the dag.
-
-jacobs_network_config = {
-    "awsvpcConfiguration": {
-        "securityGroups": [get_ssm_parameter("jacobs_ssm_sg_task")],
-        "subnets": [
-            get_ssm_parameter("jacobs_ssm_subnet1"),
-            get_ssm_parameter("jacobs_ssm_subnet2"),
-        ],
-        "assignPublicIp": "ENABLED",
-    } # has to be enabled otherwise it cant pull image from ecr??
-}
-
 # ECR is a service that exists outside your VPC, so (when using fargate) you need one of the following for the network connection to ECR to be established:
 # Public IP.
 # NAT Gateway, with a route to the NAT Gateway in the subnet.
@@ -37,9 +24,8 @@ jacobs_default_args = {
     "on_failure_callback": jacobs_slack_alert,
 }
 
-os.environ["AWS_DEFAULT_REGION"] = "us-east-1"
+def jacobs_ecs_task(dag: DAG, network_config: dict) -> EcsRunTaskOperator:
 
-def jacobs_ecs_task(dag: DAG) -> EcsRunTaskOperator:
     return EcsRunTaskOperator(
         task_id="jacobs_airflow_ecs_task_dev",
         dag=dag,
@@ -64,7 +50,7 @@ def jacobs_ecs_task(dag: DAG) -> EcsRunTaskOperator:
                 }
             ]
         },
-        network_configuration=jacobs_network_config,
+        network_configuration=network_config,
         awslogs_group="/ecs/hello-world-test",
         awslogs_stream_prefix="ecs/jacobs_hello_world_container",
         # this ^ stream prefix shit is prefixed with ecs/ followed by the container name which comes from line 48.
@@ -76,6 +62,16 @@ def create_dag() -> DAG:
     """
     xxx
     """
+    jacobs_network_config = {
+        "awsvpcConfiguration": {
+            "securityGroups": [get_ssm_parameter("jacobs_ssm_sg_task")],
+            "subnets": [
+                get_ssm_parameter("jacobs_ssm_subnet1"),
+                get_ssm_parameter("jacobs_ssm_subnet2"),
+            ],
+            "assignPublicIp": "ENABLED",
+        } # has to be enabled otherwise it cant pull image from ecr??
+    }
     schedule_interval = "0 11 * * *"
 
     dag = DAG(
@@ -87,7 +83,7 @@ def create_dag() -> DAG:
         max_active_runs=1,
         tags=["dev", "ecs", "template"],
     )
-    t1 = jacobs_ecs_task(dag)
+    t1 = jacobs_ecs_task(dag, jacobs_network_config)
 
     t1
 

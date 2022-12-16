@@ -23,17 +23,6 @@ from utils import (
 
 # https://stackoverflow.com/questions/46059161/airflow-how-to-pass-xcom-variable-into-python-function
 
-jacobs_network_config = {
-    "awsvpcConfiguration": {
-        "securityGroups": [get_ssm_parameter("jacobs_ssm_sg_task")],
-        "subnets": [
-            get_ssm_parameter("jacobs_ssm_subnet1"),
-            get_ssm_parameter("jacobs_ssm_subnet2"),
-        ],
-        "assignPublicIp": "ENABLED",
-    }
-}
-
 # send both an email alert + a slack alert to specified channel on any task failure
 JACOBS_DEFAULT_ARGS = {
     "owner": "jacob",

@@ -10,26 +10,6 @@ from utils import get_ssm_parameter, jacobs_slack_alert
 
 # dbt test failure WILL fail the task, and fail the dag.
 
-jacobs_env_vars = {
-    "DBT_DBNAME": get_ssm_parameter("jacobs_ssm_rds_db_name"),
-    "DBT_HOST": get_ssm_parameter("jacobs_ssm_rds_host"),
-    "DBT_USER": get_ssm_parameter("jacobs_ssm_rds_user"),
-    "DBT_PASS": get_ssm_parameter("jacobs_ssm_rds_pw"),
-    "DBT_SCHEMA": get_ssm_parameter("jacobs_ssm_rds_schema"),
-    "DBT_PRAC_KEY": get_ssm_parameter("jacobs_ssm_dbt_prac_key"),
-}
-
-jacobs_network_config = {
-    "awsvpcConfiguration": {
-        "securityGroups": [get_ssm_parameter("jacobs_ssm_sg_task")],
-        "subnets": [
-            get_ssm_parameter("jacobs_ssm_subnet1"),
-            get_ssm_parameter("jacobs_ssm_subnet2"),
-        ],
-        "assignPublicIp": "ENABLED",
-    }
-}
-
 jacobs_default_args = {
     "owner": "jacob",
     "depends_on_past": False,
@@ -43,12 +23,12 @@ jacobs_default_args = {
 
 jacobs_tags = ["nba_elt_pipeline", "dev", "ml"]
 
-os.environ["AWS_DEFAULT_REGION"] = "us-east-1"
 DBT_PROFILE_DIR = "~/.dbt/"
 DBT_PROJECT_DIR = "~/airflow/dags/dbt/"
 
 
-def jacobs_ecs_task(dag: DAG) -> EcsRunTaskOperator:
+def jacobs_ecs_task(dag: DAG, network_config: dict) -> EcsRunTaskOperator:
+
     return EcsRunTaskOperator(
         task_id="jacobs_airflow_ecs_task",
         dag=dag,
@@ -85,7 +65,7 @@ def jacobs_ecs_task(dag: DAG) -> EcsRunTaskOperator:
                 }
             ]
         },
-        network_configuration=jacobs_network_config,
+        network_configuration=network_config,
         awslogs_group="jacobs_ecs_logs_airflow",
         awslogs_stream_prefix="ecs/jacobs_container_airflow",
         do_xcom_push=True,
@@ -99,7 +79,8 @@ def jacobs_ecs_task(dag: DAG) -> EcsRunTaskOperator:
 # 4) you run the project in gitlab ci or github actions and can trigger it vs requests.post()
 
 
-def jacobs_ecs_task_dbt(dag: DAG) -> EcsRunTaskOperator:
+def jacobs_ecs_task_dbt(dag: DAG, dbt_config: dict, network_config: dict) -> EcsRunTaskOperator:
+
     return EcsRunTaskOperator(
         task_id="jacobs_airflow_dbt_task",
         dag=dag,
@@ -121,20 +102,20 @@ def jacobs_ecs_task_dbt(dag: DAG) -> EcsRunTaskOperator:
                             "value": " {{ ds }}",
                         },  # USE THESE TO CREATE IDEMPOTENT TASKS / DAGS
                         {"name": "run_type", "value": "dev",},
-                        {"name": "DBT_DBNAME", "value": jacobs_env_vars["DBT_DBNAME"],},
-                        {"name": "DBT_HOST", "value": jacobs_env_vars["DBT_HOST"],},
-                        {"name": "DBT_USER", "value": jacobs_env_vars["DBT_USER"],},
-                        {"name": "DBT_PASS", "value": jacobs_env_vars["DBT_PASS"],},
-                        {"name": "DBT_SCHEMA", "value": jacobs_env_vars["DBT_SCHEMA"],},
+                        {"name": "DBT_DBNAME", "value": dbt_config["DBT_DBNAME"],},
+                        {"name": "DBT_HOST", "value": dbt_config["DBT_HOST"],},
+                        {"name": "DBT_USER", "value": dbt_config["DBT_USER"],},
+                        {"name": "DBT_PASS", "value": dbt_config["DBT_PASS"],},
+                        {"name": "DBT_SCHEMA", "value": dbt_config["DBT_SCHEMA"],},
                         {
                             "name": "DBT_PRAC_KEY",
-                            "value": jacobs_env_vars["DBT_PRAC_KEY"],
+                            "value": dbt_config["DBT_PRAC_KEY"],
                         },
                     ],
                 }
             ]
         },
-        network_configuration=jacobs_network_config,
+        network_configuration=network_config,
         awslogs_group="jacobs_ecs_logs_dbt",
         awslogs_stream_prefix="ecs/jacobs_container_dbt",
         do_xcom_push=True,
@@ -142,7 +123,8 @@ def jacobs_ecs_task_dbt(dag: DAG) -> EcsRunTaskOperator:
 
 
 # adding in framework for adding the ml pipeline in after dbt runs
-def jacobs_ecs_task_ml(dag: DAG) -> EcsRunTaskOperator:
+def jacobs_ecs_task_ml(dag: DAG, network_config: dict) -> EcsRunTaskOperator:
+
     return EcsRunTaskOperator(
         task_id="jacobs_airflow_ecs_task_ml",
         dag=dag,
@@ -169,7 +151,7 @@ def jacobs_ecs_task_ml(dag: DAG) -> EcsRunTaskOperator:
                 }
             ]
         },
-        network_configuration=jacobs_network_config,
+        network_configuration=network_config,
         awslogs_group="jacobs_ecs_logs_ml",
         awslogs_stream_prefix="ecs/jacobs_container_ml",
         do_xcom_push=True,
@@ -195,6 +177,26 @@ def create_dag() -> DAG:
     """
     xxx
     """
+    jacobs_network_config = {
+        "awsvpcConfiguration": {
+            "securityGroups": [get_ssm_parameter("jacobs_ssm_sg_task")],
+            "subnets": [
+                get_ssm_parameter("jacobs_ssm_subnet1"),
+                get_ssm_parameter("jacobs_ssm_subnet2"),
+            ],
+            "assignPublicIp": "ENABLED",
+        } # has to be enabled otherwise it cant pull image from ecr??
+    }
+
+    jacobs_dbt_vars = {
+        "DBT_DBNAME": get_ssm_parameter("jacobs_ssm_rds_db_name"),
+        "DBT_HOST": get_ssm_parameter("jacobs_ssm_rds_host"),
+        "DBT_USER": get_ssm_parameter("jacobs_ssm_rds_user"),
+        "DBT_PASS": get_ssm_parameter("jacobs_ssm_rds_pw"),
+        "DBT_SCHEMA": get_ssm_parameter("jacobs_ssm_rds_schema"),
+        "DBT_PRAC_KEY": get_ssm_parameter("jacobs_ssm_dbt_prac_key"),
+    }
+
     schedule_interval = "0 11 * * *"
 
     dag = DAG(
@@ -206,9 +208,9 @@ def create_dag() -> DAG:
         max_active_runs=1,
         tags=jacobs_tags,
     )
-    t1 = jacobs_ecs_task(dag)
-    t2 = jacobs_ecs_task_dbt(dag)
-    t3 = jacobs_ecs_task_ml(dag)
+    t1 = jacobs_ecs_task(dag, jacobs_network_config)
+    t2 = jacobs_ecs_task_dbt(dag, jacobs_dbt_vars, jacobs_network_config)
+    t3 = jacobs_ecs_task_ml(dag, jacobs_network_config)
     t4 = jacobs_email_task(dag)
 
     t1 >> t2 >> t3 >> t4
