@@ -4,7 +4,7 @@
 # from airflow.utils.dates import days_ago
 # from airflow.providers.airbyte.operators.airbyte import AirbyteTriggerSyncOperator
 
-# from utils import get_ssm_parameter, jacobs_discord_alert
+# from include.utils import get_ssm_parameter, jacobs_discord_alert
 
 # JACOBS_DEFAULT_ARGS = {
 #     "owner": "jacob",

@@ -6,7 +6,10 @@ from airflow.models.connection import Connection
 from airflow.contrib.operators.slack_webhook_operator import SlackWebhookOperator
 from airflow.providers.discord.operators.discord_webhook import DiscordWebhookOperator
 
-from exceptions import NoConnectionExists
+try:
+    from .exceptions import NoConnectionExists
+except:
+    from exceptions import NoConnectionExists
 
 SLACK_CONN_ID = "slack"
 

@@ -8,7 +8,7 @@ from airflow.settings import Session
 from airflow.models.connection import Connection
 from airflow.decorators import dag, task
 from airflow.operators.python import PythonOperator
-from utils import (
+from include.utils import (
     jacobs_slack_alert,
     check_connections,
     get_ssm_parameter
@@ -42,9 +42,9 @@ def my_practice_dag():
     @task
     def check_for_connection():
         check_connections("warehaus")
-        test1 = get_ssm_parameter("jacobs_ssm_test")
+        test1 = 1
         print(test1)
-        test2 = get_ssm_parameter("jacobs_ssm_sg_task")
+        test2 = 2
         print(test2)
         return 1
 

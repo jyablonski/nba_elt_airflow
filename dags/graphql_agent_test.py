@@ -14,7 +14,7 @@ from airflow.operators.email import EmailOperator
 import boto3
 import requests
 
-from utils import jacobs_airflow_email, jacobs_discord_alert, jacobs_slack_alert
+from include.utils import jacobs_airflow_email, jacobs_discord_alert, jacobs_slack_alert
 
 jacobs_default_args = {
     "owner": "jacob",
@@ -27,7 +27,7 @@ jacobs_default_args = {
     "on_failure_callback": jacobs_slack_alert,
 }
 
-api = "https://graphql.jyablonski.dev/graphqlzz"
+api = "https://graphql.jyablonski.dev/graphql"
 table = "redditComments"
 
 
@@ -64,17 +64,17 @@ def graphql_query():
 def taskflow():
     @task(task_id="api_trigger", retries=0)
     def api_trigger() -> Dict[str, str]:
-        # bb = BaseHook.get_connection('slack').get_uri()
-        print('hello world')
-        # print(bb)
-        print(os.environ)
-        return requests.post(api, json={"query": graphql_query()}).json()
+        df = requests.post(api, json={"query": graphql_query()})
+        if df.status_code != 200:
+            raise AirflowException(f"API Data for {table} is empty Failed")
+        return df.json()
 
+    # passing data from 1st task to the 2nd task
     @task
     def write_to_s3(data: Dict[str, str]):
+        print(data)
         s3 = boto3.client("s3")
-        if data is None:
-            raise AirflowException("S3 Task Failed")
+
         s3.put_object(
             Body=json.dumps(data["data"][table]),
             Bucket="jacobsbucket97-dev",

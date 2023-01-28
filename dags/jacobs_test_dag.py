@@ -12,7 +12,7 @@ from airflow.operators.python import PythonOperator
 from airflow.providers.slack.operators.slack_webhook import SlackWebhookOperator
 from airflow.providers.discord.operators.discord_webhook import DiscordWebhookOperator
 
-from utils import (
+from include.utils import (
     my_function,
     get_ssm_parameter,
     jacobs_airflow_email,
@@ -28,7 +28,7 @@ JACOBS_DEFAULT_ARGS = {
     "owner": "jacob",
     "depends_on_past": False,
     "email": ["jyablonski9@gmail.com"],
-    "email_on_failure": True,
+    "email_on_failure": False,
     "email_on_retry": False,
     "retries": 0,
     "on_failure_callback": jacobs_slack_alert  # jacobs_discord_alert - apparently dont work at the same time together

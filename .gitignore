@@ -132,3 +132,4 @@ plugins/
 docker_ecs/
 jacobs_notes.md
 context.json
+dags/snowflake_utils.py

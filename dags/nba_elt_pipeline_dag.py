@@ -6,7 +6,7 @@ from airflow.operators.email import EmailOperator
 from airflow.operators.bash import BashOperator
 from airflow.operators.empty import EmptyOperator
 from airflow.providers.amazon.aws.operators.ecs import EcsRunTaskOperator
-from utils import get_ssm_parameter, jacobs_slack_alert
+from include.utils import get_ssm_parameter, jacobs_slack_alert
 
 # dbt test failure WILL fail the task, and fail the dag.
 
@@ -177,24 +177,44 @@ def create_dag() -> DAG:
     """
     xxx
     """
+    # jacobs_network_config = {
+    #     "awsvpcConfiguration": {
+    #         "securityGroups": [get_ssm_parameter("jacobs_ssm_sg_task")],
+    #         "subnets": [
+    #             get_ssm_parameter("jacobs_ssm_subnet1"),
+    #             get_ssm_parameter("jacobs_ssm_subnet2"),
+    #         ],
+    #         "assignPublicIp": "ENABLED",
+    #     } # has to be enabled otherwise it cant pull image from ecr??
+    # }
+
+    # jacobs_dbt_vars = {
+    #     "DBT_DBNAME": get_ssm_parameter("jacobs_ssm_rds_db_name"),
+    #     "DBT_HOST": get_ssm_parameter("jacobs_ssm_rds_host"),
+    #     "DBT_USER": get_ssm_parameter("jacobs_ssm_rds_user"),
+    #     "DBT_PASS": get_ssm_parameter("jacobs_ssm_rds_pw"),
+    #     "DBT_SCHEMA": get_ssm_parameter("jacobs_ssm_rds_schema"),
+    #     "DBT_PRAC_KEY": get_ssm_parameter("jacobs_ssm_dbt_prac_key"),
+    # }
+
     jacobs_network_config = {
         "awsvpcConfiguration": {
-            "securityGroups": [get_ssm_parameter("jacobs_ssm_sg_task")],
+            "securityGroups": ["1"],
             "subnets": [
-                get_ssm_parameter("jacobs_ssm_subnet1"),
-                get_ssm_parameter("jacobs_ssm_subnet2"),
+                "2",
+                "3",
             ],
             "assignPublicIp": "ENABLED",
         } # has to be enabled otherwise it cant pull image from ecr??
     }
 
     jacobs_dbt_vars = {
-        "DBT_DBNAME": get_ssm_parameter("jacobs_ssm_rds_db_name"),
-        "DBT_HOST": get_ssm_parameter("jacobs_ssm_rds_host"),
-        "DBT_USER": get_ssm_parameter("jacobs_ssm_rds_user"),
-        "DBT_PASS": get_ssm_parameter("jacobs_ssm_rds_pw"),
-        "DBT_SCHEMA": get_ssm_parameter("jacobs_ssm_rds_schema"),
-        "DBT_PRAC_KEY": get_ssm_parameter("jacobs_ssm_dbt_prac_key"),
+        "DBT_DBNAME": 1,
+        "DBT_HOST": 2,
+        "DBT_USER": 3,
+        "DBT_PASS": 4,
+        "DBT_SCHEMA": 5,
+        "DBT_PRAC_KEY": 6,
     }
 
     schedule_interval = "0 11 * * *"
