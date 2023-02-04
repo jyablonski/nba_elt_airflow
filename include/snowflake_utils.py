@@ -184,14 +184,14 @@ connection = connect_snowflake_sqlalchemy(
 
 # connection.close()
 
-def build_snowflake_table_s3(stage: str, file_format: str, database: str, schema: str, table_name: str):
+def build_snowflake_table_from_s3(stage: str, file_format: str, database: str, schema: str, table_name: str) -> str:
     """
     a stage is pointed at an s3 url ex. s3://jyablonski-kafka-s3-sink/topics/movies
 
     stage = @movies_stage or @movies_stage/partition=0/movies+0+0000000000.snappy.parquet
     """
     sql = f"""
-    CREATE TABLE {database}.{schema}.{table_name}
+    CREATE OR REPLACE TABLE {database}.{schema}.{table_name}
     USING TEMPLATE (
         SELECT ARRAY_AGG(OBJECT_CONSTRUCT(*))
         FROM TABLE(
@@ -204,7 +204,7 @@ def build_snowflake_table_s3(stage: str, file_format: str, database: str, schema
 
     return sql
 
-def load_snowflake_table_s3(stage: str, file_format: str, database: str, schema: str, table_name: str, truncate_table: bool = False):
+def load_snowflake_table_from_s3(stage: str, file_format: str, database: str, schema: str, table_name: str, truncate_table: bool = False) -> str:
     """
     a stage is pointed at an s3 url ex. s3://jyablonski-kafka-s3-sink/topics/movies
 
