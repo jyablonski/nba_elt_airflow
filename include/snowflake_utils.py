@@ -168,7 +168,7 @@ def connect_snowflake_sqlalchemy(
 
 connection = connect_snowflake_sqlalchemy(
     user="jyablonski",
-    password="Nooblord4321!",
+    password="xxx",
     role="accountadmin",
     warehouse="test_warehouse",
     database="snowpipe_db",
