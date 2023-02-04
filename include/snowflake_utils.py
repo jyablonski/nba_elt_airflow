@@ -99,7 +99,7 @@ def query_snowflake(cursor: snowflake.connector.SnowflakeConnection, query: str)
 ### SQLAlchemy Stuff
 def connect_snowflake_sqlalchemy(
     user: str,
-    password: str,
+    password: str = None,
     role: Optional[str] = None,
     warehouse: Optional[str] = None,
     schema: Optional[str] = None,
