@@ -24,6 +24,7 @@ jacobs_default_args = {
     "on_failure_callback": jacobs_slack_alert,
 }
 
+
 def jacobs_ecs_task(dag: DAG, network_config: dict) -> EcsRunTaskOperator:
 
     return EcsRunTaskOperator(
@@ -42,10 +43,7 @@ def jacobs_ecs_task(dag: DAG, network_config: dict) -> EcsRunTaskOperator:
                             "name": "dag_run_ts",
                             "value": "{{ ts }}",
                         },  # https://airflow.apache.org/docs/apache-airflow/stable/templates-ref.html
-                        {
-                            "name": "dag_run_date",
-                            "value": " {{ ds }}",
-                        }
+                        {"name": "dag_run_date", "value": " {{ ds }}",},
                     ],
                 }
             ]
@@ -65,12 +63,9 @@ def create_dag() -> DAG:
     jacobs_network_config = {
         "awsvpcConfiguration": {
             "securityGroups": ["1"],
-            "subnets": [
-                "2",
-                "3",
-            ],
+            "subnets": ["2", "3",],
             "assignPublicIp": "ENABLED",
-        } # has to be enabled otherwise it cant pull image from ecr??
+        }  # has to be enabled otherwise it cant pull image from ecr??
     }
     schedule_interval = "0 11 * * *"
 

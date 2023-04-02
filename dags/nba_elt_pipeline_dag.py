@@ -39,28 +39,13 @@ def jacobs_ecs_task(dag: DAG, network_config: dict) -> EcsRunTaskOperator:
         overrides={
             "containerOverrides": [
                 {
-                    "name": "jacobs_container",  # change this to any of the task_definitons created in ecs
+                    "name": "jacobs_container",
                     "environment": [
-                        {
-                            "name": "dag_run_ts",
-                            "value": "{{ ts }}",
-                        },  # https://airflow.apache.org/docs/apache-airflow/stable/templates-ref.html
-                        {
-                            "name": "dag_run_date",
-                            "value": " {{ ds }}",
-                        },  # USE THESE TEMPLATE VARIABLES TO CREATE IDEMPOTENT TASKS / DAGS
-                        {
-                            "name": "run_type",
-                            "value": "dev",  # you can do like if run_type == 'dev': S3_BUCKET=xxx, RDS_SCHEMA=xxx
-                        },
-                        {
-                            "name": "S3_BUCKET",
-                            "value": "jacobsbucket97",  # you can dynamically change this for dev/prod
-                        },
-                        {
-                            "name": "RDS_SCHEMA",
-                            "value": "nba_source",  # you can dynamically change this for dev/prod
-                        },
+                        {"name": "dag_run_ts", "value": "{{ ts }}",},
+                        {"name": "dag_run_date", "value": "{{ ds }}",},
+                        {"name": "run_type", "value": "dev",},
+                        {"name": "S3_BUCKET", "value": "jacobsbucket97",},
+                        {"name": "RDS_SCHEMA", "value": "nba_source",},
                     ],
                 }
             ]
@@ -72,14 +57,9 @@ def jacobs_ecs_task(dag: DAG, network_config: dict) -> EcsRunTaskOperator:
     )
 
 
-# 4 ways of doing dbt as far as i know:
-# 1) you put the entire dbt project locally in the airflow server somewhere and run it like below, and keep it updated on your own
-# 2) run it as an ecs operator and keep a docker image in ecr to run the dbt build job
-# 3) you have a paid dbt cloud plan and use dbt airflow provider to call the api & run the job from there, which just pulls from the git repo automatically
-# 4) you run the project in gitlab ci or github actions and can trigger it vs requests.post()
-
-
-def jacobs_ecs_task_dbt(dag: DAG, dbt_config: dict, network_config: dict) -> EcsRunTaskOperator:
+def jacobs_ecs_task_dbt(
+    dag: DAG, dbt_config: dict, network_config: dict
+) -> EcsRunTaskOperator:
 
     return EcsRunTaskOperator(
         task_id="jacobs_airflow_dbt_task",
@@ -93,24 +73,15 @@ def jacobs_ecs_task_dbt(dag: DAG, dbt_config: dict, network_config: dict) -> Ecs
                 {
                     "name": "jacobs_container_dbt",
                     "environment": [
-                        {
-                            "name": "dag_run_ts",
-                            "value": "{{ ts }}",
-                        },  # https://airflow.apache.org/docs/apache-airflow/stable/templates-ref.html
-                        {
-                            "name": "dag_run_date",
-                            "value": " {{ ds }}",
-                        },  # USE THESE TO CREATE IDEMPOTENT TASKS / DAGS
+                        {"name": "dag_run_ts", "value": "{{ ts }}",},
+                        {"name": "dag_run_date", "value": " {{ ds }}",},
                         {"name": "run_type", "value": "dev",},
                         {"name": "DBT_DBNAME", "value": dbt_config["DBT_DBNAME"],},
                         {"name": "DBT_HOST", "value": dbt_config["DBT_HOST"],},
                         {"name": "DBT_USER", "value": dbt_config["DBT_USER"],},
                         {"name": "DBT_PASS", "value": dbt_config["DBT_PASS"],},
                         {"name": "DBT_SCHEMA", "value": dbt_config["DBT_SCHEMA"],},
-                        {
-                            "name": "DBT_PRAC_KEY",
-                            "value": dbt_config["DBT_PRAC_KEY"],
-                        },
+                        {"name": "DBT_PRAC_KEY", "value": dbt_config["DBT_PRAC_KEY"],},
                     ],
                 }
             ]
@@ -122,7 +93,6 @@ def jacobs_ecs_task_dbt(dag: DAG, dbt_config: dict, network_config: dict) -> Ecs
     )
 
 
-# adding in framework for adding the ml pipeline in after dbt runs
 def jacobs_ecs_task_ml(dag: DAG, network_config: dict) -> EcsRunTaskOperator:
 
     return EcsRunTaskOperator(
@@ -137,14 +107,8 @@ def jacobs_ecs_task_ml(dag: DAG, network_config: dict) -> EcsRunTaskOperator:
                 {
                     "name": "jacobs_container_ml",
                     "environment": [
-                        {
-                            "name": "dag_run_ts",
-                            "value": "{{ ts }}",
-                        },  # https://airflow.apache.org/docs/apache-airflow/stable/templates-ref.html
-                        {
-                            "name": "dag_run_date",
-                            "value": " {{ ds }}",
-                        },  # USE THESE TO CREATE IDEMPOTENT TASKS / DAGS
+                        {"name": "dag_run_ts", "value": "{{ ts }}",},
+                        {"name": "dag_run_date", "value": " {{ ds }}",},
                         {"name": "run_type", "value": "dev",},
                         {"name": "RDS_SCHEMA", "value": "ml_models",},
                     ],
@@ -177,35 +141,12 @@ def create_dag() -> DAG:
     """
     xxx
     """
-    # jacobs_network_config = {
-    #     "awsvpcConfiguration": {
-    #         "securityGroups": [get_ssm_parameter("jacobs_ssm_sg_task")],
-    #         "subnets": [
-    #             get_ssm_parameter("jacobs_ssm_subnet1"),
-    #             get_ssm_parameter("jacobs_ssm_subnet2"),
-    #         ],
-    #         "assignPublicIp": "ENABLED",
-    #     } # has to be enabled otherwise it cant pull image from ecr??
-    # }
-
-    # jacobs_dbt_vars = {
-    #     "DBT_DBNAME": get_ssm_parameter("jacobs_ssm_rds_db_name"),
-    #     "DBT_HOST": get_ssm_parameter("jacobs_ssm_rds_host"),
-    #     "DBT_USER": get_ssm_parameter("jacobs_ssm_rds_user"),
-    #     "DBT_PASS": get_ssm_parameter("jacobs_ssm_rds_pw"),
-    #     "DBT_SCHEMA": get_ssm_parameter("jacobs_ssm_rds_schema"),
-    #     "DBT_PRAC_KEY": get_ssm_parameter("jacobs_ssm_dbt_prac_key"),
-    # }
-
     jacobs_network_config = {
         "awsvpcConfiguration": {
             "securityGroups": ["1"],
-            "subnets": [
-                "2",
-                "3",
-            ],
+            "subnets": ["2", "3",],
             "assignPublicIp": "ENABLED",
-        } # has to be enabled otherwise it cant pull image from ecr??
+        }
     }
 
     jacobs_dbt_vars = {

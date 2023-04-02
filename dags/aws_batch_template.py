@@ -3,13 +3,9 @@ import os
 
 from airflow import DAG
 from airflow.models.connection import Connection
-from airflow.operators.email import EmailOperator
-from airflow.operators.bash import BashOperator
-from airflow.operators.empty import EmptyOperator
 from airflow.providers.amazon.aws.operators.batch import BatchOperator
-from include.utils import get_ssm_parameter, jacobs_slack_alert
+from include.utils import jacobs_slack_alert
 
-# dbt test failure WILL fail the task, and fail the dag.
 
 jacobs_default_args = {
     "owner": "jacob",
@@ -19,7 +15,7 @@ jacobs_default_args = {
     "email_on_retry": False,
     "retries": 0,
     "retry_delay": timedelta(minutes=30),
-    # "on_failure_callback": jacobs_slack_alert,
+    "on_failure_callback": jacobs_slack_alert,
 }
 # batch_conn_id = "BATCH_AWS_CONNECTION"
 
@@ -36,26 +32,20 @@ jacobs_default_args = {
 # conn_uri=conn.get_uri()
 # os.environ[env_key]=conn_uri
 
+
 def jacobs_ecs_task(dag: DAG) -> BatchOperator:
 
     return BatchOperator(
-        task_id='submit_batch_job',
+        task_id="submit_batch_job",
         dag=dag,
-        job_name="jacobs-airflow-job",              # can be named anything
-        job_queue="jacobs-batch-queue",           # has to be setup in aws batch
-        job_definition="arn:aws:batch:us-east-1:288364792694:job-definition/jacobs-job-definition:5", # has to be setup in aws batch
+        job_name="jacobs-airflow-job",  # can be named anything
+        job_queue="jacobs-batch-queue",  # has to be setup in aws batch
+        job_definition="arn:aws:batch:us-east-1:288364792694:job-definition/jacobs-job-definition:5",  # has to be setup in aws batch
         overrides={
-        'environment': [
-            {
-                'name': 'string',
-                'value': 'string'
-            },
-        ],
-        "command": ["echo hello world"]
-    },
-        parameters={
-            "scheduledStartTime": str(datetime.now().date())
-        }
+            "environment": [{"name": "string", "value": "string"},],
+            "command": ["echo hello world"],
+        },
+        parameters={"scheduledStartTime": "{{ data_interval_end }}"},
     )
 
 
@@ -63,16 +53,15 @@ def create_dag() -> DAG:
     """
     xxx
     """
-    schedule_interval = "0 11 * * *"
 
     dag = DAG(
         "aws_batch_template",
         catchup=False,
         default_args=jacobs_default_args,
-        schedule_interval=None,  # change to none when testing / schedule_interval | None
+        schedule_interval=None,
         start_date=datetime(2021, 11, 20),
         max_active_runs=1,
-        tags=["dev", "ecs", "template"],
+        tags=["ecs", "template"],
     )
     t1 = jacobs_ecs_task(dag)
 

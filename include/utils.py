@@ -154,6 +154,7 @@ def jacobs_discord_alert(context):
     )
     return failed_alert.execute(context=context)
 
+
 def check_connections(conn: str, **context):
     session = Session()
     conns = session.query(Connection).all()
@@ -161,5 +162,7 @@ def check_connections(conn: str, **context):
     # conns is a list of airflow connections, have to turn them into raw strings to do comparison
     conns = [str(x) for x in conns]
     if conn not in conns:
-        raise NoConnectionExists(f"Requested Connection {conn} is not in Airflow Connections")
+        raise NoConnectionExists(
+            f"Requested Connection {conn} is not in Airflow Connections"
+        )
     return 1
