@@ -6,7 +6,7 @@ from contextlib import contextmanager
 import pytest
 from airflow.models import DagBag
 
-from dags.utils import check_connections
+from include.utils import check_connections
 
 
 @contextmanager
