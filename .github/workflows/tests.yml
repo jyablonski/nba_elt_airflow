@@ -8,14 +8,11 @@ jobs:
     name: Pytest 
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v2
-      - name: Install Python 3
-        uses: actions/setup-python@v1
-        with:
-          python-version: 3.8
-      - name: Install dependencies
+      - name: Checkout Repo
+        uses: actions/checkout@v2
+      - name: Install Astro CLI
         run: |
-          python3 -m pip install virtualenv
-          make venv
-      - name: Run Tests with pytest
-        run: make test
+          curl -sSL install.astronomer.io | sudo bash -s
+      - name: Run Test Suite
+        run: |
+          astro dev pytest

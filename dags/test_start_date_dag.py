@@ -2,6 +2,9 @@ from datetime import datetime, timedelta
 import time
 
 from airflow.decorators import dag, task
+import boto3
+
+from include.utils import check_s3_file_exists
 
 # can manually delete previous successful DAG runs w/ browse -> DAG Runs
 # or can manually clear state previous successful DAG Runs
@@ -29,13 +32,26 @@ today = datetime.combine(datetime.now().date().today(), datetime.min.time())
     max_active_runs=1,
     default_args=default_args,
     tags=["yoo"],
+    params={"hello": "world"},
+    render_template_as_native_obj=True,
 )
+
 def test_start_date_dag():
     @task()
-    def test_task(**kwargs):
+    def test_task(**context):  # can call this **kwargs, but context makes more sense.
 
-        timestamp = kwargs["data_interval_end"].strftime("%Y-%m-%dT%H:%M:%SZ")
-        print(f"timestamp is {timestamp}")
+        print(context)
+        print(context['params'])
+        print(context['params']['hello'])
+        timestamp = context["data_interval_end"].strftime("%Y-%m-%dT%H:%M:%SZ")
+        print(f"timestampzzz is {timestamp}")
+
+        client = boto3.client('s3')
+        check_s3_file_exists(
+            client,
+            bucket="jacobsbucket97-dev",
+            prefix="graphql/lambda_function.zip"
+        )
 
         print(f"Sleeping for 30 seconds")
         time.sleep(30)
@@ -44,3 +60,4 @@ def test_start_date_dag():
 
 
 dag = test_start_date_dag()
+# test_start_date_dag() # either of these work
