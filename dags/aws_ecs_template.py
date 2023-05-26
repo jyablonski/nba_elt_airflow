@@ -24,8 +24,6 @@ jacobs_default_args = {
 def jacobs_ecs_task(
     dag: DAG, network_config: dict, park_id="{{ params['park'] }}"
 ) -> EcsRunTaskOperator:
-    # print(context)
-    # park_id = context['params']['park']
 
     return EcsRunTaskOperator(
         task_id="jacobs_airflow_ecs_task_dev",
@@ -39,10 +37,13 @@ def jacobs_ecs_task(
                 {
                     "name": "jacobs_hello_world_container",
                     "environment": [
-                        {"name": "dag_run_ts", "value": "{{ ts }}",},
-                        {"name": "dag_run_date", "value": " {{ ds }}",},
-                        {"name": "park_id", "value": f"'{park_id}'",},
-                    ],
+                        {"name": "dag_run_ts", "value": "{{ ts }}"},
+                        {"name": "dag_run_date", "value": " {{ ds }}"},
+                        {
+                            "name": "park_id",
+                            "value": f"'{park_id}'",
+                        },  # cant send an integer; has to be a string.
+                    ],  # although, it will appear as an int for the container
                 }
             ]
         },
