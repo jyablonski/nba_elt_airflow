@@ -76,18 +76,6 @@ def snowflake_connection(
             raise e
 
 
-connection = snowflake_connection(
-    user="jyablonski",
-    password="xxx",
-    role="accountadmin",
-    warehouse="test_warehouse",
-    database="snowpipe_db",
-    schema="snowpipe",
-    # private_key="astro_rsa_key.p8", # <---- This is the FILE PATH to the private key
-    # private_key_passphrase=os.environ.get('pk_pass')
-)
-
-
 def build_snowflake_table_from_s3(
     stage: str, file_format: str, database: str, schema: str, table_name: str
 ) -> str:

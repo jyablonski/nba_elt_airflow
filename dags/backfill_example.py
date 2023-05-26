@@ -3,9 +3,6 @@ import time
 
 from airflow.decorators import dag, task
 
-# can manually delete previous successful DAG runs w/ browse -> DAG Runs
-# or can manually clear state previous successful DAG Runs
-
 default_args = {
     "owner": "jacob",
     "depends_on_past": True,

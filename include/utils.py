@@ -168,17 +168,12 @@ def check_connections(conn: str, **context):
         )
     return 1
 
+
 def check_s3_file_exists(
-        client: botocore.client.BaseClient,
-        bucket: str,
-        prefix: str,
+    client: botocore.client.BaseClient, bucket: str, prefix: str,
 ):
-    res = client.list_objects_v2(
-        Bucket=bucket,
-        Prefix=prefix,
-        MaxKeys=1,
-    )
-    if ("Contents" in res.keys()):
+    res = client.list_objects_v2(Bucket=bucket, Prefix=prefix, MaxKeys=1,)
+    if "Contents" in res.keys():
         print(f"S3 File Exists for {bucket}/{prefix}")
     else:
         raise S3PrefixCheckFail(f"S3 Prefix doesn't exist for {bucket}/{prefix}")

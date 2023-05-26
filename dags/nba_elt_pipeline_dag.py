@@ -1,12 +1,9 @@
 from datetime import datetime, timedelta
-import os
 
 from airflow import DAG
 from airflow.operators.email import EmailOperator
-from airflow.operators.bash import BashOperator
-from airflow.operators.empty import EmptyOperator
 from airflow.providers.amazon.aws.operators.ecs import EcsRunTaskOperator
-from include.utils import get_ssm_parameter, jacobs_slack_alert
+from include.utils import jacobs_slack_alert
 
 # dbt test failure WILL fail the task, and fail the dag.
 

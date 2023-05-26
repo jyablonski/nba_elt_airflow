@@ -1,5 +1,6 @@
 from airflow import AirflowException
 
+
 class NoConnectionExists(AirflowException):
     pass
 

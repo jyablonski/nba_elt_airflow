@@ -18,7 +18,7 @@ JACOBS_DEFAULT_ARGS = {
     "email_on_failure": False,
     "email_on_retry": False,
     "retries": 0,
-    # "on_failure_callback": jacobs_slack_alert
+    "on_failure_callback": jacobs_slack_alert,
 }
 
 

@@ -1,6 +1,8 @@
 name: Push-to-EC2
 
-# Trigger deployment only on push to master branch
+# this file is/was only used to update an ec2 instance running a docker-compose version of astronomer airflow
+# when triggered it syncs the `dags/` directory of the repo to the ec2 instance to refresh the code on there.
+# no ec2 instance restart is required
 on:
   push:
     branches:
