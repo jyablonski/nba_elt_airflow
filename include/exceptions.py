@@ -7,3 +7,7 @@ class NoConnectionExists(AirflowException):
 
 class S3PrefixCheckFail(AirflowException):
     pass
+
+
+class SnowflakeCheckError(AirflowException):
+    pass

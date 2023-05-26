@@ -2,7 +2,8 @@ from datetime import datetime, timedelta
 
 from airflow import DAG
 from airflow.providers.amazon.aws.operators.ecs import EcsRunTaskOperator
-from include.utils import get_ssm_parameter, jacobs_slack_alert
+from include.aws_utils import get_ssm_parameter
+from include.utils import jacobs_slack_alert
 
 jacobs_default_args = {
     "owner": "jacob",

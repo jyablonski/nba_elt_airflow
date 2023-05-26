@@ -1,6 +1,4 @@
 import os
-import boto3
-import botocore
 
 from airflow.settings import Session
 from airflow.models.connection import Connection
@@ -8,64 +6,90 @@ from airflow.contrib.operators.slack_webhook_operator import SlackWebhookOperato
 from airflow.providers.discord.operators.discord_webhook import DiscordWebhookOperator
 
 try:
-    from .exceptions import NoConnectionExists, S3PrefixCheckFail
+    from .exceptions import NoConnectionExists
 except:
-    from exceptions import NoConnectionExists, S3PrefixCheckFail
+    from exceptions import NoConnectionExists
 
 SLACK_CONN_ID = "slack"
 
-# when making a new aws account, make a jacobs_airflow_user with
-# s3, ec2, ses, cloudwatch logs, ecs, ssm, ecstaskexecution, ec2container service policies
-# and then create access key / secret pair and store them in ~/.aws
-# accessed via systems manager -> parameter store
 
-
-def practice_xcom_function(number: int = 5):
-    print(f"the number is {number}!")
-    return number
-
-
-def get_owner(parameter: str) -> str:
-    print(f"The owner is {parameter}!")
-    return parameter
-
-
-# to use this you have to store the raw values in systems secure manager first
-# accessed via systems manager -> parameter store
-def get_ssm_parameter(parameter_name: str, decryption: bool = True) -> str:
+def get_instance_type(instance_type: str = os.environ.get("ASTRO_INSTANCE_TYPE")):
     """
-    Function to grab parameters from SSM
-
-    note: withdecryption = false will make pg user not work bc its a securestring.
-        ignored for String and StringList parameter types
+    Function used to grab the instance type of Airflow for Dev / Stg / Prod environments
 
     Args:
-        parameter_name (string) - name of the parameter you want
-
-        decryption (Boolean) - Parameter if decryption is needed to access the parameter (default True)
+        instance_type (str): The Instance Type of the Instance.  Defaults to grabbing from `ASTRO_INSTANCE_TYPE`
 
     Returns:
-        parameter_value (string)
+        The Instance Type of the Instance, which can be passed into other functions like `get_schedule_interval`
+            to control whether the DAG should be triggered in lower environments or only in Prod.
+
     """
-    try:
-        ssm = boto3.client("ssm")
-        resp = ssm.get_parameter(Name=parameter_name, WithDecryption=decryption)
-        return resp["Parameter"]["Value"]
-    except BaseException as error:
-        print(f"SSM Failed, {error}")
-        df = []
-        return df
+    if instance_type is None:
+        instance_type = "dev"
+
+    return instance_type
 
 
-def my_function():
-    print(
-        f"""
-           ssm_test: {get_ssm_parameter('jacobs_ssm_test')},
-           subnet_1: {get_ssm_parameter('jacobs_ssm_subnet1')},
-           subnet2: {get_ssm_parameter('jacobs_ssm_subnet2')},
-           sg: {get_ssm_parameter('jacobs_ssm_sg_task')}
-          """
+def get_schedule_interval(
+    cron_schedule: str = None,
+    is_override: bool = False,
+    instance_type: str = get_instance_type(),
+):
+    """
+    Function to control the Cron Scheduling of DAGs across multiple environments.
+    Typical use case is you have a DAG running in Prod but you don't want it to be scheduled in
+    Dev and/or Staging.
+
+    Args:
+        cron_schedule (str): The Cron Schedule for the DAG
+
+        is_override (bool): Boolean value to allow the DAG to be scheduled in Stg environment
+
+        instance_type (str): The Instance Type of the Airflow Instance
+
+    Returns:
+        The Cron Schedule for the DAG
+    """
+    if (is_override is True) & (instance_type == "stg"):
+        cron_schedule = cron_schedule
+    elif instance_type == "prod":
+        cron_schedule = cron_schedule
+    else:
+        cron_schedule = None
+
+    return cron_schedule
+
+
+def write_to_slack(slack_conn_id: str, context, message: str):
+    """
+    Function that writes a message to Slack.  A Slack Hook Connection needs
+    to be created in the Airflow UI in order for this to work.
+
+    Args:
+        slack_conn_id (str): Name of the Slack Connection made in the UI
+
+        context: Airflow Context for the Task where this is ran
+
+        message (str): The Message to send in Slack
+
+    Returns:
+        None, but writes the Message specified to Slack
+    """
+    slack_hook = SlackWebhookOperator(
+        http_conn_id=slack_conn_id,
     )
+    ti = context["task_instance"]
+
+    slack_msg = f"""
+        *Task*: {ti.task_id}
+        *DAG*: {ti.dag_id}
+        *Execution Date*: {context["execution_date"]}
+        *Log URL*: {ti.log_url}
+        *Message*: {message}"""
+
+    print(f"Sending Slack Message for {slack_conn_id}")
+    slack_hook.send(text=slack_msg)
 
 
 def jacobs_airflow_email():
@@ -167,13 +191,3 @@ def check_connections(conn: str, **context):
             f"Requested Connection {conn} is not in Airflow Connections"
         )
     return 1
-
-
-def check_s3_file_exists(
-    client: botocore.client.BaseClient, bucket: str, prefix: str,
-):
-    res = client.list_objects_v2(Bucket=bucket, Prefix=prefix, MaxKeys=1,)
-    if "Contents" in res.keys():
-        print(f"S3 File Exists for {bucket}/{prefix}")
-    else:
-        raise S3PrefixCheckFail(f"S3 Prefix doesn't exist for {bucket}/{prefix}")

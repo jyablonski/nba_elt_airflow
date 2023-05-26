@@ -1,11 +1,8 @@
 from datetime import datetime, timedelta
-import time
+
 
 from airflow.decorators import dag, task
-import boto3
 from airflow.providers.amazon.aws.operators.ecs import EcsRunTaskOperator
-
-from include.utils import check_s3_file_exists
 
 # can manually delete previous successful DAG runs w/ browse -> DAG Runs
 # or can manually clear state previous successful DAG Runs
@@ -93,7 +90,7 @@ def test_start_date_dag():
         # check_s3_file_exists(
         #     client,
         #     bucket="jacobsbucket97-dev",
-        #     prefix="graphql/lambda_function.zip"
+        #     file_prefix="graphql/lambda_function.zip"
         # )
 
         # print(f"Sleeping for 30 seconds")

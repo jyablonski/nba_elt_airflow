@@ -2,7 +2,9 @@ from datetime import datetime, timedelta
 
 from airflow import DAG
 from airflow.providers.amazon.aws.operators.ecs import EcsRunTaskOperator
-from include.utils import get_ssm_parameter, jacobs_slack_alert
+
+from include.aws_utils import get_ssm_parameter
+from include.utils import jacobs_slack_alert
 
 # ECR is a service that exists outside your VPC, so (when using fargate) you need one of the following for the network connection to ECR to be established:
 # Public IP.

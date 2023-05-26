@@ -4,7 +4,7 @@ from moto import mock_s3
 
 from include.exceptions import S3PrefixCheckFail
 
-from include.utils import check_s3_file_exists
+from include.aws_utils import check_s3_file_exists
 
 
 @mock_s3
@@ -20,7 +20,7 @@ def test_check_s3_file_exists():
         check_s3_file_exists(
             client=conn,
             bucket=bucket_name,
-            prefix=f"{bucket_name}-file.txt",
+            file_prefix=f"{bucket_name}-file.txt",
         )
         == None
     )
@@ -30,5 +30,5 @@ def test_check_s3_file_exists():
         check_s3_file_exists(
             client=conn,
             bucket=bucket_name,
-            prefix="my-fake-ass-file-yo.txt",
+            file_prefix="my-fake-ass-file-yo.txt",
         )
