@@ -69,8 +69,8 @@ Variable.get = variable_get_monkeypatch
 @contextmanager
 def suppress_logging(namespace):
     """
-	Suppress logging within a specific namespace to keep tests "clean" during build
-	"""
+    Suppress logging within a specific namespace to keep tests "clean" during build
+    """
     logger = logging.getLogger(namespace)
     old_value = logger.disabled
     logger.disabled = True
@@ -82,8 +82,8 @@ def suppress_logging(namespace):
 
 def get_import_errors():
     """
-	Generate a tuple for import errors in the dag bag
-	"""
+    Generate a tuple for import errors in the dag bag
+    """
     with suppress_logging("airflow"):
         dag_bag = DagBag(include_examples=False)
 
@@ -100,6 +100,6 @@ def get_import_errors():
     "rel_path,rv", get_import_errors(), ids=[x[0] for x in get_import_errors()]
 )
 def test_file_imports(rel_path, rv):
-    """ Test for import errors on a file """
+    """Test for import errors on a file"""
     if rel_path and rv:  # Make sure our no op test doesn't raise an error
         raise Exception(f"{rel_path} failed to import with message \n {rv}")
