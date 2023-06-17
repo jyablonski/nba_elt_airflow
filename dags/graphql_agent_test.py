@@ -1,20 +1,14 @@
 from datetime import datetime, timedelta
 import json
-import logging
-import os
 from typing import Dict
-import sys
 
-from airflow import DAG
-from airflow.hooks.base import BaseHook
 from airflow.decorators import dag, task
 from airflow.exceptions import AirflowException
-from airflow.operators.python import PythonOperator
 from airflow.operators.email import EmailOperator
 import boto3
 import requests
 
-from include.utils import jacobs_airflow_email, jacobs_discord_alert, jacobs_slack_alert
+from include.utils import jacobs_airflow_email, jacobs_slack_alert
 
 jacobs_default_args = {
     "owner": "jacob",
@@ -59,8 +53,6 @@ def graphql_query():
     tags=["test", "graphql", "dev", "jacob"],
     default_args=jacobs_default_args,
 )
-
-# you have to return json for xcoms to work.
 def taskflow():
     @task(task_id="api_trigger", retries=0)
     def api_trigger() -> Dict[str, str]:
@@ -69,7 +61,6 @@ def taskflow():
             raise AirflowException(f"API Data for {table} is empty Failed")
         return df.json()
 
-    # passing data from 1st task to the 2nd task
     @task
     def write_to_s3(data: Dict[str, str]):
         print(data)

@@ -1,5 +1,4 @@
 from datetime import datetime, timedelta
-import os
 
 from airflow import DAG
 from airflow.models.connection import Connection
@@ -17,6 +16,8 @@ jacobs_default_args = {
     "retry_delay": timedelta(minutes=30),
     "on_failure_callback": jacobs_slack_alert,
 }
+
+# do this to assume a different iam role
 # batch_conn_id = "BATCH_AWS_CONNECTION"
 
 # conn = Connection(

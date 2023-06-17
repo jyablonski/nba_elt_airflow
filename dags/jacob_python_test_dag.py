@@ -1,14 +1,8 @@
 """ Python Test DAG"""
-from datetime import datetime, timedelta
-import os
-import time
+from datetime import datetime
 
-from airflow import DAG
-from airflow.settings import Session
-from airflow.models.connection import Connection
 from airflow.decorators import dag, task
-from airflow.operators.python import PythonOperator
-from include.utils import jacobs_slack_alert, check_connections, get_ssm_parameter
+from include.utils import jacobs_slack_alert, check_connections
 
 # send both an email alert + a slack alert to specified channel on any task failure
 JACOBS_DEFAULT_ARGS = {
@@ -18,7 +12,7 @@ JACOBS_DEFAULT_ARGS = {
     "email_on_failure": False,
     "email_on_retry": False,
     "retries": 0,
-    # "on_failure_callback": jacobs_slack_alert
+    "on_failure_callback": jacobs_slack_alert,
 }
 
 
