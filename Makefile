@@ -4,7 +4,7 @@ test:
 	@astro dev pytest
 
 test-docker:
-	@docker-compose up test
+	@docker compose up test
 
 .PHONY: bump-patch
 bump-patch:
