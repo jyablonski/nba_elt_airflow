@@ -22,11 +22,7 @@ def check_s3_file_exists(client, bucket: str, file_prefix: str):
     Returns:
         None, but will raise an error if the file doesn't exist.
     """
-    result = client.list_objects_v2(
-        Bucket=bucket,
-        Prefix=file_prefix,
-        MaxKeys=1,
-    )
+    result = client.list_objects_v2(Bucket=bucket, Prefix=file_prefix, MaxKeys=1,)
     if "Contents" in result.keys():
         print(f"S3 File Exists for {bucket}/{file_prefix}")
     else:
