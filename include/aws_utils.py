@@ -1,6 +1,8 @@
 import json
 
+import awswrangler as wr
 import boto3
+import pandas as pd
 
 try:
     from .exceptions import S3PrefixCheckFail
@@ -22,7 +24,11 @@ def check_s3_file_exists(client, bucket: str, file_prefix: str):
     Returns:
         None, but will raise an error if the file doesn't exist.
     """
-    result = client.list_objects_v2(Bucket=bucket, Prefix=file_prefix, MaxKeys=1,)
+    result = client.list_objects_v2(
+        Bucket=bucket,
+        Prefix=file_prefix,
+        MaxKeys=1,
+    )
     if "Contents" in result.keys():
         print(f"S3 File Exists for {bucket}/{file_prefix}")
     else:
@@ -75,3 +81,15 @@ def get_secret_value(secret_name: str):
         return creds
     except BaseException as e:
         raise e(f"Error Occurred while grabbing secret {secret_name}, {e}")
+
+
+def write_to_s3(dataframe: pd.DataFrame, s3_bucket: str, s3_path: str):
+    
+    try:
+        print(f"Writing DataFrame to {s3_bucket}/{s3_path}.parquet")
+        wr.s3.to_parquet(
+            df=dataframe, path=f"s3://{s3_bucket}/{s3_path}.parquet", compression="snappy"
+        )
+        return True
+    except BaseException as e:
+        raise e(f"Error Occurred while writing dataframe to {s3_bucket}/{s3_path}.parquet")

@@ -31,8 +31,14 @@ def jacobs_ecs_ec2_task(dag: DAG, network_config: dict) -> EcsRunTaskOperator:
                 {
                     "name": "hello-world-ec2",
                     "environment": [
-                        {"name": "dag_run_ts", "value": "{{ ts }}",},
-                        {"name": "dag_run_date", "value": " {{ ds }}",},
+                        {
+                            "name": "dag_run_ts",
+                            "value": "{{ ts }}",
+                        },
+                        {
+                            "name": "dag_run_date",
+                            "value": " {{ ds }}",
+                        },
                     ],
                 }
             ],
