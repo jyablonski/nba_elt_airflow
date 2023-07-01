@@ -25,7 +25,9 @@ JACOBS_DEFAULT_ARGS = {
 )
 def my_practice_dag():
     @task
-    def practice():
+    def practice(**context):
+        print(f"context is {context}")
+        print(f"yo {context['ts']}")
         print(f"Hello world at {datetime.now()}")
         # time.sleep(10)
         return 1

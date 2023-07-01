@@ -22,7 +22,10 @@ today = datetime.combine(datetime.now().date().today(), datetime.min.time())
 network_config = {
     "awsvpcConfiguration": {
         "securityGroups": ["1"],
-        "subnets": ["2", "3",],
+        "subnets": [
+            "2",
+            "3",
+        ],
         "assignPublicIp": "ENABLED",
     }  # has to be enabled otherwise it cant pull image from ecr??
 }
@@ -69,7 +72,10 @@ def test_start_date_dag():
                                 "name": "dag_run_ts",
                                 "value": "{{ ts }}",
                             },  # https://airflow.apache.org/docs/apache-airflow/stable/templates-ref.html
-                            {"name": "dag_run_date", "value": " {{ ds }}",},
+                            {
+                                "name": "dag_run_date",
+                                "value": " {{ ds }}",
+                            },
                             {"name": "test", "value": park_id},
                         ],
                     }

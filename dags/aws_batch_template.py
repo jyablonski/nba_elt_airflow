@@ -43,7 +43,9 @@ def jacobs_ecs_task(dag: DAG) -> BatchOperator:
         job_queue="jacobs-batch-queue",  # has to be setup in aws batch
         job_definition="arn:aws:batch:us-east-1:288364792694:job-definition/jacobs-job-definition:5",  # has to be setup in aws batch
         overrides={
-            "environment": [{"name": "string", "value": "string"},],
+            "environment": [
+                {"name": "string", "value": "string"},
+            ],
             "command": ["echo hello world"],
         },
         parameters={"scheduledStartTime": "{{ data_interval_end }}"},
