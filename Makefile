@@ -24,10 +24,10 @@ bump-major:
 	@git push --tags
 	@git push
 
-.PHONY: start-astro
-start-astro:
+.PHONY: up
+up:
 	@astro dev start
 
-.PHONY: stop-astro
-stop-astro:
+.PHONY: down
+down:
 	@astro dev stop

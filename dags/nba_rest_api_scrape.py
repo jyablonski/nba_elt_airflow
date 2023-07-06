@@ -45,9 +45,7 @@ def nba_rest_api_scrape_dag():
         )
 
         write_to_s3(
-            dataframe=game_types,
-            s3_bucket=bucket,
-            s3_path=file_path,
+            dataframe=game_types, s3_bucket=bucket, s3_path=file_path,
         )
 
         pass
@@ -67,9 +65,7 @@ def nba_rest_api_scrape_dag():
         )
 
         write_to_s3(
-            dataframe=game_types,
-            s3_bucket=bucket,
-            s3_path=file_path,
+            dataframe=game_types, s3_bucket=bucket, s3_path=file_path,
         )
 
         pass
@@ -89,9 +85,7 @@ def nba_rest_api_scrape_dag():
         )
 
         write_to_s3(
-            dataframe=game_types,
-            s3_bucket=bucket,
-            s3_path=file_path,
+            dataframe=game_types, s3_bucket=bucket, s3_path=file_path,
         )
 
         pass
@@ -111,9 +105,7 @@ def nba_rest_api_scrape_dag():
         )
 
         write_to_s3(
-            dataframe=game_types,
-            s3_bucket=bucket,
-            s3_path=file_path,
+            dataframe=game_types, s3_bucket=bucket, s3_path=file_path,
         )
 
         pass
@@ -133,9 +125,7 @@ def nba_rest_api_scrape_dag():
         )
 
         write_to_s3(
-            dataframe=game_types,
-            s3_bucket=bucket,
-            s3_path=file_path,
+            dataframe=game_types, s3_bucket=bucket, s3_path=file_path,
         )
 
         pass
@@ -155,9 +145,7 @@ def nba_rest_api_scrape_dag():
         )
 
         write_to_s3(
-            dataframe=game_types,
-            s3_bucket=bucket,
-            s3_path=file_path,
+            dataframe=game_types, s3_bucket=bucket, s3_path=file_path,
         )
 
         pass
@@ -177,9 +165,7 @@ def nba_rest_api_scrape_dag():
         )
 
         write_to_s3(
-            dataframe=game_types,
-            s3_bucket=bucket,
-            s3_path=file_path,
+            dataframe=game_types, s3_bucket=bucket, s3_path=file_path,
         )
 
         pass
@@ -199,9 +185,7 @@ def nba_rest_api_scrape_dag():
         )
 
         write_to_s3(
-            dataframe=game_types,
-            s3_bucket=bucket,
-            s3_path=file_path,
+            dataframe=game_types, s3_bucket=bucket, s3_path=file_path,
         )
 
         pass
@@ -221,9 +205,7 @@ def nba_rest_api_scrape_dag():
         )
 
         write_to_s3(
-            dataframe=game_types,
-            s3_bucket=bucket,
-            s3_path=file_path,
+            dataframe=game_types, s3_bucket=bucket, s3_path=file_path,
         )
 
         pass
@@ -243,9 +225,7 @@ def nba_rest_api_scrape_dag():
         )
 
         write_to_s3(
-            dataframe=game_types,
-            s3_bucket=bucket,
-            s3_path=file_path,
+            dataframe=game_types, s3_bucket=bucket, s3_path=file_path,
         )
 
         pass
@@ -265,20 +245,18 @@ def nba_rest_api_scrape_dag():
         )
 
         write_to_s3(
-            dataframe=game_types,
-            s3_bucket=bucket,
-            s3_path=file_path,
+            dataframe=game_types, s3_bucket=bucket, s3_path=file_path,
         )
 
         pass
 
-    (
+    [
         scrape_game_types(
             base_api_endpoint=api_endpoint,
             task_endpoint="game_types",
             bucket=api_scrape_bucket,
-        )
-        >> scrape_injuries(
+        ),
+        scrape_injuries(
             base_api_endpoint=api_endpoint,
             task_endpoint="injuries",
             bucket=api_scrape_bucket,
@@ -287,8 +265,8 @@ def nba_rest_api_scrape_dag():
             base_api_endpoint=api_endpoint,
             task_endpoint="predictions",
             bucket=api_scrape_bucket,
-        )
-        >> scrape_reddit_comments(
+        ),
+        scrape_reddit_comments(
             base_api_endpoint=api_endpoint,
             task_endpoint="reddit_comments",
             bucket=api_scrape_bucket,
@@ -297,8 +275,8 @@ def nba_rest_api_scrape_dag():
             base_api_endpoint=api_endpoint,
             task_endpoint="schedule",
             bucket=api_scrape_bucket,
-        )
-        >> scrape_player_stats(
+        ),
+        scrape_player_stats(
             base_api_endpoint=api_endpoint,
             task_endpoint="scorers",
             bucket=api_scrape_bucket,
@@ -307,8 +285,8 @@ def nba_rest_api_scrape_dag():
             base_api_endpoint=api_endpoint,
             task_endpoint="standings",
             bucket=api_scrape_bucket,
-        )
-        >> scrape_team_ratings(
+        ),
+        scrape_team_ratings(
             base_api_endpoint=api_endpoint,
             task_endpoint="team_ratings",
             bucket=api_scrape_bucket,
@@ -317,12 +295,11 @@ def nba_rest_api_scrape_dag():
             base_api_endpoint=api_endpoint,
             task_endpoint="transactions",
             bucket=api_scrape_bucket,
-        )
-        >> scrape_twitter_comments(
-            base_api_endpoint=api_endpoint,
-            task_endpoint="twitter_comments",
-            bucket=api_scrape_bucket,
-        )
+        ),
+    ] >> scrape_twitter_comments(
+        base_api_endpoint=api_endpoint,
+        task_endpoint="twitter_comments",
+        bucket=api_scrape_bucket,
     )
 
 
