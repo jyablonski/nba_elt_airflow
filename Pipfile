@@ -9,11 +9,12 @@ pandas = "*"
 numpy = "*"
 requests = "*"
 boto3 = "*"
+apache-airflow-providers-amazon = "*"
 
 [dev-packages]
-black = "==22.3.0"
+black = "*"
 pytest = "*"
 moto = "*"
 
 [requires]
-python_version = "3.9"
+python_version = "3.10"

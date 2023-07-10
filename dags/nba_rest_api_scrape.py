@@ -4,7 +4,7 @@ from datetime import datetime
 from airflow.decorators import dag, task
 
 from include.aws_utils import write_to_s3
-from include.utils import jacobs_slack_alert
+from include.utils import get_schedule_interval, jacobs_slack_alert
 from include.rest_api_scrape.utils import scrape_endpoint
 
 api_endpoint = "https://api.jyablonski.dev"
@@ -23,11 +23,11 @@ default_args = {
 
 
 @dag(
-    schedule=None,
+    schedule=get_schedule_interval(None),
     start_date=datetime(2023, 7, 1),
     catchup=False,
     default_args=default_args,
-    tags=["ingestion"],
+    tags=["nba_elt_project"],
 )
 def nba_rest_api_scrape_dag():
     @task()

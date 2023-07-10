@@ -3,9 +3,9 @@ import os
 
 from airflow import DAG
 from airflow.operators.email import EmailOperator
-from airflow.operators.bash_operator import BashOperator
-from airflow.operators.dummy_operator import DummyOperator
-from include.utils import jacobs_slack_alert
+from airflow.operators.bash import BashOperator
+from airflow.operators.empty import EmptyOperator
+from include.utils import get_schedule_interval, jacobs_slack_alert
 
 # dbt test failure WILL fail the task, and fail the dag.
 
@@ -23,9 +23,9 @@ JACOBS_DEFAULT_ARGS = {
 os.environ["AWS_DEFAULT_REGION"] = "us-east-1"
 
 
-def jacobs_dummy_task(dag: DAG, task_id) -> DummyOperator:
+def jacobs_dummy_task(dag: DAG, task_id) -> EmptyOperator:
     task_id = "dummy_task_qa" + str(task_id)
-    return DummyOperator(task_id=task_id, dag=dag)
+    return EmptyOperator(task_id=task_id, dag=dag)
 
 
 # having problems installing meltano on airflow, gunicorn dependency issue as of 2022-03-21
@@ -67,10 +67,12 @@ def create_dag() -> DAG:
         "meltano_pipeline_qa",
         catchup=False,
         default_args=JACOBS_DEFAULT_ARGS,
-        schedule_interval=None,  # change to none when testing / schedule_interval | None
+        schedule_interval=get_schedule_interval(
+            None
+        ),  # change to none when testing / schedule_interval | None
         start_date=datetime(2022, 3, 21),
         max_active_runs=1,
-        tags=["qa", "meltano", "practice", "airflow_test"],
+        tags=["test"],
     )
     t1 = jacobs_dummy_task(dag, 1)
     t2 = jacobs_meltano_task(dag)

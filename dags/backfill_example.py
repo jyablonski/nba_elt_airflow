@@ -3,6 +3,8 @@ import time
 
 from airflow.decorators import dag, task
 
+from include.utils import get_schedule_interval, jacobs_slack_alert
+
 default_args = {
     "owner": "jacob",
     "depends_on_past": True,
@@ -11,17 +13,18 @@ default_args = {
     "email_on_retry": False,
     "retries": 0,
     "retry_delay": timedelta(minutes=5),
+    "on_failure_callback": jacobs_slack_alert,
 }
 
 
 @dag(
     "backfill_example",
-    schedule_interval="*/2 * * * *",
+    schedule_interval=get_schedule_interval("*/2 * * * *"),
     start_date=datetime(2023, 4, 1),
     catchup=True,
     max_active_runs=1,
     default_args=default_args,
-    tags=["yoo"],
+    tags=["example"],
 )
 def backfill_example():
     @task()

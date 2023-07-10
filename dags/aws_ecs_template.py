@@ -4,7 +4,7 @@ from airflow import DAG
 from airflow.providers.amazon.aws.operators.ecs import EcsRunTaskOperator
 
 from include.aws_utils import get_ssm_parameter
-from include.utils import jacobs_slack_alert
+from include.utils import get_schedule_interval, jacobs_slack_alert
 
 # ECR is a service that exists outside your VPC, so (when using fargate) you need one of the following for the network connection to ECR to be established:
 # Public IP.
@@ -76,10 +76,10 @@ def create_dag() -> DAG:
         "aws_ecs_template",
         catchup=False,
         default_args=jacobs_default_args,
-        schedule_interval=None,
+        schedule_interval=get_schedule_interval(None),
         start_date=datetime(2021, 11, 20),
         max_active_runs=1,
-        tags=["dev", "ecs", "template"],
+        tags=["example", "template"],
         params={"park": 0},
         render_template_as_native_obj=True,
     )

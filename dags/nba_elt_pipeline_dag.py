@@ -3,7 +3,7 @@ from datetime import datetime, timedelta
 from airflow import DAG
 from airflow.operators.email import EmailOperator
 from airflow.providers.amazon.aws.operators.ecs import EcsRunTaskOperator
-from include.utils import jacobs_slack_alert
+from include.utils import get_schedule_interval, jacobs_slack_alert
 
 # dbt test failure WILL fail the task, and fail the dag.
 
@@ -18,7 +18,7 @@ jacobs_default_args = {
     "on_failure_callback": jacobs_slack_alert,
 }
 
-jacobs_tags = ["nba_elt_pipeline", "dev", "ml"]
+jacobs_tags = ["nba_elt_project"]
 
 DBT_PROFILE_DIR = "~/.dbt/"
 DBT_PROJECT_DIR = "~/airflow/dags/dbt/"
@@ -161,7 +161,9 @@ def create_dag() -> DAG:
         "nba_elt_pipeline_dag",
         catchup=False,
         default_args=jacobs_default_args,
-        schedule_interval=None,  # change to none when testing / schedule_interval | None
+        schedule_interval=get_schedule_interval(
+            None
+        ),  # change to none when testing / schedule_interval | None
         start_date=datetime(2021, 11, 20),
         max_active_runs=1,
         tags=jacobs_tags,

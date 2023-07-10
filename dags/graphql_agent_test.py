@@ -8,7 +8,11 @@ from airflow.operators.email import EmailOperator
 import boto3
 import requests
 
-from include.utils import jacobs_airflow_email, jacobs_slack_alert
+from include.utils import (
+    get_schedule_interval,
+    jacobs_airflow_email,
+    jacobs_slack_alert,
+)
 
 jacobs_default_args = {
     "owner": "jacob",
@@ -47,10 +51,10 @@ def graphql_query():
 
 @dag(
     "graphql_agent_test",
-    schedule_interval=None,
+    schedule_interval=get_schedule_interval(None),
     start_date=datetime(2022, 6, 1),
     catchup=False,
-    tags=["test", "graphql", "dev", "jacob"],
+    tags=["test"],
     default_args=jacobs_default_args,
 )
 def taskflow():

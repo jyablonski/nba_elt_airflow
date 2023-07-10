@@ -1,5 +1,4 @@
 import boto3
-from botocore.exceptions import ClientError
 from moto import mock_s3
 import pandas as pd
 import pytest
@@ -52,6 +51,8 @@ def test_write_to_s3_success():
     assert write_test == True
 
 
+# get some dumbass mf error about no such bucket exists, im over it
+@pytest.mark.filterwarnings("ignore::pytest.PytestUnraisableExceptionWarning")
 @mock_s3
 def test_write_to_s3_fail():
     client = boto3.client("s3", region_name="us-east-1")

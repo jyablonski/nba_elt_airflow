@@ -2,7 +2,7 @@
 from datetime import datetime
 
 from airflow.decorators import dag, task
-from include.utils import jacobs_slack_alert, check_connections
+from include.utils import get_schedule_interval, jacobs_slack_alert, check_connections
 
 # send both an email alert + a slack alert to specified channel on any task failure
 JACOBS_DEFAULT_ARGS = {
@@ -17,7 +17,7 @@ JACOBS_DEFAULT_ARGS = {
 
 
 @dag(
-    schedule=None,
+    schedule=get_schedule_interval(None),
     start_date=datetime(2021, 1, 1),
     catchup=False,
     default_args=JACOBS_DEFAULT_ARGS,
