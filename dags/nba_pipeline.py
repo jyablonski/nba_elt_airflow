@@ -4,7 +4,6 @@ from airflow.decorators import dag
 from airflow.models import Variable
 from airflow.providers.amazon.aws.operators.ecs import EcsRunTaskOperator
 
-from include.aws_utils import get_ssm_parameter
 from include.utils import get_schedule_interval, get_instance_type, jacobs_slack_alert
 
 default_args = {
@@ -42,7 +41,7 @@ dbt_config_env = Variable.get(
 
 @dag(
     "nba_pipeline",
-    schedule=get_schedule_interval(None),
+    schedule=get_schedule_interval(cron_schedule="0 12 * * *"),
     start_date=datetime(2023, 7, 1),
     catchup=False,
     default_args=default_args,
