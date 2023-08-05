@@ -34,7 +34,6 @@ def nba_rest_api_scrape_dag():
     def scrape_game_types(
         base_api_endpoint: str, task_endpoint: str, bucket: str, **context: dict
     ):
-
         date = context["data_interval_end"].strftime("%Y-%m-%d")
         file_path = f"rest_api_scrapes/{task_endpoint}/{task_endpoint}-{date}"
 
@@ -45,7 +44,9 @@ def nba_rest_api_scrape_dag():
         )
 
         write_to_s3(
-            dataframe=game_types, s3_bucket=bucket, s3_path=file_path,
+            dataframe=game_types,
+            s3_bucket=bucket,
+            s3_path=file_path,
         )
 
         pass
@@ -54,7 +55,6 @@ def nba_rest_api_scrape_dag():
     def scrape_injuries(
         base_api_endpoint: str, task_endpoint: str, bucket: str, **context: dict
     ):
-
         date = context["data_interval_end"].strftime("%Y-%m-%d")
         file_path = f"rest_api_scrapes/{task_endpoint}/{task_endpoint}-{date}"
 
@@ -65,7 +65,9 @@ def nba_rest_api_scrape_dag():
         )
 
         write_to_s3(
-            dataframe=game_types, s3_bucket=bucket, s3_path=file_path,
+            dataframe=game_types,
+            s3_bucket=bucket,
+            s3_path=file_path,
         )
 
         pass
@@ -74,7 +76,6 @@ def nba_rest_api_scrape_dag():
     def scrape_predictions(
         base_api_endpoint: str, task_endpoint: str, bucket: str, **context: dict
     ):
-
         date = context["data_interval_end"].strftime("%Y-%m-%d")
         file_path = f"rest_api_scrapes/{task_endpoint}/{task_endpoint}-{date}"
 
@@ -85,7 +86,9 @@ def nba_rest_api_scrape_dag():
         )
 
         write_to_s3(
-            dataframe=game_types, s3_bucket=bucket, s3_path=file_path,
+            dataframe=game_types,
+            s3_bucket=bucket,
+            s3_path=file_path,
         )
 
         pass
@@ -94,7 +97,6 @@ def nba_rest_api_scrape_dag():
     def scrape_reddit_comments(
         base_api_endpoint: str, task_endpoint: str, bucket: str, **context: dict
     ):
-
         date = context["data_interval_end"].strftime("%Y-%m-%d")
         file_path = f"rest_api_scrapes/{task_endpoint}/{task_endpoint}-{date}"
 
@@ -105,7 +107,9 @@ def nba_rest_api_scrape_dag():
         )
 
         write_to_s3(
-            dataframe=game_types, s3_bucket=bucket, s3_path=file_path,
+            dataframe=game_types,
+            s3_bucket=bucket,
+            s3_path=file_path,
         )
 
         pass
@@ -114,7 +118,6 @@ def nba_rest_api_scrape_dag():
     def scrape_schedule(
         base_api_endpoint: str, task_endpoint: str, bucket: str, **context: dict
     ):
-
         date = context["data_interval_end"].strftime("%Y-%m-%d")
         file_path = f"rest_api_scrapes/{task_endpoint}/{task_endpoint}-{date}"
 
@@ -125,7 +128,9 @@ def nba_rest_api_scrape_dag():
         )
 
         write_to_s3(
-            dataframe=game_types, s3_bucket=bucket, s3_path=file_path,
+            dataframe=game_types,
+            s3_bucket=bucket,
+            s3_path=file_path,
         )
 
         pass
@@ -134,7 +139,6 @@ def nba_rest_api_scrape_dag():
     def scrape_player_stats(
         base_api_endpoint: str, task_endpoint: str, bucket: str, **context: dict
     ):
-
         date = context["data_interval_end"].strftime("%Y-%m-%d")
         file_path = f"rest_api_scrapes/{task_endpoint}/{task_endpoint}-{date}"
 
@@ -145,7 +149,9 @@ def nba_rest_api_scrape_dag():
         )
 
         write_to_s3(
-            dataframe=game_types, s3_bucket=bucket, s3_path=file_path,
+            dataframe=game_types,
+            s3_bucket=bucket,
+            s3_path=file_path,
         )
 
         pass
@@ -154,7 +160,6 @@ def nba_rest_api_scrape_dag():
     def scrape_standings(
         base_api_endpoint: str, task_endpoint: str, bucket: str, **context: dict
     ):
-
         date = context["data_interval_end"].strftime("%Y-%m-%d")
         file_path = f"rest_api_scrapes/{task_endpoint}/{task_endpoint}-{date}"
 
@@ -165,7 +170,9 @@ def nba_rest_api_scrape_dag():
         )
 
         write_to_s3(
-            dataframe=game_types, s3_bucket=bucket, s3_path=file_path,
+            dataframe=game_types,
+            s3_bucket=bucket,
+            s3_path=file_path,
         )
 
         pass
@@ -174,7 +181,6 @@ def nba_rest_api_scrape_dag():
     def scrape_team_ratings(
         base_api_endpoint: str, task_endpoint: str, bucket: str, **context: dict
     ):
-
         date = context["data_interval_end"].strftime("%Y-%m-%d")
         file_path = f"rest_api_scrapes/{task_endpoint}/{task_endpoint}-{date}"
 
@@ -185,7 +191,9 @@ def nba_rest_api_scrape_dag():
         )
 
         write_to_s3(
-            dataframe=game_types, s3_bucket=bucket, s3_path=file_path,
+            dataframe=game_types,
+            s3_bucket=bucket,
+            s3_path=file_path,
         )
 
         pass
@@ -194,7 +202,6 @@ def nba_rest_api_scrape_dag():
     def scrape_transactions(
         base_api_endpoint: str, task_endpoint: str, bucket: str, **context: dict
     ):
-
         date = context["data_interval_end"].strftime("%Y-%m-%d")
         file_path = f"rest_api_scrapes/{task_endpoint}/{task_endpoint}-{date}"
 
@@ -205,7 +212,9 @@ def nba_rest_api_scrape_dag():
         )
 
         write_to_s3(
-            dataframe=game_types, s3_bucket=bucket, s3_path=file_path,
+            dataframe=game_types,
+            s3_bucket=bucket,
+            s3_path=file_path,
         )
 
         pass
@@ -214,7 +223,6 @@ def nba_rest_api_scrape_dag():
     def scrape_transactions(
         base_api_endpoint: str, task_endpoint: str, bucket: str, **context: dict
     ):
-
         date = context["data_interval_end"].strftime("%Y-%m-%d")
         file_path = f"rest_api_scrapes/{task_endpoint}/{task_endpoint}-{date}"
 
@@ -225,7 +233,9 @@ def nba_rest_api_scrape_dag():
         )
 
         write_to_s3(
-            dataframe=game_types, s3_bucket=bucket, s3_path=file_path,
+            dataframe=game_types,
+            s3_bucket=bucket,
+            s3_path=file_path,
         )
 
         pass
@@ -234,7 +244,6 @@ def nba_rest_api_scrape_dag():
     def scrape_twitter_comments(
         base_api_endpoint: str, task_endpoint: str, bucket: str, **context: dict
     ):
-
         date = context["data_interval_end"].strftime("%Y-%m-%d")
         file_path = f"rest_api_scrapes/{task_endpoint}/{task_endpoint}-{date}"
 
@@ -245,7 +254,9 @@ def nba_rest_api_scrape_dag():
         )
 
         write_to_s3(
-            dataframe=game_types, s3_bucket=bucket, s3_path=file_path,
+            dataframe=game_types,
+            s3_bucket=bucket,
+            s3_path=file_path,
         )
 
         pass

@@ -25,7 +25,6 @@ DBT_PROJECT_DIR = "~/airflow/dags/dbt/"
 
 
 def jacobs_ecs_task(dag: DAG, network_config: dict) -> EcsRunTaskOperator:
-
     return EcsRunTaskOperator(
         task_id="jacobs_airflow_ecs_task",
         dag=dag,
@@ -38,11 +37,26 @@ def jacobs_ecs_task(dag: DAG, network_config: dict) -> EcsRunTaskOperator:
                 {
                     "name": "jacobs_container",
                     "environment": [
-                        {"name": "dag_run_ts", "value": "{{ ts }}",},
-                        {"name": "dag_run_date", "value": "{{ ds }}",},
-                        {"name": "run_type", "value": "dev",},
-                        {"name": "S3_BUCKET", "value": "jacobsbucket97",},
-                        {"name": "RDS_SCHEMA", "value": "nba_source",},
+                        {
+                            "name": "dag_run_ts",
+                            "value": "{{ ts }}",
+                        },
+                        {
+                            "name": "dag_run_date",
+                            "value": "{{ ds }}",
+                        },
+                        {
+                            "name": "run_type",
+                            "value": "dev",
+                        },
+                        {
+                            "name": "S3_BUCKET",
+                            "value": "jacobsbucket97",
+                        },
+                        {
+                            "name": "RDS_SCHEMA",
+                            "value": "nba_source",
+                        },
                     ],
                 }
             ]
@@ -57,7 +71,6 @@ def jacobs_ecs_task(dag: DAG, network_config: dict) -> EcsRunTaskOperator:
 def jacobs_ecs_task_dbt(
     dag: DAG, dbt_config: dict, network_config: dict
 ) -> EcsRunTaskOperator:
-
     return EcsRunTaskOperator(
         task_id="jacobs_airflow_dbt_task",
         dag=dag,
@@ -70,15 +83,42 @@ def jacobs_ecs_task_dbt(
                 {
                     "name": "jacobs_container_dbt",
                     "environment": [
-                        {"name": "dag_run_ts", "value": "{{ ts }}",},
-                        {"name": "dag_run_date", "value": " {{ ds }}",},
-                        {"name": "run_type", "value": "dev",},
-                        {"name": "DBT_DBNAME", "value": dbt_config["DBT_DBNAME"],},
-                        {"name": "DBT_HOST", "value": dbt_config["DBT_HOST"],},
-                        {"name": "DBT_USER", "value": dbt_config["DBT_USER"],},
-                        {"name": "DBT_PASS", "value": dbt_config["DBT_PASS"],},
-                        {"name": "DBT_SCHEMA", "value": dbt_config["DBT_SCHEMA"],},
-                        {"name": "DBT_PRAC_KEY", "value": dbt_config["DBT_PRAC_KEY"],},
+                        {
+                            "name": "dag_run_ts",
+                            "value": "{{ ts }}",
+                        },
+                        {
+                            "name": "dag_run_date",
+                            "value": " {{ ds }}",
+                        },
+                        {
+                            "name": "run_type",
+                            "value": "dev",
+                        },
+                        {
+                            "name": "DBT_DBNAME",
+                            "value": dbt_config["DBT_DBNAME"],
+                        },
+                        {
+                            "name": "DBT_HOST",
+                            "value": dbt_config["DBT_HOST"],
+                        },
+                        {
+                            "name": "DBT_USER",
+                            "value": dbt_config["DBT_USER"],
+                        },
+                        {
+                            "name": "DBT_PASS",
+                            "value": dbt_config["DBT_PASS"],
+                        },
+                        {
+                            "name": "DBT_SCHEMA",
+                            "value": dbt_config["DBT_SCHEMA"],
+                        },
+                        {
+                            "name": "DBT_PRAC_KEY",
+                            "value": dbt_config["DBT_PRAC_KEY"],
+                        },
                     ],
                 }
             ]
@@ -91,7 +131,6 @@ def jacobs_ecs_task_dbt(
 
 
 def jacobs_ecs_task_ml(dag: DAG, network_config: dict) -> EcsRunTaskOperator:
-
     return EcsRunTaskOperator(
         task_id="jacobs_airflow_ecs_task_ml",
         dag=dag,
@@ -104,10 +143,22 @@ def jacobs_ecs_task_ml(dag: DAG, network_config: dict) -> EcsRunTaskOperator:
                 {
                     "name": "jacobs_container_ml",
                     "environment": [
-                        {"name": "dag_run_ts", "value": "{{ ts }}",},
-                        {"name": "dag_run_date", "value": " {{ ds }}",},
-                        {"name": "run_type", "value": "dev",},
-                        {"name": "RDS_SCHEMA", "value": "ml_models",},
+                        {
+                            "name": "dag_run_ts",
+                            "value": "{{ ts }}",
+                        },
+                        {
+                            "name": "dag_run_date",
+                            "value": " {{ ds }}",
+                        },
+                        {
+                            "name": "run_type",
+                            "value": "dev",
+                        },
+                        {
+                            "name": "RDS_SCHEMA",
+                            "value": "ml_models",
+                        },
                     ],
                 }
             ]
@@ -141,7 +192,10 @@ def create_dag() -> DAG:
     jacobs_network_config = {
         "awsvpcConfiguration": {
             "securityGroups": ["1"],
-            "subnets": ["2", "3",],
+            "subnets": [
+                "2",
+                "3",
+            ],
             "assignPublicIp": "ENABLED",
         }
     }

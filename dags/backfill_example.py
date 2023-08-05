@@ -29,7 +29,6 @@ default_args = {
 def backfill_example():
     @task()
     def test_task(**kwargs):
-
         timestamp = kwargs["data_interval_end"].strftime("%Y-%m-%dT%H:%M:%SZ")
         print(f"timestamp is {timestamp}")
 

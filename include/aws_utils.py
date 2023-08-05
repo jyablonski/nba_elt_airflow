@@ -24,7 +24,11 @@ def check_s3_file_exists(client, bucket: str, file_prefix: str):
     Returns:
         None, but will raise an error if the file doesn't exist.
     """
-    result = client.list_objects_v2(Bucket=bucket, Prefix=file_prefix, MaxKeys=1,)
+    result = client.list_objects_v2(
+        Bucket=bucket,
+        Prefix=file_prefix,
+        MaxKeys=1,
+    )
     if "Contents" in result.keys():
         print(f"S3 File Exists for {bucket}/{file_prefix}")
     else:
@@ -33,25 +37,36 @@ def check_s3_file_exists(client, bucket: str, file_prefix: str):
 
 # to use this you have to store the raw values in systems secure manager first
 # accessed via systems manager -> parameter store
-def get_ssm_parameter(parameter_name: str, decryption: bool = True) -> str:
+def get_ssm_parameter(
+    parameter_name: str, decryption: bool = True, is_json: bool = False
+) -> str | dict:
     """
     Function to grab parameters from SSM
 
     note: withdecryption = false will make pg user not work bc its a securestring.
         ignored for String and StringList parameter types
 
+    When storing these in SSM do it on one line or JSON gets fkd up :)
+
     Args:
         parameter_name (string) - name of the parameter you want
 
-        decryption (Boolean) - Parameter if decryption is needed to access the parameter (default True)
+        decryption (bool) - Optional parameter to specify if decryption is needed to access the parameter (default True)
 
+        is_json (bool) - Optional parameter to specify if the parameter is a json dictionary
+        
     Returns:
         parameter_value (string)
     """
     try:
         ssm = boto3.client("ssm")
         resp = ssm.get_parameter(Name=parameter_name, WithDecryption=decryption)
-        return resp["Parameter"]["Value"]
+
+        if is_json is True:
+            resp = json.loads(resp["Parameter"]["Value"])
+            return resp
+        else:
+            return resp["Parameter"]["Value"]
     except BaseException as error:
         print(f"SSM Failed, {error}")
         df = []
@@ -80,7 +95,6 @@ def get_secret_value(secret_name: str):
 
 
 def write_to_s3(dataframe: pd.DataFrame, s3_bucket: str, s3_path: str):
-
     try:
         print(f"Writing DataFrame to {s3_bucket}/{s3_path}.parquet")
         wr.s3.to_parquet(

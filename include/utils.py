@@ -76,7 +76,9 @@ def write_to_slack(slack_conn_id: str, context, message: str):
     Returns:
         None, but writes the Message specified to Slack
     """
-    slack_hook = SlackWebhookOperator(http_conn_id=slack_conn_id,)
+    slack_hook = SlackWebhookOperator(
+        http_conn_id=slack_conn_id,
+    )
     ti = context["task_instance"]
 
     slack_msg = f"""

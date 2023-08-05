@@ -26,7 +26,6 @@ jacobs_default_args = {
 def jacobs_ecs_task(
     dag: DAG, network_config: dict, park_id="{{ params['park'] }}"
 ) -> EcsRunTaskOperator:
-
     return EcsRunTaskOperator(
         task_id="jacobs_airflow_ecs_task_dev",
         dag=dag,
