@@ -1,6 +1,7 @@
 from datetime import datetime, timedelta
 
 from airflow.decorators import dag
+from airflow.models import Variable
 from airflow.providers.amazon.aws.operators.ecs import EcsRunTaskOperator
 
 from include.aws_utils import get_ssm_parameter
@@ -17,8 +18,26 @@ default_args = {
     "on_failure_callback": jacobs_slack_alert,
 }
 
+# set these on each dev / stg / prod airflow instance
+# doing this with ssm or secrets manager for ecs + batch tasks is a fucking bitch
+# and it constantly grabs the secrets everytime airflow refreshes
 instance_type_env = get_instance_type()
 ecs_cluster_env = f"ecs_cluster_{get_instance_type()}"
+network_config_env = Variable.get(
+    "network_config", deserialize_json=True, default_var={}
+)
+dbt_config_env = Variable.get(
+    "dbt_config",
+    deserialize_json=True,
+    default_var={
+        "DBT_DBNAME": "test",
+        "DBT_HOST": "test",
+        "DBT_USER": "test",
+        "DBT_PASS": "test",
+        "DBT_SCHEMA": "test",
+        "DBT_PRAC_KEY": "test",
+    },
+)
 
 
 @dag(
@@ -30,11 +49,9 @@ ecs_cluster_env = f"ecs_cluster_{get_instance_type()}"
     tags=["nba_elt_project"],
 )
 def pipeline():
-    def ingestion_pipeline(instance_type: str, ecs_cluster: str, **context):
-        network_config = get_ssm_parameter(
-            f"ecs_network_config_{instance_type}", is_json=True
-        )
-
+    def ingestion_pipeline(
+        instance_type: str, ecs_cluster: str, network_config: dict, **context
+    ):
         return EcsRunTaskOperator(
             task_id="ingestion_pipeline",
             aws_conn_id="aws_ecs",
@@ -76,13 +93,13 @@ def pipeline():
             do_xcom_push=True,
         )
 
-    def dbt_pipeline(instance_type: str, ecs_cluster: str, **context):
-        network_config = get_ssm_parameter(
-            f"ecs_network_config_{instance_type}", is_json=True
-        )
-
-        dbt_config = get_ssm_parameter("dbt_config", is_json=True)
-
+    def dbt_pipeline(
+        instance_type: str,
+        ecs_cluster: str,
+        network_config: dict,
+        dbt_config: dict,
+        **context,
+    ):
         return EcsRunTaskOperator(
             task_id="dbt_pipeline",
             aws_conn_id="aws_ecs",
@@ -90,7 +107,6 @@ def pipeline():
             task_definition="jacobs_dbt_task",
             launch_type="FARGATE",
             overrides={
-                "lol ADSFWAEFWEF"
                 "containerOverrides": [
                     {
                         "name": "jacobs_container_dbt",
@@ -141,11 +157,9 @@ def pipeline():
             do_xcom_push=True,
         )
 
-    def ml_pipeline(instance_type: str, ecs_cluster: str, **context):
-        network_config = get_ssm_parameter(
-            f"ecs_network_config_{instance_type}", is_json=True
-        )
-
+    def ml_pipeline(
+        instance_type: str, ecs_cluster: str, network_config: dict, **context
+    ):
         return EcsRunTaskOperator(
             task_id="ml_pipeline",
             aws_conn_id="aws_ecs",
@@ -184,9 +198,22 @@ def pipeline():
         )
 
     (
-        ingestion_pipeline(instance_type=instance_type_env, ecs_cluster=ecs_cluster_env)
-        >> dbt_pipeline(instance_type=instance_type_env, ecs_cluster=ecs_cluster_env)
-        >> ml_pipeline(instance_type=instance_type_env, ecs_cluster=ecs_cluster_env)
+        ingestion_pipeline(
+            instance_type=instance_type_env,
+            ecs_cluster=ecs_cluster_env,
+            network_config=network_config_env,
+        )
+        >> dbt_pipeline(
+            instance_type=instance_type_env,
+            ecs_cluster=ecs_cluster_env,
+            network_config=network_config_env,
+            dbt_config=dbt_config_env,
+        )
+        >> ml_pipeline(
+            instance_type=instance_type_env,
+            ecs_cluster=ecs_cluster_env,
+            network_config=network_config_env,
+        )
     )
 
 
