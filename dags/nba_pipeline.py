@@ -39,7 +39,7 @@ def pipeline():
             task_id="ingestion_pipeline",
             aws_conn_id="aws_ecs",
             cluster=ecs_cluster,
-            task_definition=f"jacobs_webscrape_taskg_" "{{ ds }}",
+            task_definition=f"jacobs_webscrape_task_",
             launch_type="FARGATE",
             overrides={
                 "containerOverrides": [

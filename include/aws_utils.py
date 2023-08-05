@@ -54,7 +54,7 @@ def get_ssm_parameter(
         decryption (bool) - Optional parameter to specify if decryption is needed to access the parameter (default True)
 
         is_json (bool) - Optional parameter to specify if the parameter is a json dictionary
-        
+
     Returns:
         parameter_value (string)
     """
@@ -69,7 +69,7 @@ def get_ssm_parameter(
             return resp["Parameter"]["Value"]
     except BaseException as error:
         print(f"SSM Failed, {error}")
-        df = []
+        df = {}
         return df
 
 
