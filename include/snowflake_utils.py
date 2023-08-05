@@ -51,7 +51,9 @@ def snowflake_connection(
                     password=password,
                     role=role,
                 ),
-                connect_args={"private_key": pkb,},
+                connect_args={
+                    "private_key": pkb,
+                },
             )
 
             session = sessionmaker(bind=engine)()

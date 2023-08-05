@@ -19,7 +19,9 @@ def test_check_s3_file_exists():
     # assert it can successfuly check a file
     assert (
         check_s3_file_exists(
-            client=conn, bucket=bucket_name, file_prefix=f"{bucket_name}-file.txt",
+            client=conn,
+            bucket=bucket_name,
+            file_prefix=f"{bucket_name}-file.txt",
         )
         == None
     )
@@ -27,7 +29,9 @@ def test_check_s3_file_exists():
     # assert it raises a failure when it checks a file that doesn't exist
     with pytest.raises(S3PrefixCheckFail):
         check_s3_file_exists(
-            client=conn, bucket=bucket_name, file_prefix="my-fake-ass-file-yo.txt",
+            client=conn,
+            bucket=bucket_name,
+            file_prefix="my-fake-ass-file-yo.txt",
         )
 
 
@@ -46,7 +50,11 @@ def test_write_to_s3_success():
         }
     )
 
-    write_test = write_to_s3(dataframe=df, s3_bucket=bucket_name, s3_path=file_path,)
+    write_test = write_to_s3(
+        dataframe=df,
+        s3_bucket=bucket_name,
+        s3_path=file_path,
+    )
 
     assert write_test == True
 
@@ -69,5 +77,7 @@ def test_write_to_s3_fail():
 
     with pytest.raises(TypeError):
         write_test = write_to_s3(
-            dataframe=df, s3_bucket=bucket_name, s3_path=file_path,
+            dataframe=df,
+            s3_bucket=bucket_name,
+            s3_path=file_path,
         )
