@@ -2,6 +2,8 @@
 from datetime import datetime
 
 from airflow.decorators import dag, task
+import boto3
+
 from include.utils import get_schedule_interval, jacobs_slack_alert, check_connections
 
 # send both an email alert + a slack alert to specified channel on any task failure
@@ -39,6 +41,10 @@ def my_practice_dag():
         print(test1)
         test2 = 2
         print(test2)
+        client = boto3.client("sts")
+
+        current_user = client.get_caller_identity()
+        print(f"current user is {current_user} mfer")
         return 1
 
     practice()
