@@ -1,6 +1,8 @@
 from datetime import datetime, timedelta
+import os
 
 from airflow import DAG
+from airflow.models.connection import Connection
 from airflow.providers.amazon.aws.operators.ecs import EcsRunTaskOperator
 from include.aws_utils import get_ssm_parameter
 from include.utils import get_schedule_interval, jacobs_slack_alert
@@ -15,6 +17,21 @@ jacobs_default_args = {
     "retry_delay": timedelta(minutes=30),
     "on_failure_callback": jacobs_slack_alert,
 }
+
+# batch_conn_id = "BATCH_AWS_CONNECTION"
+
+# conn = Connection(
+#     conn_id=batch_conn_id,
+#     conn_type="aws",
+#     extra={
+#         "region_name": "us-east-1",
+#         "role_arn": "arn:aws:iam::288364792694:role/jacobs-ecs-ec2-cluster-cs-role",
+#     },
+# )
+
+# env_key = f"AIRFLOW_CONN_{conn.conn_id}"
+# conn_uri = conn.get_uri()
+# os.environ[env_key] = conn_uri
 
 
 def jacobs_ecs_ec2_task(dag: DAG, network_config: dict) -> EcsRunTaskOperator:

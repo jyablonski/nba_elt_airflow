@@ -1,26 +1,25 @@
-name: Push-to-EC2
+name: Astronomer Deployment
 
-# this file is/was only used to update an ec2 instance running a docker-compose version of astronomer airflow
-# when triggered it syncs the `dags/` directory of the repo to the ec2 instance to refresh the code on there.
-# no ec2 instance restart is required
 on:
   push:
     branches:
       - master
 
+env:
+  ## Sets API token as an environment variable
+  ASTRONOMER_KEY_ID: ${{ secrets.ASTRO_KEY }}
+  ASTRONOMER_KEY_SECRET: ${{ secrets.ASTRO_SECRET_KEY }}
+
 jobs:
-  deploy:
-    name: Deploy to EC2
+  build:
     runs-on: ubuntu-latest
-
     steps:
-      - name: Checkout the Airflow Repo
-        uses: actions/checkout@v2
+    - name: checkout repo
+      uses: actions/checkout@v3
+    - name: Install Astro CLI
+      run: |
+        curl -sSL install.astronomer.io | sudo bash -s
 
-      - name: Deploy to Airflow Server
-        uses: easingthemes/ssh-deploy@main
-        env:
-          SSH_PRIVATE_KEY: ${{ secrets.EC2_SSH_KEY }}
-          REMOTE_HOST: ${{ secrets.HOST_DNS }}
-          REMOTE_USER: ${{ secrets.USERNAME }}
-          TARGET: ${{ secrets.TARGET_DIR }}
+    - name: Deploy to Astro
+      run: |
+        astro deploy

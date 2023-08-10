@@ -1,0 +1,26 @@
+name: Push-to-EC2
+
+# this file is/was only used to update an ec2 instance running a docker-compose version of astronomer airflow
+# when triggered it syncs the `dags/` directory of the repo to the ec2 instance to refresh the code on there.
+# no ec2 instance restart is required
+on:
+  push:
+    branches:
+      - master
+
+jobs:
+  deploy:
+    name: Deploy to EC2
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout the Airflow Repo
+        uses: actions/checkout@v2
+
+      - name: Deploy to Airflow Server
+        uses: easingthemes/ssh-deploy@main
+        env:
+          SSH_PRIVATE_KEY: ${{ secrets.EC2_SSH_KEY }}
+          REMOTE_HOST: ${{ secrets.HOST_DNS }}
+          REMOTE_USER: ${{ secrets.USERNAME }}
+          TARGET: ${{ secrets.TARGET_DIR }}
