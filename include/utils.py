@@ -2,7 +2,8 @@ import os
 
 from airflow.settings import Session
 from airflow.models.connection import Connection
-from airflow.contrib.operators.slack_webhook_operator import SlackWebhookOperator
+from airflow.providers.slack.hooks.slack_webhook import SlackWebhookHook
+from airflow.providers.slack.operators.slack_webhook import SlackWebhookOperator
 from airflow.providers.discord.operators.discord_webhook import DiscordWebhookOperator
 
 try:
@@ -76,8 +77,8 @@ def write_to_slack(slack_conn_id: str, context, message: str):
     Returns:
         None, but writes the Message specified to Slack
     """
-    slack_hook = SlackWebhookOperator(
-        http_conn_id=slack_conn_id,
+    slack_hook = SlackWebhookHook(
+        slack_webhook_conn_id=slack_conn_id,
     )
     ti = context["task_instance"]
 
@@ -141,7 +142,7 @@ def jacobs_slack_alert(context):
     #  *context*: {context} for the exhaustive list
     failed_alert = SlackWebhookOperator(
         task_id="slack_test",
-        http_conn_id="slack",
+        slack_webhook_conn_id="slack",
         message=slack_msg,
         channel="#airflow-channel",
     )
