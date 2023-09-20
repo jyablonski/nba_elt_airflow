@@ -1,8 +1,7 @@
-# psycopg2-binary
-# dbt-core==1.1.0
-# dbt-postgres==1.1.0
-apache-airflow-providers-slack
-apache-airflow-providers-discord
-apache-airflow-providers-amazon
-moto
-awswrangler
+apache-airflow-providers-amazon==8.5.1
+apache-airflow-providers-discord==3.3.0
+apache-airflow-providers-google==10.6.0
+apache-airflow-providers-slack==8.0.0
+awswrangler==3.3.0
+moto==4.2.0
+pandas==2.0.3
