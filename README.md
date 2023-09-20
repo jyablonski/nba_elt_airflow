@@ -1,4 +1,4 @@
-# Airflow Project Version: 2.2.5
+# Airflow Project Version: 2.2.6
 ![Tests](https://github.com/jyablonski/nba_elt_airflow/actions/workflows/tests.yml/badge.svg) ![Code Style](https://img.shields.io/badge/code%20style-black-000000.svg)
 
 ![NBA ELT Pipeline Data Flow](https://github.com/jyablonski/nba_elt_airflow/assets/16946556/aee52f5d-b985-46e6-bf09-d1cfab0ee0c2)
