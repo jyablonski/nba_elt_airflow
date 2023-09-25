@@ -19,8 +19,7 @@ default_args = {
 
 @dag(
     "backfill_params_test_v2",
-    # schedule_interval=get_schedule_interval("*/2 * * * *"),
-    schedule_interval="0 1 * * *",
+    schedule_interval=get_schedule_interval("*/2 * * * *"),
     start_date=datetime(2023, 9, 23, 15, 0, 0),
     catchup=True,
     max_active_runs=1,
