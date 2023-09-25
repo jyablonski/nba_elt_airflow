@@ -1,3 +1,4 @@
+from datetime import datetime, timedelta
 import os
 
 from airflow.settings import Session
@@ -192,3 +193,15 @@ def check_connections(conn: str, **context):
             f"Requested Connection {conn} is not in Airflow Connections"
         )
     return 1
+
+
+def loop_through_days(start_date: str, end_date: str):
+    start_date = datetime.strptime(start_date, "%Y-%m-%d")
+    end_date = datetime.strptime(end_date, "%Y-%m-%d")
+
+    current_date = start_date
+
+    while current_date <= end_date:
+        # do your processing here for each day in between the 2 dates
+        print(current_date.strftime("%Y-%m-%d"))
+        current_date += timedelta(days=1)

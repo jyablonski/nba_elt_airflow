@@ -30,12 +30,13 @@ def package_dependencies():
     @task()
     def test_task(**kwargs):
         installed_packages = pkg_resources.working_set
-        installed_packages_list = sorted(["%s==%s" % (i.key, i.version)
-            for i in installed_packages])
-        
+        installed_packages_list = sorted(
+            ["%s==%s" % (i.key, i.version) for i in installed_packages]
+        )
+
         for i in installed_packages_list:
             print(i)
-            
+
         return {"hello": "world"}
 
     test_task()
