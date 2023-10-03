@@ -1,7 +1,7 @@
 # Runs all tests
 .PHONY: test
 test: 
-	@astro dev pytest
+	@astro dev pytest --args "-v"
 
 test-docker:
 	@docker compose up test
