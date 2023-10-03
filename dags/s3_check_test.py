@@ -22,7 +22,7 @@ default_args = {
 
 @dag(
     "s3_check_test",
-    schedule_interval="0 12/4 * * *",
+    schedule_interval=get_schedule_interval("0 12/4 * * *"),
     start_date=datetime(2023, 9, 23, 15, 0, 0),
     catchup=True,
     max_active_runs=1,
