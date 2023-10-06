@@ -6,6 +6,6 @@ apache-airflow-providers-sftp==4.6.1
 # awswrangler==3.3.0
 moto==4.2.0
 pandas==2.0.3
-protobuf==4.21.12
+protobuf==4.24.4
 google-analytics-data==0.17.1
 mysql-connector-python==8.1.0
