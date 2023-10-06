@@ -1,6 +1,6 @@
 import json
 
-import awswrangler as wr
+# import awswrangler as wr
 import boto3
 import pandas as pd
 
@@ -94,16 +94,16 @@ def get_secret_value(secret_name: str):
         raise e(f"Error Occurred while grabbing secret {secret_name}, {e}")
 
 
-def write_to_s3(dataframe: pd.DataFrame, s3_bucket: str, s3_path: str):
-    try:
-        print(f"Writing DataFrame to {s3_bucket}/{s3_path}.parquet")
-        wr.s3.to_parquet(
-            df=dataframe,
-            path=f"s3://{s3_bucket}/{s3_path}.parquet",
-            compression="snappy",
-        )
-        return True
-    except BaseException as e:
-        raise e(
-            f"Error Occurred while writing dataframe to {s3_bucket}/{s3_path}.parquet"
-        )
+# def write_to_s3(dataframe: pd.DataFrame, s3_bucket: str, s3_path: str):
+#     try:
+#         print(f"Writing DataFrame to {s3_bucket}/{s3_path}.parquet")
+#         wr.s3.to_parquet(
+#             df=dataframe,
+#             path=f"s3://{s3_bucket}/{s3_path}.parquet",
+#             compression="snappy",
+#         )
+#         return True
+#     except BaseException as e:
+#         raise e(
+#             f"Error Occurred while writing dataframe to {s3_bucket}/{s3_path}.parquet"
+#         )
