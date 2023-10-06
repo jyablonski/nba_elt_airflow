@@ -5,6 +5,8 @@ from airflow.models import Variable
 from airflow.providers.amazon.aws.operators.ecs import EcsRunTaskOperator
 
 from include.utils import get_schedule_interval, get_instance_type, jacobs_slack_alert
+from google.analytics.data_v1beta import BetaAnalyticsDataClient
+from google.analytics.data_v1beta.types import GetMetadataRequest, MetricType
 
 default_args = {
     "owner": "jacob",
