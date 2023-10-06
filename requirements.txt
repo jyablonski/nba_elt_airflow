@@ -8,4 +8,4 @@ moto==4.2.0
 pandas==2.0.3
 protobuf==4.21.1
 google-analytics-data==0.17.1
-mysql-connector-python==8.1.0
+mysql-connector-python==8.0.33
