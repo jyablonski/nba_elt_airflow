@@ -8,6 +8,7 @@ from airflow.providers.amazon.aws.operators.ecs import EcsRunTaskOperator
 from include.utils import get_schedule_interval, get_instance_type, jacobs_slack_alert
 from google.analytics.data_v1beta import BetaAnalyticsDataClient
 from google.analytics.data_v1beta.types import GetMetadataRequest, MetricType
+
 os.environ["PROTOCOL_BUFFERS_PYTHON_IMPLEMENTATION"] = "python"
 
 default_args = {

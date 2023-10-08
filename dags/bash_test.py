@@ -38,24 +38,24 @@ def bash_test_pipeline():
         print(f"hi")
 
     def bash_task():
-
-        sts = boto3.client('sts')
+        sts = boto3.client("sts")
         response = sts.assume_role(
             RoleArn="arn:aws:iam::717791819289:role/jacobs-airflow-bash-testing-role",
             RoleSessionName="jacob-airflow-bash-session",
         )
 
         os.environ["AWS_ACCESS_KEY_ID"] = response["Credentials"]["AccessKeyId"]
-        os.environ["AWS_SECRET_ACCESS_KEY"]=response["Credentials"]["SecretAccessKey"]
-        os.environ["AWS_SESSION_TOKEN"]=response["Credentials"]["SessionToken"]
+        os.environ["AWS_SECRET_ACCESS_KEY"] = response["Credentials"]["SecretAccessKey"]
+        os.environ["AWS_SESSION_TOKEN"] = response["Credentials"]["SessionToken"]
         os.environ["AIRFLOW_ENV_VAR"] = "hijacobfrombashtask"
 
         return BashOperator(
-            task_id='bash_task',
+            task_id="bash_task",
             # "scripts" folder is under "/usr/local/airflow/dags"
             bash_command="${AIRFLOW_HOME}/include/scripts/test.sh ",
         )
 
     test_task() >> bash_task()
+
 
 dag = bash_test_pipeline()

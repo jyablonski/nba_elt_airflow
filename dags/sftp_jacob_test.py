@@ -9,8 +9,9 @@ from airflow.providers.ssh.hooks.ssh import SSHHook
 
 from include.utils import get_schedule_interval, jacobs_slack_alert
 
+
 def send_to_sftp(
-    sftp_client, 
+    sftp_client,
     sftp_path: str,
     s3_client,
     s3_bucket: str,
@@ -20,7 +21,8 @@ def send_to_sftp(
     with NamedTemporaryFile("w") as f:
         s3_client.download_file(s3_bucket, s3_key, f.name)
         sftp_client.put(f.name, sftp_path)
-            
+
+
 default_args = {
     "owner": "jacob",
     "depends_on_past": True,
@@ -31,6 +33,7 @@ default_args = {
     "retry_delay": timedelta(minutes=5),
     "on_failure_callback": jacobs_slack_alert,
 }
+
 
 @dag(
     "sftp_jacob_test",
@@ -53,7 +56,7 @@ def sftp_jacob_test_pipeline():
         sftp_conn = ssh_hook.get_conn().open_sftp()
 
         test_entries = [1, 2, 3, 4, 5]
-        
+
         for i in test_entries:
             send_to_sftp(
                 sftp_client=sftp_conn,
