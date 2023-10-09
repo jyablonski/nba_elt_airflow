@@ -55,7 +55,7 @@ def bash_test_pipeline():
             bash_command="${AIRFLOW_HOME}/include/scripts/test.sh ",
         )
 
-    test_task() >> bash_task()
+    [test_task(), bash_task()]
 
 
 dag = bash_test_pipeline()
