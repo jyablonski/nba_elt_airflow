@@ -48,6 +48,13 @@ def bash_test_pipeline():
         os.environ["AWS_SECRET_ACCESS_KEY"] = response["Credentials"]["SecretAccessKey"]
         os.environ["AWS_SESSION_TOKEN"] = response["Credentials"]["SessionToken"]
         os.environ["AIRFLOW_ENV_VAR"] = "hijacobfrombashtask"
+        os.environ["RDSPORT"] = "3306"
+        os.environ["COMNAME"] = "jyablonski Productions"
+        os.environ["DBNAME"] = "jyablonski_production"
+        os.environ["EP"] = "rds.jyablonski.dev"
+        os.environ["MASTERUSER"] = "myuser"
+        os.environ["MYPASS"] = "mypass"
+        
 
         return BashOperator(
             task_id="bash_task",

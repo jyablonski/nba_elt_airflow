@@ -1,18 +1,20 @@
 #!/bin/bash
 
-clear
-echo -n -e "RDS Endpoint: "
-read EP
-echo -n -e "Port: "
-read PORT
-echo -n -e "Database Name: "
-read DBNAME
+# clear
+# echo -n -e "RDS Endpoint: "
+# read EP
+# echo -n -e "Port: "
+# read PORT
+# echo -n -e "Database Name: "
+# read DBNAME
 
 echo $EP
-echo $PORT
+echo $RDSPORT
 echo $DBNAME
-echo $TEST_ENV_VAR
+echo $COMNAME
 echo $AIRFLOW_ENV_VAR
+echo $MASTERUSER
+echo $MYPASS
 
 aws sts get-caller-identity
 
