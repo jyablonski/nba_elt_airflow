@@ -37,7 +37,7 @@ def s3_check_test():
         file_name = "manifest1.json"
 
         try:
-            client=boto3.client(f"s3")
+            client = boto3.client(f"s3")
             check_s3_file_exists(
                 client=client,
                 bucket="nba-elt-dbt-ci",
@@ -45,7 +45,9 @@ def s3_check_test():
             )
 
         except S3PrefixCheckFail:
-            print(f"File not found, assuming there was no data for today.  exiting out ...")
+            print(
+                f"File not found, assuming there was no data for today.  exiting out ..."
+            )
             return
 
         print(f"Found file {file_name} !")

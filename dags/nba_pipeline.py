@@ -1,4 +1,5 @@
 from datetime import datetime, timedelta
+import os
 
 from airflow.decorators import dag
 from airflow.models import Variable
@@ -20,9 +21,9 @@ default_args = {
 # set these on each dev / stg / prod airflow instance
 # doing this with ssm or secrets manager for ecs + batch tasks is a fucking bitch
 # and it constantly grabs the secrets everytime airflow refreshes
-instance_type_env = get_instance_type()
-ecs_cluster_env = f"ecs_cluster_{get_instance_type()}"
-network_config_env = Variable.get(
+INSTANCE_TYPE_ENV = get_instance_type()
+ECS_CLUSTER_ENV = f"ecs_cluster_{get_instance_type()}"
+NETWORK_CONFIG_ENV = Variable.get(
     "network_config", deserialize_json=True, default_var={}
 )
 dbt_config_env = Variable.get(
@@ -198,20 +199,20 @@ def pipeline():
 
     (
         ingestion_pipeline(
-            instance_type=instance_type_env,
-            ecs_cluster=ecs_cluster_env,
-            network_config=network_config_env,
+            instance_type=INSTANCE_TYPE_ENV,
+            ecs_cluster=ECS_CLUSTER_ENV,
+            network_config=NETWORK_CONFIG_ENV,
         )
         >> dbt_pipeline(
-            instance_type=instance_type_env,
-            ecs_cluster=ecs_cluster_env,
-            network_config=network_config_env,
+            instance_type=INSTANCE_TYPE_ENV,
+            ecs_cluster=ECS_CLUSTER_ENV,
+            network_config=NETWORK_CONFIG_ENV,
             dbt_config=dbt_config_env,
         )
         >> ml_pipeline(
-            instance_type=instance_type_env,
-            ecs_cluster=ecs_cluster_env,
-            network_config=network_config_env,
+            instance_type=INSTANCE_TYPE_ENV,
+            ecs_cluster=ECS_CLUSTER_ENV,
+            network_config=NETWORK_CONFIG_ENV,
         )
     )
 

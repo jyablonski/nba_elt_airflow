@@ -27,8 +27,12 @@ def get_instance_type(instance_type: str = os.environ.get("ASTRO_INSTANCE_TYPE")
             to control whether the DAG should be triggered in lower environments or only in Prod.
 
     """
-    if instance_type is None:
+    if instance_type is not None and "dev" in instance_type:
         instance_type = "dev"
+    elif instance_type is None:
+        instance_type = "dev"
+    else:
+        instance_type = instance_type
 
     return instance_type
 
