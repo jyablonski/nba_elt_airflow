@@ -2,12 +2,10 @@ from datetime import datetime, timedelta
 import os
 
 from airflow.decorators import dag, task
-from airflow.operators.bash import BashOperator
+from airflow.hooks.subprocess import SubprocessHook
 import boto3
-
-from include.aws_utils import check_s3_file_exists
-from include.exceptions import S3PrefixCheckFail
 from include.utils import get_schedule_interval, jacobs_slack_alert
+
 
 default_args = {
     "owner": "jacob",
@@ -37,10 +35,11 @@ def bash_test_pipeline():
     ):
         print(f"hi")
 
+    @task()
     def bash_task():
         sts = boto3.client("sts")
         response = sts.assume_role(
-            RoleArn="arn:aws:iam::717791819289:role/jacobs-airflow-bash-testing-role",
+            RoleArn="arn:aws:iam::717791819289:role/jacobs-airflow-bash-testing-role2",
             RoleSessionName="jacob-airflow-bash-session",
         )
 
@@ -54,15 +53,14 @@ def bash_test_pipeline():
         os.environ["EP"] = "rds.jyablonski.dev"
         os.environ["MASTERUSER"] = "myuser"
         os.environ["MYPASS"] = "mypass"
-        
 
-        return BashOperator(
-            task_id="bash_task",
-            # "scripts" folder is under "/usr/local/airflow/dags"
-            bash_command="${AIRFLOW_HOME}/include/scripts/test.sh ",
+        script_path = os.path.join(
+            os.environ["AIRFLOW_HOME"], "include/scripts/test.sh"
         )
+        subprocess_hook = SubprocessHook()
+        subprocess_hook.run_command(["bash", script_path])
 
-    [test_task(), bash_task()]
+    test_task() >> bash_task()
 
 
 dag = bash_test_pipeline()
