@@ -2,10 +2,9 @@ from datetime import datetime, timedelta
 import os
 
 from airflow.decorators import dag, task
-from airflow.operators.bash import BashOperator
 from airflow.hooks.subprocess import SubprocessHook
 import boto3
-from include.utils import get_schedule_interval, jacobs_slack_alert, write_to_slack
+from include.utils import get_schedule_interval, jacobs_slack_alert
 
 
 default_args = {
