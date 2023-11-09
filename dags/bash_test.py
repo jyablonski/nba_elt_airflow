@@ -55,23 +55,11 @@ def bash_test_pipeline():
         os.environ["MASTERUSER"] = "myuser"
         os.environ["MYPASS"] = "mypass"
 
-        # return BashOperator(
-        #     task_id="bash_task",
-        #     # "scripts" folder is under "/usr/local/airflow/dags"
-        #     bash_command="${AIRFLOW_HOME}/include/scripts/test.sh ",
-        # )
-        # Specify the path to your script
-        # script_path = os.path.join(os.environ["AIRFLOW_HOME"], "include/scripts/test.sh ")ssss
-
-        # Execute the bash script using subprocess
-        print(f"hi")
-        # Specify the path to your script
         script_path = os.path.join(
             os.environ["AIRFLOW_HOME"], "include/scripts/test.sh"
         )
         subprocess_hook = SubprocessHook()
         subprocess_hook.run_command(["bash", script_path])
-        print(f"hoo")
 
     test_task() >> bash_task()
 
