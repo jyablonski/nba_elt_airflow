@@ -4,7 +4,7 @@ import time
 from airflow.decorators import dag, task
 from airflow.providers.smtp.hooks.smtp import SmtpHook
 
-from include.utils import send_email
+from include.utils import send_email, jacobs_slack_alert
 
 
 default_args = {
@@ -15,7 +15,7 @@ default_args = {
     "email_on_retry": False,
     "retries": 0,
     "retry_delay": timedelta(minutes=5),
-    # "on_failure_callback": jacobs_slack_alert,
+    "on_failure_callback": jacobs_slack_alert,
 }
 
 
