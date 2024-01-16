@@ -3,6 +3,7 @@ apache-airflow-providers-discord
 apache-airflow-providers-google
 apache-airflow-providers-slack
 apache-airflow-providers-sftp
+apache-airflow-providers-smtp
 awswrangler
 moto
 panda

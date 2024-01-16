@@ -1,6 +1,7 @@
 from datetime import datetime, timedelta
 import pkg_resources
 
+from airflow import AirflowException
 from airflow.decorators import dag, task
 
 from include.utils import get_schedule_interval, jacobs_slack_alert, loop_through_days
@@ -8,8 +9,8 @@ from include.utils import get_schedule_interval, jacobs_slack_alert, loop_throug
 default_args = {
     "owner": "jacob",
     "depends_on_past": True,
-    "email": "jyablonski9@gmail.com",
-    "email_on_failure": False,
+    "email": ["jyablonski9@gmail.com", "jyablonski.aws2@gmail.com"],
+    "email_on_failure": True,
     "email_on_retry": False,
     "retries": 0,
     "retry_delay": timedelta(minutes=5),
@@ -46,7 +47,9 @@ def package_dependencies():
 
         loop_through_days(start_date=start_date, end_date=end_date)
 
-        return {"hello": "world"}
+        raise AirflowException("hello world")
+
+        # return {"hello": "world"}
 
     test_task(run_date="{{ params['start_date'] }}")
 

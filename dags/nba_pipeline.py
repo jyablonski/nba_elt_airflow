@@ -26,18 +26,6 @@ ECS_CLUSTER_ENV = f"ecs_cluster_{get_instance_type()}"
 NETWORK_CONFIG_ENV = Variable.get(
     "network_config", deserialize_json=True, default_var={}
 )
-dbt_config_env = Variable.get(
-    "dbt_config",
-    deserialize_json=True,
-    default_var={
-        "DBT_DBNAME": "test",
-        "DBT_HOST": "test",
-        "DBT_USER": "test",
-        "DBT_PASS": "test",
-        "DBT_SCHEMA": "test",
-        "DBT_PRAC_KEY": "test",
-    },
-)
 
 
 @dag(
@@ -97,9 +85,21 @@ def pipeline():
         instance_type: str,
         ecs_cluster: str,
         network_config: dict,
-        dbt_config: dict,
         **context,
     ):
+        dbt_config = Variable.get(
+            "dbt_config",
+            deserialize_json=True,
+            default_var={
+                "DBT_DBNAME": "test",
+                "DBT_HOST": "test",
+                "DBT_USER": "test",
+                "DBT_PASS": "test",
+                "DBT_SCHEMA": "test",
+                "DBT_PRAC_KEY": "test",
+            },
+        )
+
         return EcsRunTaskOperator(
             task_id="dbt_pipeline",
             aws_conn_id="aws_ecs",
@@ -207,7 +207,6 @@ def pipeline():
             instance_type=INSTANCE_TYPE_ENV,
             ecs_cluster=ECS_CLUSTER_ENV,
             network_config=NETWORK_CONFIG_ENV,
-            dbt_config=dbt_config_env,
         )
         >> ml_pipeline(
             instance_type=INSTANCE_TYPE_ENV,

@@ -12,7 +12,7 @@ This Repo is a local Airflow Deployment to host a DAG for the Data Pipeline port
 
 * Links to other Repos providing infrastructure for this Project
 
-    * [Shiny Server](https://github.com/jyablonski/NBA-Dashboard)
+    * [Dash Server](https://github.com/jyablonski/nba_elt_dashboard)
 	* [Ingestion Script](https://github.com/jyablonski/python_docker)
 	* [ML Pipeline](https://github.com/jyablonski/nba_elt_mlflow)
 	* [Terraform](https://github.com/jyablonski/aws_terraform/)
