@@ -4,7 +4,7 @@ import time
 from airflow.decorators import dag, task
 from airflow.providers.smtp.hooks.smtp import SmtpHook
 
-from include.utils import send_email, jacobs_slack_alert
+from include.utils import send_email, jacobs_slack_alert, get_schedule_interval
 
 
 default_args = {
@@ -22,7 +22,7 @@ default_args = {
 @dag(
     "smtp_test",
     # schedule_interval="0 0 12 1 4/6 ? *",
-    schedule_interval=None,
+    schedule_interval=get_schedule_interval(None),
     start_date=datetime(2023, 9, 23, 15, 0, 0),
     catchup=False,
     max_active_runs=1,
