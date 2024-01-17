@@ -3,6 +3,7 @@ import os
 
 from airflow.settings import Session
 from airflow.models.connection import Connection
+from airflow.providers.smtp.hooks.smtp import SmtpHook
 from airflow.providers.slack.hooks.slack_webhook import SlackWebhookHook
 from airflow.providers.slack.operators.slack_webhook import SlackWebhookOperator
 from airflow.providers.discord.operators.discord_webhook import DiscordWebhookOperator
@@ -209,3 +210,11 @@ def loop_through_days(start_date: str, end_date: str):
         # do your processing here for each day in between the 2 dates
         print(current_date.strftime("%Y-%m-%d"))
         current_date += timedelta(days=1)
+
+
+def send_email(smtp_hook, email_body: str):
+    smtp_hook.send_email_smtp(
+        to="jyablonski9@gmail.com",
+        subject="hello world",
+        html_content=email_body,
+    )
