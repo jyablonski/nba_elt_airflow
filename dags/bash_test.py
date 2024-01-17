@@ -22,7 +22,7 @@ default_args = {
 @dag(
     "bash_test",
     # schedule_interval="0 0 12 1 4/6 ? *",
-    schedule_interval="0 12 1 5,9 *",
+    schedule_interval=get_schedule_interval("0 12 1 5,9 *"),
     start_date=datetime(2023, 9, 23, 15, 0, 0),
     catchup=True,
     max_active_runs=1,
