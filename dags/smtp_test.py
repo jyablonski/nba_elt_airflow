@@ -35,15 +35,21 @@ def bash_test_pipeline():
         **context: dict,
     ):
         print(f"hi")
+        full_msg = (
+            "hello world, it's me \n\n"  # doesn't work
+            "does this work <br> <br>"  # does work
+            "how about this"
+        )
 
         # context manager so that it manages opening & closing the
         # smtp server
         with SmtpHook(smtp_conn_id="smtp_default") as smtp_hook:
+            print(type(smtp_hook))
             smtp_hook.send_email_smtp(
                 to="jyablonski9@gmail.com",
                 subject="hello world",
                 from_email="jyablonski9@gmail.com",
-                html_content="hi",
+                html_content=full_msg,
             )
         # try:
         #     send_email(smtp_hook=hook, email_body="hello world body")
