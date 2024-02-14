@@ -38,7 +38,7 @@ def bash_test_pipeline():
         full_msg = (
             "hello world, it's me \n\n"  # doesn't work
             "does this work <br> <br>"  # does work
-            "how about this"
+            "how about this <a href='https://google.com'>Link Text</a>"
         )
 
         # context manager so that it manages opening & closing the

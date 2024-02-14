@@ -1,4 +1,5 @@
 """ Python Test DAG"""
+
 from datetime import datetime
 
 from airflow.decorators import dag, task
@@ -24,6 +25,7 @@ JACOBS_DEFAULT_ARGS = {
 
 
 @dag(
+    "jacob_python_test_dag",
     schedule=get_schedule_interval("15 3-10 * * *"),
     start_date=datetime(2023, 8, 13, 10, 15, 0),
     catchup=False,
