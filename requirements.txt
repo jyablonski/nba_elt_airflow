@@ -7,5 +7,3 @@ apache-airflow-providers-sftp
 apache-airflow-providers-smtp
 awswrangler
 moto
-protobuf
-gspread

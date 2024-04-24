@@ -218,3 +218,12 @@ def send_email(smtp_hook, email_body: str):
         subject="hello world",
         html_content=email_body,
     )
+
+
+def start_log_block(group: str) -> None:
+    print(f"::group::{group}")
+    return
+
+def end_log_block() -> None:
+    print("::endgroup::")
+    return
