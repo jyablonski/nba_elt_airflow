@@ -43,32 +43,33 @@ ID_DEFAULT = "10, 11, 12"
 )
 def multi_load_test_pipeline():
     @task()
-    def test_task(
+    def generate_run_config(
         **context: dict,
     ):
         if context["params"]["run_type"] == "Full Backfill":
-            print("hello world")
             tables = ["table1", "table2", "table3"]
+            run_type = "backfill"
         else:
-            print("Incremental")
             tables = ["table1"]
+            run_type = "incremental"
 
         if context["data_interval_end"].hour == 12:
             s3_prefix = "morning"
         elif context["data_interval_end"].hour == 16:
             s3_prefix = "afternoon"
         elif context["data_interval_end"].hour == 20:
-            s3_prefix = "night"
+            s3_prefix = "evening"
         else:
             s3_prefix = "manual"
 
-        print(context)
-        print(f"try 2 {context['ts']}")
-
+        # Tables determines which tables to run for
+        # S3 Prefix is used to store the files in the appropriate place in the S3 Bucket
+        # Run Type determines whether it's a full backfill or an incremental load,
+        #    which we would filter the tables down for using timestamp filters
         return {
-            "data_interval_end": context["data_interval_end"],
-            "tables": tables,
+            "run_type": run_type,
             "s3_prefix": s3_prefix,
+            "tables": tables,
         }
 
     @task()
@@ -80,7 +81,18 @@ def multi_load_test_pipeline():
         print(context)
         print(f"try 2 {context['ts']}")
 
-    test_task_followup(test_task())
+        return run_config
+
+    @task()
+    def test_task_final(
+        run_config: dict[str, str],
+        **context: dict,
+    ):
+        print(run_config)
+        print(context)
+        print(f"try 3 {context['ts']}")
+
+    test_task_final(test_task_followup(generate_run_config()))
 
 
 dag = multi_load_test_pipeline()

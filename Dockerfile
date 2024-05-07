@@ -1,3 +1,4 @@
-FROM quay.io/astronomer/astro-runtime:11.1.0
+FROM quay.io/astronomer/astro-runtime:11.2.0
 
 ENV AIRFLOW__CORE__TEST_CONNECTION=Enabled
+ENV AIRFLOW__ASTRONOMER__UPDATE_CHECK_INTERVAL=0
