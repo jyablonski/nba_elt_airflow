@@ -28,6 +28,7 @@ import datetime
 from airflow.decorators import dag, task
 from airflow.models.param import Param
 
+
 @dag(
     # dag_id=Path(__file__).stem,
     "params_on_crack",
@@ -215,7 +216,7 @@ from airflow.models.param import Param
             </script>""",
             section="Special advanced stuff with form fields",
         ),
-    }
+    },
 )
 def params_example_pipeline():
     @task()
@@ -223,5 +224,6 @@ def params_example_pipeline():
         print(context)
 
     test_task()
+
 
 params_example_pipeline()

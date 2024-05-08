@@ -45,7 +45,7 @@ def multi_load_test_pipeline():
     @task()
     def generate_run_config(
         **context: dict,
-    ):
+    ) -> None:
         if context["params"]["run_type"] == "Full Backfill":
             tables = ["table1", "table2", "table3"]
             run_type = "backfill"
@@ -74,25 +74,23 @@ def multi_load_test_pipeline():
 
     @task()
     def test_task_followup(
-        run_config: dict[str, str],
         **context: dict,
-    ):
-        print(run_config)
+    ) -> None:
         print(context)
-        print(f"try 2 {context['ts']}")
-
-        return run_config
+        run_config = context["ti"].xcom_pull(task_ids="generate_run_config")
+        print(run_config)
+        return None
 
     @task()
     def test_task_final(
-        run_config: dict[str, str],
         **context: dict,
-    ):
+    ) -> None:
+        run_config = context["ti"].xcom_pull(task_ids="generate_run_config")
         print(run_config)
-        print(context)
-        print(f"try 3 {context['ts']}")
+        return None
 
-    test_task_final(test_task_followup(generate_run_config()))
+    generate_run_config() >> test_task_followup() >> test_task_final()
+    # test_task_final(test_task_followup(generate_run_config()))
 
 
 dag = multi_load_test_pipeline()

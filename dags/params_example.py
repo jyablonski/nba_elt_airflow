@@ -79,7 +79,6 @@ def params_example_pipeline():
         print(f'{context["params"]["list_items"]}')
         print(f'{context["params"]["is_full_backfill"]}')
 
-
         # print(context["data_interval_end"])
         # if context["data_interval_end"]
 
