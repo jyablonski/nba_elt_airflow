@@ -13,7 +13,7 @@ default_args = {
     "email": "jyablonski9@gmail.com",
     "email_on_failure": False,
     "email_on_retry": False,
-    "retries": 0,
+    "retries": 1,
     "retry_delay": timedelta(minutes=5),
     # "on_failure_callback": jacobs_slack_alert,
 }
@@ -72,7 +72,7 @@ def multi_load_test_pipeline():
             "tables": tables,
         }
 
-    @task()
+    @task(retries=0, retry_delay=timedelta(minutes=4))
     def test_task_followup(
         **context: dict,
     ) -> None:
@@ -81,7 +81,7 @@ def multi_load_test_pipeline():
         print(run_config)
         return None
 
-    @task()
+    @task(retries=2)
     def test_task_final(
         **context: dict,
     ) -> None:
