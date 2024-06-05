@@ -43,7 +43,7 @@ def sql_test_pipeline():
     ):
         print(run_date)
 
-        pg_hook = PostgresHook(postgres_conn_id="nba_prod")
+        pg_hook = PostgresHook(postgres_conn_id="nba_database")
 
         # list of tuples
         data = pg_hook.get_records("select * from information_schema.tables;")

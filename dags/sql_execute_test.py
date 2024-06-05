@@ -58,7 +58,7 @@ ID_DEFAULT = "10, 11, 12"
 def sql_test_pipeline():
     execute_query = SQLExecuteQueryOperator(
         task_id="execute_query",
-        conn_id="nba_prod",
+        conn_id="nba_database",
         sql="test.sql",
         return_last=False,
         show_return_value_in_logs=True,
