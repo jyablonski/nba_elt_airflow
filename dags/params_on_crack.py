@@ -22,11 +22,24 @@ to the DAG and which are used to render a trigger form.
 """
 from __future__ import annotations
 
-import datetime
+from datetime import datetime, timedelta, time
 
 
 from airflow.decorators import dag, task
 from airflow.models.param import Param
+
+from include.utils import jacobs_slack_alert, get_schedule_interval
+
+DEFAULT_ARGS = {
+    "owner": "jacob",
+    "depends_on_past": False,
+    "email": "jyablonski9@gmail.com",
+    "email_on_failure": False,
+    "email_on_retry": False,
+    "retries": 0,
+    "retry_delay": timedelta(minutes=5),
+    "on_failure_callback": jacobs_slack_alert,
+}
 
 
 @dag(
@@ -34,10 +47,11 @@ from airflow.models.param import Param
     "params_on_crack",
     description=__doc__[0 : __doc__.find(".")],
     doc_md=__doc__,
-    schedule=None,
-    start_date=datetime.datetime(2022, 3, 4),
+    schedule=get_schedule_interval(None),
+    start_date=datetime(2022, 3, 4),
+    default_args=DEFAULT_ARGS,
     catchup=False,
-    tags=["example_ui"],
+    tags=["example"],
     params={
         # Let's start simple: Standard dict values are detected from type and offered as entry form fields.
         # Detected types are numbers, text, boolean, lists and dicts.
@@ -77,14 +91,14 @@ from airflow.models.param import Param
         ),
         # Dates and Times are also supported
         "date_time": Param(
-            f"{datetime.date.today()}T{datetime.time(hour=12, minute=17, second=00)}+00:00",
+            f"{datetime.today()}T{time(hour=12, minute=17, second=00)}+00:00",
             type="string",
             format="date-time",
             title="Date-Time Picker",
             description="Please select a date and time, use the button on the left for a pup-up calendar.",
         ),
         "date": Param(
-            f"{datetime.date.today()}",
+            f"{datetime.today()}",
             type="string",
             format="date",
             title="Date Picker",
@@ -92,7 +106,7 @@ from airflow.models.param import Param
             "See that here are no times!",
         ),
         "time": Param(
-            f"{datetime.time(hour=12, minute=13, second=14)}",
+            f"{time(hour=12, minute=13, second=14)}",
             type=["string", "null"],
             format="time",
             title="Time Picker",

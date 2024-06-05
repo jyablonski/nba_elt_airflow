@@ -1,68 +1,43 @@
 import os
-
 import pytest
-
 from include.utils import (
     get_instance_type,
     get_schedule_interval,
 )
 
 
-def test_get_instance_type():
-    os.environ["INSTANCE_TYPE_TEST_DEV"] = "dev"
-    os.environ["INSTANCE_TYPE_TEST_DEV_1"] = "dev-1"
-    os.environ["INSTANCE_TYPE_TEST_DEV_LOCAL"] = "jacob-dev"
-    os.environ["INSTANCE_TYPE_STG"] = "stg"
-    os.environ["INSTANCE_TYPE"] = "prod"
-
-    instance_type_dev = get_instance_type(os.environ.get("INSTANCE_TYPE_TEST_DEV"))
-    instance_type_dev_1 = get_instance_type(os.environ.get("INSTANCE_TYPE_TEST_DEV_1"))
-    instance_type_dev_local = get_instance_type(
-        os.environ.get("INSTANCE_TYPE_TEST_DEV_LOCAL")
-    )
-    instance_type_dev_stg = get_instance_type(os.environ.get("INSTANCE_TYPE_STG"))
-    instance_type_dev_prod = get_instance_type(os.environ.get("INSTANCE_TYPE"))
-
-    assert instance_type_dev == "dev"
-    assert instance_type_dev_1 == "dev"
-    assert instance_type_dev_local == "dev"
-    assert instance_type_dev_stg == "stg"
-    assert instance_type_dev_prod == "prod"
+@pytest.mark.parametrize(
+    "env_var, env_value, expected",
+    [
+        ("INSTANCE_TYPE_TEST_DEV", "dev", "dev"),
+        ("INSTANCE_TYPE_TEST_DEV_1", "dev-1", "dev"),
+        ("INSTANCE_TYPE_TEST_DEV_LOCAL", "jacob-dev", "dev"),
+        ("INSTANCE_TYPE_STG", "stg", "stg"),
+        ("INSTANCE_TYPE", "prod", "prod"),
+    ],
+)
+def test_get_instance_type(env_var, env_value, expected):
+    os.environ[env_var] = env_value
+    instance_type = get_instance_type(os.environ.get(env_var))
+    assert instance_type == expected
 
 
-def test_get_schedule_interval():
-    os.environ["INSTANCE_TYPE_DEV"] = "dev"
-    os.environ["INSTANCE_TYPE_STG"] = "stg"
-    os.environ["INSTANCE_TYPE"] = "prod"
-
+@pytest.mark.parametrize(
+    "env_var, env_value, is_override, expected",
+    [
+        ("INSTANCE_TYPE_DEV", "dev", False, None),
+        ("INSTANCE_TYPE_DEV", "dev", True, None),
+        ("INSTANCE_TYPE_STG", "stg", False, None),
+        ("INSTANCE_TYPE_STG", "stg", True, "40 12 * * *"),
+        ("INSTANCE_TYPE", "prod", False, "40 12 * * *"),
+    ],
+)
+def test_get_schedule_interval(env_var, env_value, is_override, expected):
+    os.environ[env_var] = env_value
     cron_schedule = "40 12 * * *"
 
-    sched_interval_dev = get_schedule_interval(
-        cron_schedule, instance_type=os.environ.get("INSTANCE_TYPE_DEV")
+    sched_interval = get_schedule_interval(
+        cron_schedule, instance_type=os.environ.get(env_var), is_override=is_override
     )
 
-    sched_interval_dev_override = get_schedule_interval(
-        cron_schedule,
-        instance_type=os.environ.get("INSTANCE_TYPE_DEV"),
-        is_override=True,
-    )
-
-    sched_interval_stg = get_schedule_interval(
-        cron_schedule, instance_type=os.environ.get("INSTANCE_TYPE_STG")
-    )
-
-    sched_interval_stg_override = get_schedule_interval(
-        cron_schedule,
-        instance_type=os.environ.get("INSTANCE_TYPE_STG"),
-        is_override=True,
-    )
-
-    sched_interval_prod = get_schedule_interval(
-        cron_schedule, instance_type=os.environ.get("INSTANCE_TYPE")
-    )
-
-    assert sched_interval_dev is None
-    assert sched_interval_dev_override is None
-    assert sched_interval_stg is None
-    assert sched_interval_stg_override == cron_schedule
-    assert sched_interval_prod == cron_schedule
+    assert sched_interval == expected
