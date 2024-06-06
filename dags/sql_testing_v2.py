@@ -3,6 +3,7 @@ from datetime import date, datetime, timedelta
 from airflow.decorators import dag, task
 from airflow.models.param import Param
 from airflow.providers.postgres.hooks.postgres import PostgresHook
+from airflow.providers.common.sql.hooks.sql import DbApiHook
 import pandas as pd
 
 from include.utils import get_schedule_interval, jacobs_slack_alert
@@ -36,7 +37,7 @@ def sql_test_pipeline():
         table = "jacob_loop_test"
         run_date = datetime(2023, 12, 29).date()
 
-        pg_hook = PostgresHook(postgres_conn_id="nba_prod")
+        pg_hook = PostgresHook(postgres_conn_id="nba_database")
         conn = pg_hook.get_conn()
         engine = pg_hook.get_sqlalchemy_engine()
         conn.autocommit = True
@@ -53,6 +54,8 @@ def sql_test_pipeline():
 
         # 'psycopg2.extensions.cursor'
         print(type(cursor))
+
+        print(f"Hook URI: {pg_hook.get_uri()}")
 
         # this works
         with engine.begin() as engine_conn:

@@ -15,7 +15,7 @@ default_args = {
     "email_on_retry": False,
     "retries": 1,
     "retry_delay": timedelta(minutes=5),
-    # "on_failure_callback": jacobs_slack_alert,
+    "on_failure_callback": jacobs_slack_alert,
 }
 
 ID_DEFAULT = "10, 11, 12"
@@ -23,7 +23,7 @@ ID_DEFAULT = "10, 11, 12"
 
 @dag(
     "multi_load_test",
-    schedule_interval="0 12,16,20 * * *",
+    schedule_interval=get_schedule_interval("0 12,16,20 * * *"),
     # schedule=UnevenIntervalsTimetable(),
     start_date=datetime(2023, 9, 23, 15, 0, 0),
     catchup=False,

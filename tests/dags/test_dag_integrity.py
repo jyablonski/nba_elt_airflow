@@ -88,7 +88,6 @@ def test_dag_retries(dag_id, dag, fileloc):
         dag.default_args.get("retries", None) >= dag_retries
     ), f"{dag_id} in {fileloc} does not have retries not set to {dag_retries}."
 
-
 @pytest.mark.parametrize(
     "dag_id,dag,fileloc", get_dags(), ids=[x[2] for x in get_dags()]
 )

@@ -40,7 +40,7 @@ default_args = {
     catchup=True,
     max_active_runs=1,
     default_args=default_args,
-    tags=["example", "log_block"],
+    tags=["example", "template"],
 )
 def package_dependencies():
     @task()

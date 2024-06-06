@@ -1,5 +1,5 @@
 import boto3
-from moto import mock_s3
+from moto import mock_aws
 import pandas as pd
 import pytest
 
@@ -8,7 +8,7 @@ from include.exceptions import S3PrefixCheckFail
 from include.aws_utils import check_s3_file_exists, write_to_s3
 
 
-@mock_s3
+@mock_aws
 def test_check_s3_file_exists():
     conn = boto3.client("s3", region_name="us-east-1")
     bucket_name = "jyablonski_fake_bucket"
@@ -35,7 +35,7 @@ def test_check_s3_file_exists():
         )
 
 
-@mock_s3
+@mock_aws
 def test_write_to_s3_success():
     conn = boto3.client("s3", region_name="us-east-1")
     bucket_name = "jyablonski_write_to_s3_bucket"
@@ -61,7 +61,7 @@ def test_write_to_s3_success():
 
 # get some dumbass mf error about no such bucket exists, im over it
 @pytest.mark.filterwarnings("ignore::pytest.PytestUnraisableExceptionWarning")
-@mock_s3
+@mock_aws
 def test_write_to_s3_fail():
     client = boto3.client("s3", region_name="us-east-1")
     bucket_name = "jyablonski_write_to_s3_bucket_fail"

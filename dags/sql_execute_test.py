@@ -14,7 +14,7 @@ default_args = {
     "email_on_retry": False,
     "retries": 0,
     "retry_delay": timedelta(minutes=5),
-    # "on_failure_callback": jacobs_slack_alert,
+    "on_failure_callback": jacobs_slack_alert,
 }
 
 ID_DEFAULT = "10, 11, 12"
@@ -58,7 +58,7 @@ ID_DEFAULT = "10, 11, 12"
 def sql_test_pipeline():
     execute_query = SQLExecuteQueryOperator(
         task_id="execute_query",
-        conn_id="nba_prod",
+        conn_id="nba_database",
         sql="test.sql",
         return_last=False,
         show_return_value_in_logs=True,

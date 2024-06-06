@@ -94,9 +94,13 @@ def get_secret_value(secret_name: str):
         raise e(f"Error Occurred while grabbing secret {secret_name}, {e}")
 
 
-def write_to_s3(dataframe: pd.DataFrame, s3_bucket: str, s3_path: str):
+def write_to_s3(dataframe: pd.DataFrame, s3_bucket: str, s3_path: str) -> bool:
     try:
-        print(f"Writing DataFrame to {s3_bucket}/{s3_path}.parquet")
+        if len(dataframe) == 0:
+            print(f"Dataframe is empty, not writing to s3://{s3_bucket}/{s3_path}.parquet")
+            return True
+
+        print(f"Writing DataFrame to s3://{s3_bucket}/{s3_path}.parquet")
         wr.s3.to_parquet(
             df=dataframe,
             path=f"s3://{s3_bucket}/{s3_path}.parquet",
