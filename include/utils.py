@@ -157,6 +157,9 @@ def jacobs_slack_alert(slack_webhook_conn_id: str = "slack") -> None:
 
     # this subfunction was needed to pass the context and allow users
     # to select a slack connection when calling this in the on_failure_callback
+
+    # `_alert` can reference `slack_webhook_conn_id` and any other variables
+    # defined in the parent function.
     def _alert(context: dict[str, str]) -> None:
         ti = context["task_instance"]
         slack_msg = f"""
