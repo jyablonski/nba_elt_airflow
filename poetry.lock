@@ -642,6 +642,21 @@ files = [
 apache-airflow = ">=2.6.0"
 
 [[package]]
+name = "apache-airflow-providers-pagerduty"
+version = "3.7.2"
+description = "Provider package apache-airflow-providers-pagerduty for Apache Airflow"
+optional = false
+python-versions = "~=3.8"
+files = [
+    {file = "apache_airflow_providers_pagerduty-3.7.2-py3-none-any.whl", hash = "sha256:747e67dd6f0c61b185a3ea9cedb05fd6d80dd721e59e25698eca6c76422920f6"},
+    {file = "apache_airflow_providers_pagerduty-3.7.2.tar.gz", hash = "sha256:25d28530c7218274a444484dc571e670671c3626485d645b92ee0521483c983c"},
+]
+
+[package.dependencies]
+apache-airflow = ">=2.7.0"
+pdpyras = ">=4.2.0"
+
+[[package]]
 name = "apache-airflow-providers-postgres"
 version = "5.10.2"
 description = "Provider package apache-airflow-providers-postgres for Apache Airflow"
@@ -5111,6 +5126,20 @@ files = [
 ]
 
 [[package]]
+name = "pdpyras"
+version = "5.2.0"
+description = "PagerDuty Python REST API Sessions"
+optional = false
+python-versions = ">=3.6"
+files = [
+    {file = "pdpyras-5.2.0.tar.gz", hash = "sha256:e1c9fed3be5d4ec532de62a493b21eff3d04210a6b0d6bba47b637c3bf4ecf88"},
+]
+
+[package.dependencies]
+requests = "*"
+urllib3 = "*"
+
+[[package]]
 name = "pendulum"
 version = "3.0.0"
 description = "Python datetimes made easy"
@@ -7311,4 +7340,4 @@ testing = ["big-O", "jaraco.functools", "jaraco.itertools", "more-itertools", "p
 [metadata]
 lock-version = "2.0"
 python-versions = ">=3.11,<3.12"
-content-hash = "58ef6182ef86736aa3741de076bde2077a574a716012ac88baa2ff6b5ff6274f"
+content-hash = "457f2a182649a183827ddbc4aa4ba9d5a74ed7c797c6cd8d3aaf255af413e3b2"

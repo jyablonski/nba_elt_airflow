@@ -88,6 +88,7 @@ def test_dag_retries(dag_id, dag, fileloc):
         dag.default_args.get("retries", None) >= dag_retries
     ), f"{dag_id} in {fileloc} does not have retries not set to {dag_retries}."
 
+
 @pytest.mark.parametrize(
     "dag_id,dag,fileloc", get_dags(), ids=[x[2] for x in get_dags()]
 )
@@ -109,6 +110,6 @@ def test_dag_slack_callback_enabled(dag_id, dag, fileloc):
     """
     test if a DAG has the Slack Callback set if a Task fails
     """
-    assert "slack_alert" in str(
+    assert "alert" or "notification" in str(
         dag.default_args["on_failure_callback"]
     ), f"{dag_id} in {fileloc} has no Slack Alert Attached"

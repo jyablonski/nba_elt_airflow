@@ -21,6 +21,7 @@ apache-airflow-providers-smtp = "^1.6.0"
 apache-airflow-providers-discord = "^3.5.0"
 awswrangler = "^3.5.1"
 moto = "^4.2.13"
+apache-airflow-providers-pagerduty = "^3.7.2"
 
 
 [tool.poetry.group.dev.dependencies]
