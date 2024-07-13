@@ -97,7 +97,9 @@ def get_secret_value(secret_name: str):
 def write_to_s3(dataframe: pd.DataFrame, s3_bucket: str, s3_path: str) -> bool:
     try:
         if len(dataframe) == 0:
-            print(f"Dataframe is empty, not writing to s3://{s3_bucket}/{s3_path}.parquet")
+            print(
+                f"Dataframe is empty, not writing to s3://{s3_bucket}/{s3_path}.parquet"
+            )
             return True
 
         print(f"Writing DataFrame to s3://{s3_bucket}/{s3_path}.parquet")

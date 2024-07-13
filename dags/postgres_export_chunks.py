@@ -44,7 +44,6 @@ S3_BUCKET = "jyablonski-test-bucket123"
     render_template_as_native_obj=True,
 )
 def postgres_chunk_pipeline():
-
     @task()
     def write_data_to_s3(
         **context: dict,

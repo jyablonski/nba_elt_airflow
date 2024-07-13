@@ -7,6 +7,11 @@ from airflow.providers.smtp.hooks.smtp import SmtpHook
 from airflow.providers.slack.hooks.slack_webhook import SlackWebhookHook
 from airflow.providers.slack.operators.slack_webhook import SlackWebhookOperator
 from airflow.providers.discord.operators.discord_webhook import DiscordWebhookOperator
+from airflow.providers.pagerduty.notifications.pagerduty import (
+    send_pagerduty_notification,
+)
+from airflow.providers.pagerduty.hooks.pagerduty import PagerdutyHook
+
 
 try:
     from .exceptions import NoConnectionExists
@@ -132,31 +137,107 @@ def jacobs_airflow_email():
 # you have to set both of them up in admin -> connections
 
 
-def jacobs_slack_alert(context):
-    # the context houses all of the metadata for the task instance currently being ran, and the dag it's connected to.
-    # slack_webhook_token = BaseHook.get_connection(SLACK_CONN_ID).password
-    ti = context["task_instance"]
-    slack_msg = f"""
-            :red_circle: Task Failed. 
+def jacobs_slack_alert(slack_webhook_conn_id: str = "slack") -> None:
+    """
+    Function that sends a Slack Message when a Task Fails using the
+    `on_failure_callback` parameter in the DAG.
+
+    Slack offers two options, either a webhook URL which is connected
+    to a specific channel or a Slack bot which has access to all channels.
+    If you want to write to multiple channels you either need to set
+    up a bot or configure a Slack Hook per Channel.
+
+    Args:
+        slack_webhook_conn_id (str): The name of the Slack Connection
+            in the Airflow UI
+
+    Returns:
+        None, but writes the Message specified to Slack
+    """
+
+    # this subfunction was needed to pass the context and allow users
+    # to select a slack connection when calling this in the on_failure_callback
+    def _alert(context: dict[str, str]) -> None:
+        ti = context["task_instance"]
+        slack_msg = f"""
+                :red_circle: Task Failed. 
             *Exception*: {context['exception']}
             *Task*: {ti.task_id}
             *Dag*: {ti.dag_id} 
             *Owner*: {ti.task.owner}
             *Execution Time*: {context["execution_date"]}  
             *Log Url*: {ti.log_url} 
-            """
-    #  *context*: {context} for the exhaustive list
-    failed_alert = SlackWebhookOperator(
-        task_id="slack_test",
-        slack_webhook_conn_id="slack",
-        message=slack_msg,
-        channel="#airflow-channel",
-    )
-    return failed_alert.execute(context=context)
+                """
+        failed_alert = SlackWebhookOperator(
+            task_id="slack_task",
+            slack_webhook_conn_id=slack_webhook_conn_id,
+            message=slack_msg,
+        )
+        return failed_alert.execute(context=context)
+
+    return _alert
 
 
-# if you have multiple people you can ping 1 user or multiple users like below
-def discord_owner_ping(task_owner: str):
+def jacobs_pagerduty_notification(
+    pagerduty_events_conn_id: str = "pagerduty",
+    severity: str = "error",
+    class_type: str = "Data Pipeline",
+) -> None:
+    """
+    Function to send a PagerDuty Notification when a Task Fails.
+
+    Args:
+        pagerduty_events_conn_id (str): The name of the PagerDuty Connection
+            in the Airflow UI
+
+        severity (str): The Severity of the PagerDuty Alert. Can be
+            `info`, `warning`, `error`, `critical`
+
+        class_type (str): The Class Type of the PagerDuty Alert
+
+    Returns:
+        None, but sends a PagerDuty Notification
+
+    """
+
+    def _send_notification(context: dict[str, str]):
+        print("hello wrold")
+        ti = context["task_instance"]
+        summary = f"DAG {ti.dag_id} Failure"
+        source = f"airflow dag_id: {ti.dag_id}"
+        dedup_key = f"{ti.dag_id}-{ti.task_id}"
+
+        alert = send_pagerduty_notification(
+            pagerduty_events_conn_id=pagerduty_events_conn_id,
+            summary=summary,
+            severity=severity,
+            source=source,
+            dedup_key=dedup_key,
+            group=ti.dag_id,
+            component="airflow",
+            class_type=class_type,
+        )
+
+        # LETS FKN GO
+        return alert.notify(context=context)
+
+    return _send_notification
+
+
+def discord_owner_ping(task_owner: str) -> str:
+    """
+    Function to ping a user in Discord for use in the `jacobs_discord_alert`
+    Function. If you want to ping multiple users you can separate them with a space.
+
+    If you have multiple people you can ping 1 user or multiple users like below
+    right click their username and copy user id to get the id
+
+    Args:
+        task_owner (str): The Owner of the Task that Failed
+
+    Returns:
+        The Discord User ID of the User
+    """
     if task_owner == "jacob":
         return "<@95723063835885568> <@995779012347572334>"
     else:
@@ -165,7 +246,8 @@ def discord_owner_ping(task_owner: str):
 
 def jacobs_discord_alert(context):
     # https://github.com/apache/airflow/blob/main/airflow/providers/discord/operators/discord_webhook.py
-    # just make a discord connection with host as https://discord.com/api/ and extra as {"webhook_endpoint": "webhooks/000/xxx-xxx"}
+    # just make an http connection with host as https://discord.com/api/
+    # and extra as {"webhook_endpoint": "webhooks/000/xxx-xxx"}
     ti = context["task_instance"]
     # print(ti)
     discord_msg = f"""
@@ -185,6 +267,24 @@ def jacobs_discord_alert(context):
         # avatar_url='https://a0.awsstatic.com/libra-css/images/logos/aws_logo_smile_1200x630.png', can change avatar this way
     )
     return failed_alert.execute(context=context)
+
+
+def multi_failure_alert(context) -> None:
+    """
+    On Failure Callback that sends a Slack Message and a Discord Message.
+    Can be altered to send to other services like PagerDuty, etc.
+
+    Args:
+        context: Airflow Context
+
+    Returns:
+        None, but sends a Slack Message and a Discord Message
+    """
+    # not sure why this ()(context) is needed but it is
+    # for it to work
+    jacobs_slack_alert()(context)
+    jacobs_discord_alert(context)
+    return
 
 
 def check_connections(conn: str, **context):
@@ -223,6 +323,7 @@ def send_email(smtp_hook, email_body: str):
 def start_log_block(group: str) -> None:
     print(f"::group::{group}")
     return
+
 
 def end_log_block() -> None:
     print("::endgroup::")
