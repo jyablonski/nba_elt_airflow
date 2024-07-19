@@ -73,6 +73,7 @@ def params_example_pipeline():
     @task()
     def test_task(**context):
         print(f"hello world")
+        print(context["data_interval_end"])
         print(f'{context["params"]["test"]}')
         print(f'{context["params"]["start_date"]}')
         print(f'{context["params"]["start_timestamp"]}')
