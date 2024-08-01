@@ -331,3 +331,14 @@ def start_log_block(group: str) -> None:
 def end_log_block() -> None:
     print("::endgroup::")
     return
+
+
+def read_dag_docs(dag_name: str) -> str:
+    docs_path = f"dags/docs/{dag_name}.md"
+
+    if not os.path.exists(docs_path):
+        return f"No Documentation found for {dag_name}, please create a doc under \
+            docs/{dag_name}.md to add Documentation"
+
+    with open(docs_path) as f:
+        return f.read()

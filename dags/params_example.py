@@ -1,10 +1,10 @@
 from datetime import datetime, timedelta
-import pkg_resources
+import os
 
 from airflow.decorators import dag, task
 from airflow.models.param import Param
 
-from include.utils import get_schedule_interval, jacobs_slack_alert
+from include.utils import get_schedule_interval, jacobs_slack_alert, read_dag_docs
 
 default_args = {
     "owner": "jacob",
@@ -24,6 +24,7 @@ default_args = {
     start_date=datetime(2024, 2, 1),
     catchup=False,
     max_active_runs=1,
+    doc_md=read_dag_docs("params_example"),
     default_args=default_args,
     params={
         "test": Param(
