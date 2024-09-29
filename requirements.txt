@@ -1,10 +1,8 @@
 apache-airflow-providers-amazon
 apache-airflow-providers-discord
-apache-airflow-providers-google
 apache-airflow-providers-postgres
 apache-airflow-providers-slack
-apache-airflow-providers-sftp
-apache-airflow-providers-smtp
 apache-airflow-providers-pagerduty
+apache-airflow-providers-snowflake
 awswrangler
 moto

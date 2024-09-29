@@ -7,21 +7,15 @@ readme = "README.md"
 package-mode = false
 
 [tool.poetry.dependencies]
-python = ">=3.11,<3.12"
-apache-airflow = "^2.8.1"
-boto3 = "^1.34.23"
-requests = "^2.31.0"
-pandas = "^2.2.0"
-apache-airflow-providers-amazon = "^8.16.0"
-apache-airflow-providers-google = "^10.13.1"
-apache-airflow-providers-postgres = "^5.10.0"
-apache-airflow-providers-slack = "^8.5.1"
-apache-airflow-providers-sftp = "^4.8.1"
-apache-airflow-providers-smtp = "^1.6.0"
-apache-airflow-providers-discord = "^3.5.0"
-awswrangler = "^3.5.1"
-moto = "^4.2.13"
-apache-airflow-providers-pagerduty = "^3.7.2"
+python = "3.12.*"
+apache-airflow-providers-amazon = "^8.29.0"
+apache-airflow-providers-discord = "^3.8.0"
+apache-airflow-providers-postgres = "^5.13.0"
+apache-airflow-providers-slack = "^8.9.0"
+apache-airflow-providers-pagerduty = "^3.8.0"
+apache-airflow-providers-snowflake = "^5.7.1"
+awswrangler = "^3.9.1"
+moto = "^5.0.16"
 
 
 [tool.poetry.group.dev.dependencies]

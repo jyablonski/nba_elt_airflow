@@ -1,13 +1,7 @@
-from typing import Optional
+from typing import Any
 
-from cryptography.hazmat.backends import default_backend
-from cryptography.hazmat.primitives import serialization
+from airflow.providers.snowflake.hooks.snowflake import SnowflakeHook
 from sqlalchemy.engine.base import Connection
-from sqlalchemy.orm import sessionmaker
-from sqlalchemy import create_engine
-import snowflake.connector
-from snowflake.sqlalchemy import URL
-
 
 try:
     from .exceptions import SnowflakeCheckError
@@ -15,157 +9,162 @@ except:
     from exceptions import SnowflakeCheckError
 
 
-def snowflake_connection(
-    user: str,
-    password: str = None,
-    role: Optional[str] = None,
-    warehouse: Optional[str] = None,
-    schema: Optional[str] = None,
-    database: Optional[str] = None,
-    autocommit: bool = True,
-    account: str = "qxb14358.us-east-1",
-    private_key: str = None,
-    private_key_passphrase: str = None,
-):
-    if private_key is not None:
-        try:
-            with open(private_key, "rb") as key:
-                p_key = serialization.load_pem_private_key(
-                    key.read(),
-                    password=private_key_passphrase.encode(),
-                    backend=default_backend(),
-                )
-            pkb = p_key.private_bytes(
-                encoding=serialization.Encoding.DER,
-                format=serialization.PrivateFormat.PKCS8,
-                encryption_algorithm=serialization.NoEncryption(),
-            )
+def log_copy_into_results(results: tuple[Any, ...]) -> None:
+    """
+    Logs the results of a Snowflake COPY INTO statement into a readable dictionary.
 
-            engine = create_engine(
-                URL(
-                    account=account,
-                    warehouse=warehouse,
-                    database=database,
-                    schema=schema,
-                    user=user,
-                    password=password,
-                    role=role,
-                ),
-                connect_args={
-                    "private_key": pkb,
-                },
-            )
+    Parameters:
+        results (tuple): The tuple output from the Snowflake COPY INTO command.
 
-            session = sessionmaker(bind=engine)()
-            connection = engine.connect()
+    Returns:
+        None, but logs the formatted results.
+    """
+    # these are the column names returned by copy into statements
+    # https://docs.snowflake.com/en/sql-reference/sql/copy-into-table
+    column_names = [
+        "file",
+        "status",
+        "rows_parsed",
+        "rows_loaded",
+        "error_limit",
+        "error_seen",
+        "first_error",
+        "first_error_line",
+        "first_error_character",
+        "first_error_column_name",
+    ]
 
-            return connection
-        except BaseException as e:
-            print(f"Error Occurred while connecting to {account}, {e}")
-            raise e
+    formatted_results = dict(zip(column_names, results))
+    print(f"Formatted Results: {formatted_results}")
+
+    return None
+
+
+def get_file_format(s3_prefix: str) -> str:
+    if s3_prefix.endswith(".csv"):
+        return "csv_format"
+    elif s3_prefix.endswith(".parquet"):
+        return "parquet_format"
+    elif s3_prefix.endswith(".json"):
+        return "json_format"
     else:
-        try:
-            engine = create_engine(
-                URL(
-                    account=account,
-                    warehouse=warehouse,
-                    database=database,
-                    schema=schema,
-                    user=user,
-                    password=password,
-                    role=role,
-                ),
-            )
-            session = sessionmaker(bind=engine)()
-            connection = engine.connect()
+        raise ValueError(f"File Format not supported for {s3_prefix}")
 
-            return connection
-        except BaseException as e:
-            print(f"Error Occurred while connecting to {account}, {e}")
-            raise e
+
+def get_snowflake_conn():
+    conn = SnowflakeHook(snowflake_conn_id="snowflake_conn", autocommit=True)
+    connection = conn.get_sqlalchemy_engine().connect()
+    return connection
 
 
 def build_snowflake_table_from_s3(
     connection: Connection,
     stage: str,
-    file_format: str,
-    database: str,
     schema: str,
-    table_name: str,
-) -> str:
+    table: str,
+    s3_prefix: str,
+) -> None:
     """
     Function to build a table in Snowflake based on a File in S3
 
     Args:
-        connection (SQLAlchemy):
+        connection (SQLAlchemy): The connection to the Snowflake Database
 
-        stage (str):
+        stage (str): The stage in Snowflake that points to the S3 URL
 
-        file_format (str):
+        schema (str): The schema to build the table in
 
-        database (str):
+        table (str): The name of the table to build
 
-        schema (str):
-
-        table_name (str):
+        s3_prefix (str): The S3 Prefix to build the table from
 
     Returns:
         None, but builds the table in Snowflake as specified.
 
     """
+    file_format = get_file_format(s3_prefix=s3_prefix)
+    file_location = f"{stage}/{s3_prefix}"
+
     sql = f"""
-    CREATE OR REPLACE TABLE {database}.{schema}.{table_name}
+    CREATE OR REPLACE TABLE {schema}.{table}
     USING TEMPLATE (
         SELECT ARRAY_AGG(OBJECT_CONSTRUCT(*))
         FROM TABLE(
             INFER_SCHEMA(
-            LOCATION=>'{stage}',
+            LOCATION=>'{file_location}',
             FILE_FORMAT=>'{file_format}'
             )
-        ));
+        )
+    );
     """
 
     try:
         print(f"Executing {sql}")
-        connection.execute(sql)
-        pass
+        # it returns a list of tuples, so we need to get the first element of the first tuple
+        results = connection.execute(statement=sql).fetchall()[0][0]
+
+        print(results)
+
+        if results != f"Table {table.upper()} successfully created.":
+            raise BaseException(
+                f"Error Occurred while building {schema}.{table} for file {file_location}, table not created"
+            )
     except BaseException as e:
-        raise e(
-            f"Error Occurred while building {database}.{schema}.{table_name} for file {stage}"
-        )
+        # Instead of raising e with a message, you can raise a new exception or modify the original
+        raise Exception(
+            f"Error Occurred while building {schema}.{table} for file {file_location}: {str(e)}"
+        ) from e
 
     return sql
 
 
 def load_snowflake_table_from_s3(
+    connection: Connection,
     stage: str,
     file_format: str,
-    database: str,
     schema: str,
-    table_name: str,
+    table: str,
+    s3_prefix: str,
     truncate_table: bool = False,
 ) -> str:
     """
-    a stage is pointed at an s3 url ex. s3://jyablonski-kafka-s3-sink/topics/movies
+    Function to load a table in Snowflake based on a File in S3
 
-    stage = @movies_stage or @movies_stage/partition=0/movies+0+0000000000.snappy.parquet
+    Args:
+        connection (SQLAlchemy): The connection to the Snowflake Database
+
+        stage (str): The stage in Snowflake that points to the S3 URL
+
+        file_format (str): The file format to use when building the table
+
+        schema (str): The schema to build the table in
+
+        table (str): The name of the table to build
+
+        s3_prefix (str): The S3 Prefix to build the table from
+
+        truncate_table (bool): Whether to truncate the table before loading
     """
     sql_truncate = ""
-    if truncate_table == True:
+    if truncate_table:
         sql_truncate = f"""
-        truncate table {database}.{schema}.{table_name};
+        truncate table {schema}.{table};
         """
 
     sql = f"""
         {sql_truncate}
-        copy into {database}.{schema}.{table_name}
-        from {stage}
+        copy into {schema}.{table}
+        from {stage}/{s3_prefix}
         file_format = '{file_format}'
         match_by_column_name = 'CASE_INSENSITIVE';
 
     """
 
-    return sql
+    print(f"Executing {sql}")
+    results = connection.execute(statement=sql).fetchall()[0]
+    log_copy_into_results(results=results)
+
+    return None
 
 
 def check_snowflake_table_count(
