@@ -9,30 +9,40 @@ except:
     from exceptions import SnowflakeCheckError
 
 
-def log_copy_into_results(results: tuple[Any, ...]) -> None:
+def log_results(results: tuple[Any, ...], statement_type: str) -> None:
     """
-    Logs the results of a Snowflake COPY INTO statement into a readable dictionary.
+    Logs the results of Snowflake Copy / Merge statements into a readable dictionary.
 
     Parameters:
-        results (tuple): The tuple output from the Snowflake COPY INTO command.
+        results (tuple): The tuple output from the Snowflake command.
+
+        statement_type (str): Type of Snowflake Statement (COPY INTO, MERGE, etc.)
 
     Returns:
         None, but logs the formatted results.
     """
-    # these are the column names returned by copy into statements
-    # https://docs.snowflake.com/en/sql-reference/sql/copy-into-table
-    column_names = [
-        "file",
-        "status",
-        "rows_parsed",
-        "rows_loaded",
-        "error_limit",
-        "error_seen",
-        "first_error",
-        "first_error_line",
-        "first_error_character",
-        "first_error_column_name",
-    ]
+    if statement_type == "COPY":
+        # these are the column names returned by copy into statements
+        # https://docs.snowflake.com/en/sql-reference/sql/copy-into-table
+        column_names = [
+            "file",
+            "status",
+            "rows_parsed",
+            "rows_loaded",
+            "error_limit",
+            "error_seen",
+            "first_error",
+            "first_error_line",
+            "first_error_character",
+            "first_error_column_name",
+        ]
+    elif statement_type == "MERGE":
+        column_names = [
+            "number_of_rows_inserted",
+            "number_of_rows_updated",
+        ]
+    else:
+        raise ValueError(f"Statement Type {statement_type} not supported")
 
     formatted_results = dict(zip(column_names, results))
     print(f"Formatted Results: {formatted_results}")
@@ -51,8 +61,8 @@ def get_file_format(s3_prefix: str) -> str:
         raise ValueError(f"File Format not supported for {s3_prefix}")
 
 
-def get_snowflake_conn():
-    conn = SnowflakeHook(snowflake_conn_id="snowflake_conn", autocommit=True)
+def get_snowflake_conn(conn_id: str = "snowflake_conn") -> Connection:
+    conn = SnowflakeHook(snowflake_conn_id=conn_id, autocommit=True)
     connection = conn.get_sqlalchemy_engine().connect()
     return connection
 
@@ -162,9 +172,71 @@ def load_snowflake_table_from_s3(
 
     print(f"Executing {sql}")
     results = connection.execute(statement=sql).fetchall()[0]
-    log_copy_into_results(results=results)
+    log_results(results=results, statement_type="COPY")
 
     return None
+
+
+def merge_snowflake_source_into_target(
+    connection: Connection,
+    source_schema: str,
+    source_table: str,
+    target_schema: str,
+    target_table: str,
+    primary_keys: list[str],
+):
+    target_schema = target_schema.upper()
+    target_table = target_table.upper()
+
+    get_cols_query = connection.execute(
+        f""" \
+        select column_name
+        from information_schema.columns
+        where 
+            table_schema = '{target_schema}'
+            and table_name = '{target_table}'"""
+    ).fetchall()
+
+    column_names = [item[0] for item in get_cols_query]
+
+    # Prepare the ON clause for primary keys
+    on_clause = " AND ".join(f"TARGET.{pk} = SOURCE.{pk}" for pk in primary_keys)
+
+    # Prepare the UPDATE SET clause
+    update_set_clause = ", ".join(
+        f"TARGET.{col} = SOURCE.{col}"
+        for col in column_names
+        if col not in primary_keys
+    )
+
+    # Prepare the INSERT clause
+    insert_columns = ", ".join(column_names)
+    insert_values = ", ".join(f"SOURCE.{col}" for col in column_names)
+
+    # Construct the SQL MERGE statement
+    sql = f"""
+    MERGE INTO {target_schema}.{target_table} AS TARGET
+    USING {source_schema}.{source_table} AS SOURCE
+    ON {on_clause}
+    WHEN MATCHED THEN
+        UPDATE SET
+            {update_set_clause}
+    WHEN NOT MATCHED THEN
+        INSERT ({insert_columns})
+        VALUES ({insert_values});
+    """
+
+    try:
+        print(f"Executing {sql}")
+        results = connection.execute(statement=sql).fetchall()[0]
+        log_results(results=results, statement_type="MERGE")
+        print(
+            f"Merge Successful for {source_schema}.{source_table} into {target_schema}.{target_table}"
+        )
+    except Exception as e:
+        raise Exception(
+            f"Error Occurred while merging {source_schema}.{source_table} into {target_schema}.{target_table}: {e}"
+        )
 
 
 def check_snowflake_table_count(
