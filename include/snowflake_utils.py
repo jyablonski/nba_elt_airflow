@@ -184,55 +184,80 @@ def merge_snowflake_source_into_target(
     target_schema: str,
     target_table: str,
     primary_keys: list[str],
-):
+) -> None:
+    """
+    Function to merge a source table into a target table in Snowflake
+
+    Args:
+        connection (SQLAlchemy): The connection to the Snowflake Database
+
+        source_schema (str): The schema of the source table
+
+        source_table (str): The name of the source table
+
+        target_schema (str): The schema of the target table
+
+        target_table (str): The name of the target table
+
+        primary_keys (list[str]): The primary keys to use in the ON clause
+
+    Returns:
+        None, but merges the source table into the target table in Snowflake
+
+    """
     target_schema = target_schema.upper()
     target_table = target_table.upper()
 
-    get_cols_query = connection.execute(
-        f""" \
-        select column_name
-        from information_schema.columns
-        where 
-            table_schema = '{target_schema}'
-            and table_name = '{target_table}'"""
-    ).fetchall()
-
-    column_names = [item[0] for item in get_cols_query]
-
-    # Prepare the ON clause for primary keys
-    on_clause = " AND ".join(f"TARGET.{pk} = SOURCE.{pk}" for pk in primary_keys)
-
-    # Prepare the UPDATE SET clause
-    update_set_clause = ", ".join(
-        f"TARGET.{col} = SOURCE.{col}"
-        for col in column_names
-        if col not in primary_keys
-    )
-
-    # Prepare the INSERT clause
-    insert_columns = ", ".join(column_names)
-    insert_values = ", ".join(f"SOURCE.{col}" for col in column_names)
-
-    # Construct the SQL MERGE statement
-    sql = f"""
-    MERGE INTO {target_schema}.{target_table} AS TARGET
-    USING {source_schema}.{source_table} AS SOURCE
-    ON {on_clause}
-    WHEN MATCHED THEN
-        UPDATE SET
-            {update_set_clause}
-    WHEN NOT MATCHED THEN
-        INSERT ({insert_columns})
-        VALUES ({insert_values});
-    """
-
     try:
+
+        # pull columns from the target table; that's the source of truth
+        # we need these to build insert / update clauses for the merge
+        get_cols_query = connection.execute(
+            f""" \
+            select column_name
+            from information_schema.columns
+            where 
+                table_schema = '{target_schema}'
+                and table_name = '{target_table}'"""
+        ).fetchall()
+
+        column_names = [item[0] for item in get_cols_query]
+
+        # primary key ON clause
+        on_clause = " AND ".join(f"TARGET.{pk} = SOURCE.{pk}" for pk in primary_keys)
+
+        # update clause
+        update_set_clause = ", ".join(
+            f"TARGET.{col} = SOURCE.{col}"
+            for col in column_names
+            if col not in primary_keys
+        )
+
+        # insert clause
+        insert_columns = ", ".join(column_names)
+        insert_values = ", ".join(f"SOURCE.{col}" for col in column_names)
+
+        # can add when matched and __deleted = 1 then delete clause if data
+        # has a column like that
+        sql = f"""
+        MERGE INTO {target_schema}.{target_table} AS TARGET
+        USING {source_schema}.{source_table} AS SOURCE
+        ON {on_clause}
+        WHEN MATCHED THEN
+            UPDATE SET
+                {update_set_clause}
+        WHEN NOT MATCHED THEN
+            INSERT ({insert_columns})
+            VALUES ({insert_values});
+        """
+
         print(f"Executing {sql}")
         results = connection.execute(statement=sql).fetchall()[0]
         log_results(results=results, statement_type="MERGE")
         print(
             f"Merge Successful for {source_schema}.{source_table} into {target_schema}.{target_table}"
         )
+        return None
     except Exception as e:
         raise Exception(
             f"Error Occurred while merging {source_schema}.{source_table} into {target_schema}.{target_table}: {e}"
@@ -241,31 +266,57 @@ def merge_snowflake_source_into_target(
 
 def check_snowflake_table_count(
     connection: Connection,
-    database: str,
     schema: str,
     table_name: str,
     check_threshold: int = 0,
-):
-    """ """
-    sql = f"""select count(*) from {database}.{schema}.{table_name};"""
+) -> None:
+    """
+    Function to check the count of a table in Snowflake
+
+    Args:
+        connection (SQLAlchemy): The connection to the Snowflake Database
+
+        schema (str): The schema of the table
+
+        table_name (str): The name of the table
+
+        check_threshold (int): The threshold to check against
+
+    Returns:
+        None, but raises an error if the table has 0 records
+
+    Raises:
+        SnowflakeCheckError: If the table has 0 records
+    """
+    object_name = f"{schema}.{table_name}"
+    sql = f"""select count(*) from {object_name};"""
 
     try:
         results = connection.execute(sql).fetchone()
         if results[0] <= check_threshold:
             raise SnowflakeCheckError(
-                f"Table {database}.{schema}.{table_name} has 0 Records after DAG Run"
+                f"Table {object_name} has 0 Records after DAG Run"
             )
         else:
-            print(
-                f"{database}.{schema}.{table_name} Check Successful ({results[0]} rows)"
-            )
-            pass
+            print(f"{object_name} Check Successful ({results[0]} rows)")
+            return None
     except BaseException as e:
-        raise e(f"Error Occurred while checking {database}.{schema}.{table_name}, {e}")
+        raise e(f"Error Occurred while checking {object_name}, {e}")
 
 
 def set_session_tag(connection: Connection, query_tag: str):
-    """ """
+    """
+    Function to set a Session Tag in Snowflake. This is useful for
+    tracking queries in the Snowflake and querying the history.
+
+    Args:
+        connection (SQLAlchemy): The connection to the Snowflake Database
+
+        query_tag (str): The tag to set for the session
+
+    Returns:
+        None, but sets the query tag for the Snowflake session
+    """
     sql = f"alter session set query_tag='{query_tag}"
     try:
         connection.execute(sql)
