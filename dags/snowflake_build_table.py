@@ -1,5 +1,4 @@
 from datetime import datetime, timedelta
-import time
 
 from airflow.decorators import dag, task
 from airflow.models.param import Param
@@ -7,7 +6,10 @@ from airflow.providers.snowflake.hooks.snowflake import SnowflakeHook
 
 
 from include.utils import jacobs_slack_alert, get_schedule_interval
-from include.snowflake_utils import build_snowflake_table_from_s3, load_snowflake_table_from_s3, get_file_format
+from include.snowflake_utils import (
+    build_snowflake_table_from_s3,
+    load_snowflake_table_from_s3,
+)
 
 
 default_args = {
@@ -83,18 +85,15 @@ def snowflake_build_table_pipeline():
 
         if context["params"]["load_table_afterwards"]:
             s3_prefix = context["params"]["s3_file_prefix"]
-            file_format = get_file_format(s3_prefix=s3_prefix)
 
             load_snowflake_table_from_s3(
                 connection=connection,
-                file_format=file_format,
                 schema=context["params"]["schema_name"],
                 table=context["params"]["table_name"],
                 stage=context["params"]["s3_stage"],
                 s3_prefix=s3_prefix,
             )
 
-    # context["params"]["run_type"] == "Incremental"
     build_table_task()
 
 
