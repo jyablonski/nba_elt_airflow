@@ -12,7 +12,7 @@ from include.utils import (
         ("INSTANCE_TYPE_TEST_DEV", "dev", "dev"),
         ("INSTANCE_TYPE_TEST_DEV_1", "dev-1", "dev"),
         ("INSTANCE_TYPE_TEST_DEV_LOCAL", "jacob-dev", "dev"),
-        ("INSTANCE_TYPE_STG", "stg", "stg"),
+        ("INSTANCE_TYPE_STG", "stg", "dev"),
         ("INSTANCE_TYPE", "prod", "prod"),
     ],
 )
@@ -26,9 +26,8 @@ def test_get_instance_type(env_var, env_value, expected):
     "env_var, env_value, is_override, expected",
     [
         ("INSTANCE_TYPE_DEV", "dev", False, None),
-        ("INSTANCE_TYPE_DEV", "dev", True, None),
+        ("INSTANCE_TYPE_DEV", "dev", True, "40 12 * * *"),
         ("INSTANCE_TYPE_STG", "stg", False, None),
-        ("INSTANCE_TYPE_STG", "stg", True, "40 12 * * *"),
         ("INSTANCE_TYPE", "prod", False, "40 12 * * *"),
     ],
 )
@@ -37,7 +36,9 @@ def test_get_schedule_interval(env_var, env_value, is_override, expected):
     cron_schedule = "40 12 * * *"
 
     sched_interval = get_schedule_interval(
-        cron_schedule, instance_type=os.environ.get(env_var), is_override=is_override
+        cron_schedule=cron_schedule,
+        instance_type=os.environ.get(env_var),
+        is_override=is_override,
     )
 
     assert sched_interval == expected

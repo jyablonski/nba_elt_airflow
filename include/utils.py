@@ -10,7 +10,6 @@ from airflow.providers.discord.operators.discord_webhook import DiscordWebhookOp
 from airflow.providers.pagerduty.notifications.pagerduty import (
     send_pagerduty_notification,
 )
-from airflow.providers.pagerduty.hooks.pagerduty import PagerdutyHook
 
 
 try:
@@ -21,26 +20,23 @@ except:
 SLACK_CONN_ID = "slack"
 
 
-def get_instance_type(instance_type: str = os.environ.get("ASTRO_INSTANCE_TYPE")):
+def get_instance_type(instance_type: str = None) -> str:
     """
-    Function used to grab the instance type of Airflow for Dev / Stg / Prod environments
+    Function used to grab the instance type of Airflow for Dev / Prod environments
 
     Args:
-        instance_type (str): The Instance Type of the Instance.  Defaults to grabbing from `ASTRO_INSTANCE_TYPE`
+        instance_type (str): The Instance Type of the Instance. Defaults to grabbing from `ASTRO_INSTANCE_TYPE`
 
     Returns:
-        The Instance Type of the Instance, which can be passed into other functions like `get_schedule_interval`
-            to control whether the DAG should be triggered in lower environments or only in Prod.
-
+        str: The normalized Instance Type, which can be passed into other functions
     """
-    if instance_type is not None and "dev" in instance_type:
-        instance_type = "dev"
-    elif instance_type is None:
-        instance_type = "dev"
-    else:
-        instance_type = instance_type
+    if instance_type is None:
+        instance_type = os.environ.get("ASTRO_INSTANCE_TYPE", "dev")
 
-    return instance_type
+    if "prod" in instance_type:
+        return "prod"
+    else:
+        return "dev"
 
 
 def get_schedule_interval(
@@ -56,21 +52,19 @@ def get_schedule_interval(
     Args:
         cron_schedule (str): The Cron Schedule for the DAG
 
-        is_override (bool): Boolean value to allow the DAG to be scheduled in Stg environment
+        is_override (bool): Boolean value to allow the DAG to be scheduled in dev environment
 
         instance_type (str): The Instance Type of the Airflow Instance
 
     Returns:
         The Cron Schedule for the DAG
     """
-    if (is_override is True) & (instance_type == "stg"):
-        cron_schedule = cron_schedule
+    if is_override and instance_type == "dev":
+        return cron_schedule
     elif instance_type == "prod":
-        cron_schedule = cron_schedule
+        return cron_schedule
     else:
-        cron_schedule = None
-
-    return cron_schedule
+        return None
 
 
 def write_to_slack(slack_conn_id: str, context, message: str):
@@ -342,3 +336,14 @@ def read_dag_docs(dag_name: str) -> str:
 
     with open(docs_path) as f:
         return f.read()
+
+
+def generate_env_schedule(
+    prod_schedule: str, dev_schedule: str | None = None
+) -> str | None:
+    instance_type = get_instance_type()
+
+    if instance_type == "prod":
+        return prod_schedule
+    else:
+        return dev_schedule
