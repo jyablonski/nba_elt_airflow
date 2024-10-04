@@ -95,7 +95,7 @@ def build_snowflake_table_from_s3(
     file_format = get_file_format(s3_prefix=s3_prefix)
     file_location = f"{stage}/{s3_prefix}"
 
-    sql = f""" \
+    sql = f"""
     CREATE OR REPLACE TABLE {schema}.{table}
     USING TEMPLATE (
         SELECT ARRAY_AGG(OBJECT_CONSTRUCT(*))
@@ -120,6 +120,7 @@ def build_snowflake_table_from_s3(
                 f"Error Occurred while building {schema}.{table} for file {file_location}, table not created"
             )
     except BaseException as e:
+        # Instead of raising e with a message, you can raise a new exception or modify the original
         raise Exception(
             f"Error Occurred while building {schema}.{table} for file {file_location}: {str(e)}"
         ) from e
@@ -133,6 +134,7 @@ def load_snowflake_table_from_s3(
     schema: str,
     table: str,
     s3_prefix: str,
+    file_format: str,
     truncate_table: bool = False,
 ) -> str:
     """
@@ -149,19 +151,20 @@ def load_snowflake_table_from_s3(
 
         s3_prefix (str): The S3 Prefix to build the table from
 
+        file_format (str): The file format to use for the COPY INTO statement
+
         truncate_table (bool): Whether to truncate the table before loading
 
     Returns:
         None, but loads the table in Snowflake as specified
     """
-    file_format = get_file_format(s3_prefix=s3_prefix)
     sql_truncate = ""
     if truncate_table:
-        sql_truncate = f""" \
+        sql_truncate = f"""
         truncate table {schema}.{table};
         """
 
-    sql = f""" \
+    sql = f"""
         {sql_truncate}
         copy into {schema}.{table}
         from {stage}/{s3_prefix}
