@@ -8,6 +8,14 @@ try:
 except:
     from exceptions import SnowflakeCheckError
 
+# conn stuff
+# {
+#   "account": "qp11074.us-east-2.aws",
+#   "warehouse": "airflow_role_prod_warehouse",
+#   "database": "production",
+#   "role": "airflow_role_prod",
+#   "insecure_mode": false
+# }
 
 def log_results(results: tuple[Any, ...], statement_type: str) -> None:
     """
