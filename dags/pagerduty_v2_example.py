@@ -11,6 +11,7 @@ from include.utils import (
     jacobs_slack_alert,
     jacobs_discord_alert,
     multi_failure_alert,
+    read_dag_docs
 )
 
 default_args = {
@@ -41,6 +42,7 @@ default_args = {
     "pagerduty_v2_example",
     schedule_interval=get_schedule_interval(None),
     start_date=datetime(2023, 9, 23, 15, 0, 0),
+    doc_md=read_dag_docs("pagerduty_v2_example"),
     catchup=True,
     max_active_runs=1,
     default_args=default_args,
