@@ -5,20 +5,9 @@ from airflow.models.param import Param
 import pandas as pd
 
 from include.aws_utils import write_to_s3
+from include.common import DEFAULT_ARGS
 from include.postgres_utils import create_pg_sqlalchemy_conn
-from include.utils import jacobs_slack_alert, get_schedule_interval
-
-
-DEFAULT_ARGS = {
-    "owner": "jacob",
-    "depends_on_past": False,
-    "email": "jyablonski9@gmail.com",
-    "email_on_failure": False,
-    "email_on_retry": False,
-    "retries": 0,
-    "retry_delay": timedelta(minutes=5),
-    "on_failure_callback": jacobs_slack_alert,
-}
+from include.utils import get_schedule_interval
 
 S3_BUCKET = "jyablonski-test-bucket123"
 

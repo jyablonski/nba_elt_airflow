@@ -1,28 +1,16 @@
-from datetime import datetime, timedelta
+from datetime import datetime
 
 from airflow.decorators import dag, task
 from airflow.models.param import Param
 from airflow.providers.snowflake.hooks.snowflake import SnowflakeHook
 
-
-from include.utils import jacobs_slack_alert, get_schedule_interval
+from include.common import DEFAULT_ARGS
+from include.utils import get_schedule_interval
 from include.snowflake_utils import (
     build_snowflake_table_from_s3,
     load_snowflake_table_from_s3,
     get_file_format,
 )
-
-
-default_args = {
-    "owner": "jacob",
-    "depends_on_past": False,
-    "email": "jyablonski9@gmail.com",
-    "email_on_failure": False,
-    "email_on_retry": False,
-    "retries": 0,
-    "retry_delay": timedelta(minutes=5),
-    "on_failure_callback": jacobs_slack_alert,
-}
 
 
 @dag(
@@ -32,7 +20,7 @@ default_args = {
     start_date=datetime(2023, 9, 23, 15, 0, 0),
     catchup=False,
     max_active_runs=1,
-    default_args=default_args,
+    default_args=DEFAULT_ARGS,
     tags=["example"],
     params={
         "schema_name": Param(

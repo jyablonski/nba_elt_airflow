@@ -6,3 +6,4 @@ apache-airflow-providers-pagerduty
 apache-airflow-providers-snowflake
 awswrangler
 moto
+polars

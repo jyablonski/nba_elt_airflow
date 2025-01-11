@@ -5,18 +5,8 @@ from airflow.decorators import dag
 from airflow.models import Variable
 from airflow.providers.amazon.aws.operators.ecs import EcsRunTaskOperator
 
-from include.utils import get_schedule_interval, get_instance_type, jacobs_slack_alert
-
-default_args = {
-    "owner": "jacob",
-    "depends_on_past": False,
-    "email": ["jyablonski9@gmail.com"],
-    "email_on_failure": False,
-    "email_on_retry": False,
-    "retries": 1,
-    "retry_delay": timedelta(minutes=30),
-    "on_failure_callback": jacobs_slack_alert,
-}
+from include.common import DEFAULT_ARGS
+from include.utils import get_schedule_interval, get_instance_type
 
 # set these on each dev / stg / prod airflow instance
 # doing this with ssm or secrets manager for ecs + batch tasks is a fucking bitch
@@ -33,7 +23,7 @@ NETWORK_CONFIG_ENV = Variable.get(
     schedule=get_schedule_interval(cron_schedule="0 12 * * *"),
     start_date=datetime(2023, 7, 1),
     catchup=False,
-    default_args=default_args,
+    default_args=DEFAULT_ARGS,
     tags=["nba_elt_project"],
 )
 def pipeline():

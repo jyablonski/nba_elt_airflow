@@ -1,21 +1,10 @@
-from datetime import datetime, timedelta
-import os
+from datetime import datetime
 
 from airflow.decorators import dag, task
 from airflow.models.param import Param
 
-from include.utils import get_schedule_interval, jacobs_slack_alert, read_dag_docs
-
-default_args = {
-    "owner": "jacob",
-    "depends_on_past": False,
-    "email": "jyablonski9@gmail.com",
-    "email_on_failure": False,
-    "email_on_retry": False,
-    "retries": 0,
-    "retry_delay": timedelta(minutes=5),
-    "on_failure_callback": jacobs_slack_alert,
-}
+from include.common import DEFAULT_ARGS
+from include.utils import get_schedule_interval, read_dag_docs
 
 
 @dag(
@@ -25,7 +14,7 @@ default_args = {
     catchup=False,
     max_active_runs=1,
     doc_md=read_dag_docs("params_example"),
-    default_args=default_args,
+    default_args=DEFAULT_ARGS,
     params={
         "test": Param(
             default=None,

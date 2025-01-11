@@ -1,10 +1,9 @@
 import boto3
+from botocore.exceptions import ClientError
 from moto import mock_aws
 import pandas as pd
 import pytest
 
-
-from include.exceptions import S3PrefixCheckFail
 from include.aws_utils import check_s3_file_exists, write_to_s3
 
 
@@ -27,7 +26,7 @@ def test_check_s3_file_exists():
     )
 
     # assert it raises a failure when it checks a file that doesn't exist
-    with pytest.raises(S3PrefixCheckFail):
+    with pytest.raises(ClientError):
         check_s3_file_exists(
             client=conn,
             bucket=bucket_name,

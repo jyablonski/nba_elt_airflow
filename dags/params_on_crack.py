@@ -22,24 +22,14 @@ to the DAG and which are used to render a trigger form.
 """
 from __future__ import annotations
 
-from datetime import datetime, timedelta, time
+from datetime import datetime, time
 
 
 from airflow.decorators import dag, task
 from airflow.models.param import Param
 
-from include.utils import jacobs_slack_alert, get_schedule_interval
-
-DEFAULT_ARGS = {
-    "owner": "jacob",
-    "depends_on_past": False,
-    "email": "jyablonski9@gmail.com",
-    "email_on_failure": False,
-    "email_on_retry": False,
-    "retries": 0,
-    "retry_delay": timedelta(minutes=5),
-    "on_failure_callback": jacobs_slack_alert,
-}
+from include.common import DEFAULT_ARGS
+from include.utils import get_schedule_interval
 
 
 @dag(

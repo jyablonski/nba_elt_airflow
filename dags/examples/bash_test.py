@@ -1,22 +1,12 @@
-from datetime import datetime, timedelta
+from datetime import datetime
 import os
 
 from airflow.decorators import dag, task
 from airflow.hooks.subprocess import SubprocessHook
 import boto3
-from include.utils import get_schedule_interval, jacobs_slack_alert
 
-
-default_args = {
-    "owner": "jacob",
-    "depends_on_past": True,
-    "email": "jyablonski9@gmail.com",
-    "email_on_failure": False,
-    "email_on_retry": False,
-    "retries": 0,
-    "retry_delay": timedelta(minutes=5),
-    "on_failure_callback": jacobs_slack_alert,
-}
+from include.common import DEFAULT_ARGS
+from include.utils import get_schedule_interval
 
 
 @dag(
@@ -26,7 +16,7 @@ default_args = {
     start_date=datetime(2023, 9, 23, 15, 0, 0),
     catchup=True,
     max_active_runs=1,
-    default_args=default_args,
+    default_args=DEFAULT_ARGS,
     tags=["example"],
 )
 def bash_test_pipeline():

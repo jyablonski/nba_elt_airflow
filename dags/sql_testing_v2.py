@@ -1,23 +1,11 @@
-from datetime import date, datetime, timedelta
+from datetime import datetime, timedelta
 
 from airflow.decorators import dag, task
-from airflow.models.param import Param
 from airflow.providers.postgres.hooks.postgres import PostgresHook
-from airflow.providers.common.sql.hooks.sql import DbApiHook
 import pandas as pd
 
-from include.utils import get_schedule_interval, jacobs_slack_alert
-
-default_args = {
-    "owner": "jacob",
-    "depends_on_past": False,
-    "email": "jyablonski9@gmail.com",
-    "email_on_failure": False,
-    "email_on_retry": False,
-    "retries": 0,
-    "retry_delay": timedelta(minutes=5),
-    "on_failure_callback": jacobs_slack_alert,
-}
+from include.common import DEFAULT_ARGS
+from include.utils import get_schedule_interval
 
 
 @dag(
@@ -26,7 +14,7 @@ default_args = {
     start_date=datetime(2023, 9, 23, 15, 0, 0),
     catchup=False,
     max_active_runs=1,
-    default_args=default_args,
+    default_args=DEFAULT_ARGS,
     tags=["example"],
 )
 def sql_test_pipeline():

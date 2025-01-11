@@ -5,6 +5,8 @@ from airflow import DAG
 from airflow.operators.email import EmailOperator
 from airflow.operators.bash import BashOperator
 from airflow.operators.empty import EmptyOperator
+
+from include.common import DEFAULT_ARGS
 from include.utils import get_schedule_interval, jacobs_slack_alert
 
 # dbt test failure WILL fail the task, and fail the dag.

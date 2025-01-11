@@ -5,23 +5,12 @@ from datetime import datetime
 from airflow.decorators import dag, task
 import boto3
 
+from include.common import DEFAULT_ARGS
 from include.utils import (
     get_schedule_interval,
-    jacobs_slack_alert,
     check_connections,
     write_to_slack,
 )
-
-# send both an email alert + a slack alert to specified channel on any task failure
-JACOBS_DEFAULT_ARGS = {
-    "owner": "jacob",
-    "depends_on_past": False,
-    "email": ["jyablonski9@gmail.com"],
-    "email_on_failure": False,
-    "email_on_retry": False,
-    "retries": 0,
-    "on_failure_callback": jacobs_slack_alert,
-}
 
 
 @dag(
@@ -29,11 +18,11 @@ JACOBS_DEFAULT_ARGS = {
     schedule=get_schedule_interval("15 3-10 * * *"),
     start_date=datetime(2023, 8, 13, 10, 15, 0),
     catchup=False,
-    default_args=JACOBS_DEFAULT_ARGS,
+    default_args=DEFAULT_ARGS,
     tags=["example"],
 )
 def my_practice_dag():
-    @task
+    @task()
     def practice(**context):
         print(f"context is {context}")
         print(f"yo {context['ts']}")
@@ -42,7 +31,7 @@ def my_practice_dag():
         # time.sleep(10)
         return 1
 
-    @task
+    @task()
     def check_for_connection():
         check_connections("warehaus")
         test1 = 1

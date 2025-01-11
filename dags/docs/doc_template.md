@@ -7,30 +7,25 @@ Owner: **Team Bravo**
 ---
 
 ## ⏱️ SLA
-This DAG is expected to complete within **2 hours** of its scheduled start time.  
+This DAG is expected to complete within **X hours** of its scheduled start time.  
 Please review logs and notify stakeholders if the SLA is breached.
 
 ## 📋 Stakeholders
-- **Finance Team**: example.person@company.com
 - **Dev Z Team**: #example Slack Channel
 
 ## 🌐 Downstream Applications
-- **rETL Application**: Segment (loads data to downstream systems)
-  - Link
-- **Dashboards**: Looker (supports the `Sales Performance` dashboard)
+- **Example 1**: Segment (loads data to downstream systems)
   - Link
 
 ## 🔧 Troubleshooting Steps
-1. **Late Arriving Files**:
-   - Sometimes, the vendor doesn't deliver data on time
-   - In this case, a failure is acceptable and any data missed from that day's daily run will be picked up on the subsequent run
+1. **Example 1**:
+   - zzz
 
 ## 🔗 Additional Notes
-- This DAG is planned to be deprecated Q1 2025 after the release of XYZ product
-- If the DAG suddenly starts taking 2-4x as long to complete, do XYZ
+- Notes 1
 
 ## 🛠️ Developer Contacts
-- **Primary Developers**: Jacob Yablonski (jacob.yablonski@example.com) and Example Developer (example.developer@example.com)
+- **Primary Developers**: X (x@example.com) and Y (y@example.com)
 
 ---
 

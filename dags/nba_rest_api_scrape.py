@@ -1,32 +1,23 @@
 """ Python Test DAG"""
+
 from datetime import datetime
 
 from airflow.decorators import dag, task
 
 from include.aws_utils import write_to_s3
-from include.utils import get_schedule_interval, jacobs_slack_alert
+from include.common import DEFAULT_ARGS
+from include.utils import get_schedule_interval
 from include.rest_api_scrape.utils import scrape_endpoint
 
 api_endpoint = "https://api.jyablonski.dev"
 api_scrape_bucket = "jacobsbucket97-dev"
-
-# send both an email alert + a slack alert to specified channel on any task failure
-default_args = {
-    "owner": "jacob",
-    "depends_on_past": False,
-    "email": ["jyablonski9@gmail.com"],
-    "email_on_failure": False,
-    "email_on_retry": False,
-    "retries": 0,
-    "on_failure_callback": jacobs_slack_alert,
-}
 
 
 @dag(
     schedule=get_schedule_interval(None),
     start_date=datetime(2023, 7, 1),
     catchup=False,
-    default_args=default_args,
+    default_args=DEFAULT_ARGS,
     tags=["nba_elt_project"],
 )
 def nba_rest_api_scrape_dag():
