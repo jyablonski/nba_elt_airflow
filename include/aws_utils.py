@@ -4,13 +4,17 @@ from airflow.providers.amazon.aws.operators.ecs import EcsRunTaskOperator
 from airflow.models import Variable
 import awswrangler as wr
 import boto3
-from botocore.exceptions import ClientError
 import pandas as pd
 
 from include.utils import get_instance_type
 
+try:
+    from .exceptions import S3PrefixCheckFail
+except:
+    from exceptions import S3PrefixCheckFail
 
-def check_s3_file_exists(client, bucket: str, file_prefix: str) -> bool:
+
+def check_s3_file_exists(client: boto3.client, bucket: str, file_prefix: str) -> bool:
     """
     Function to check if a file exists in an S3 Bucket.
 
@@ -29,12 +33,11 @@ def check_s3_file_exists(client, bucket: str, file_prefix: str) -> bool:
         Prefix=file_prefix,
         MaxKeys=1,
     )
-    try:
-        result = client.list_objects_v2(Bucket=bucket, Prefix=file_prefix, MaxKeys=1)
-        return "Contents" in result
-    except ClientError as e:
-        print(f"Error checking S3 file: {e}")
-        return False
+    if "Contents" in result.keys():
+        print(f"S3 File Exists for {bucket}/{file_prefix}")
+        return True
+    else:
+        raise S3PrefixCheckFail(f"S3 Prefix for {bucket}/{file_prefix} doesn't exist")
 
 
 # to use this you have to store the raw values in systems secure manager first
