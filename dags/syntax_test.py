@@ -6,6 +6,7 @@ from airflow.models.baseoperator import chain
 from airflow.utils.task_group import TaskGroup
 
 from include.common import DEFAULT_ARGS
+from include.utils import get_schedule_interval
 
 
 # from airflow.providers.common.sql.hooks.sql import DbApiHook
@@ -15,7 +16,7 @@ from include.common import DEFAULT_ARGS
 
 @dag(
     "syntax_test",
-    schedule_interval="0 * * * *",
+    schedule_interval=get_schedule_interval("0 * * * *"),
     start_date=datetime(2024, 10, 20),
     catchup=False,
     max_active_runs=1,

@@ -22,7 +22,7 @@ def test_check_s3_file_exists():
             bucket=bucket_name,
             file_prefix=f"{bucket_name}-file.txt",
         )
-        == None
+        == True
     )
 
     # assert it raises a failure when it checks a file that doesn't exist

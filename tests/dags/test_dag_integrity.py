@@ -10,6 +10,8 @@ from include.utils import get_schedule_interval
 APPROVED_TAGS = {
     "example",
     "nba_elt_project",
+    "manual",
+    "snowflake",
     "template",
     "test",
 }

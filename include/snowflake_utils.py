@@ -523,7 +523,7 @@ def merge_from_s3_to_snowflake(
         connection=connection,
         source_schema=loading_schema,
         source_table=temp_table,
-        target_schema=merge_target_schema,
-        target_table=merge_target_table,
+        target_schema=schema,
+        target_table=table,
         primary_keys=primary_keys,
     )

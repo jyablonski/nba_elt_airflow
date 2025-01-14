@@ -65,7 +65,7 @@ def test_get_file_format_valid_extensions(s3_prefix, expected_format):
     ],
 )
 def test_get_file_format_invalid_extension(s3_prefix):
-    with pytest.raises(ValueError, match=f"File Format not supported for {s3_prefix}"):
+    with pytest.raises(ValueError, match=f"File format not supported for {s3_prefix}"):
         get_file_format(s3_prefix=s3_prefix)
 
 
