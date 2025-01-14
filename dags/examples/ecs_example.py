@@ -16,8 +16,7 @@ from include.utils import get_schedule_interval
     tags=["example"],
 )
 def pipeline():
-
-    @task()
+    
     def ecs_task():
         return create_ecs_task_operator(
             task_id="ecs_task_example",
