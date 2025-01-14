@@ -22,6 +22,7 @@ def pipeline():
             task_id="ecs_task_example",
             ecs_task_definition="jacobs_fake_task",
             ecs_cluster="jacobs_fargate_cluster",
+            container_name="jacobs_container_fake",
             environment_vars={"env1": "val1", "env2": "val2"},
         )
 

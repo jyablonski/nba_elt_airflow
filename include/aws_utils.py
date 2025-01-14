@@ -120,26 +120,27 @@ def write_to_s3(dataframe: pd.DataFrame, s3_bucket: str, s3_path: str) -> bool:
         )
 
 
-def get_container_name_from_task_definition(task_definition: str) -> str:
-    """
-    Function to pull `container_name` from an ECS Task Definition. Needed
-    in order to add Airflow Env Vars onto an ECS Task when triggering it.
-    The container name cannot be changed; hence we need to provide it
+# def get_container_name_from_task_definition(task_definition: str) -> str:
+#     """
+#     Function to pull `container_name` from an ECS Task Definition. Needed
+#     in order to add Airflow Env Vars onto an ECS Task when triggering it.
+#     The container name cannot be changed; hence we need to provide it
 
-    Args:
-        task_definition (str): Name of the Task Definition in AWS
+#     Args:
+#         task_definition (str): Name of the Task Definition in AWS
 
-    Returns:
-        `container_name` string of the ECS Task Definition
-    """
-    ecs_client = boto3.client("ecs")
-    response = ecs_client.describe_task_definition(taskDefinition=task_definition)
-    return response["taskDefinition"]["containerDefinitions"][0]["name"]
+#     Returns:
+#         `container_name` string of the ECS Task Definition
+#     """
+#     ecs_client = boto3.client("ecs")
+#     response = ecs_client.describe_task_definition(taskDefinition=task_definition)
+#     return response["taskDefinition"]["containerDefinitions"][0]["name"]
 
 
 def create_ecs_task_operator(
     task_id: str,
     ecs_task_definition: str,
+    container_name: str,
     environment_vars: dict = {},
     ecs_cluster: str | None = None,
     network_config: dict | None = None,
@@ -155,6 +156,10 @@ def create_ecs_task_operator(
         task_id (str): Task ID for the operator.
 
         ecs_task_definition (str): Name of the ECS Task Definition in AWS
+
+        container_name (str): Name of the container in the ECS Task Definition.
+            Has to be exact copy or else this fails because AWS is AWS and these
+            Operators suck
 
         environment_vars (dict): Additional environment variables to pass to the    ECS container.
 
@@ -199,10 +204,6 @@ def create_ecs_task_operator(
         {"name": key, "value": value}
         for key, value in combined_environment_vars.items()
     ]
-
-    container_name = get_container_name_from_task_definition(
-        task_definition=ecs_task_definition
-    )
 
     return EcsRunTaskOperator(
         task_id=task_id,
