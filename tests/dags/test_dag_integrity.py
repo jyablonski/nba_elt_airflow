@@ -58,13 +58,13 @@ def get_dags():
     return [(k, v, strip_path_prefix(v.fileloc)) for k, v in dag_bag.dags.items()]
 
 
-@patch("include.aws_utils.create_ecs_task_operator")
+# @patch("include.aws_utils.create_ecs_task_operator")
 @pytest.mark.parametrize(
     "rel_path,rv", get_import_errors(), ids=[x[0] for x in get_import_errors()]
 )
 def test_file_imports(mock_create_ecs_task_operator, rel_path, rv):
     """Test for import errors on a file"""
-    mock_create_ecs_task_operator.return_value = None  # Mock the operator
+    # mock_create_ecs_task_operator.return_value = None  # Mock the operator
     if rel_path and rv:
         raise Exception(f"{rel_path} failed to import with message \n {rv}")
 

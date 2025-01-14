@@ -223,4 +223,5 @@ def create_ecs_task_operator(
         awslogs_group=awslogs_group,
         awslogs_stream_prefix=awslogs_stream_prefix,
         do_xcom_push=do_xcom_push,
+        wait_for_completion=True,  # Ensures task waits for the ECS task to finish
     )
