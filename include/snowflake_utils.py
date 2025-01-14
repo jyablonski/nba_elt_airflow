@@ -17,6 +17,7 @@ except:
 #   "insecure_mode": false
 # }
 
+
 def log_results(results: tuple[Any, ...], statement_type: str) -> None:
     """
     Logs the results of Snowflake Copy / Merge statements into a readable dictionary.
@@ -59,14 +60,17 @@ def log_results(results: tuple[Any, ...], statement_type: str) -> None:
 
 
 def get_file_format(s3_prefix: str) -> str:
-    if s3_prefix.endswith(".csv"):
-        return "csv_format"
-    elif s3_prefix.endswith(".parquet"):
-        return "parquet_format"
-    elif s3_prefix.endswith(".json"):
-        return "json_format"
-    else:
-        raise ValueError(f"File Format not supported for {s3_prefix}")
+    formats = {
+        ".csv": "csv_format",
+        ".parquet": "parquet_format",
+        ".json": "json_format",
+    }
+
+    for extension, file_format in formats.items():
+        if s3_prefix.endswith(extension):
+            return file_format
+
+    raise ValueError(f"File format not supported for {s3_prefix}")
 
 
 def get_snowflake_conn(conn_id: str = "snowflake_conn") -> Connection:
@@ -81,6 +85,7 @@ def build_snowflake_table_from_s3(
     schema: str,
     table: str,
     s3_prefix: str,
+    file_format: str,
 ) -> None:
     """
     Function to build a table in Snowflake based on a File in S3
@@ -96,11 +101,12 @@ def build_snowflake_table_from_s3(
 
         s3_prefix (str): The S3 Prefix to build the table from
 
+        file_format (str): File Format to use
+
     Returns:
         None, but builds the table in Snowflake as specified.
 
     """
-    file_format = get_file_format(s3_prefix=s3_prefix)
     file_location = f"{stage}/{s3_prefix}"
 
     sql = f"""
@@ -134,6 +140,56 @@ def build_snowflake_table_from_s3(
         ) from e
 
     return sql
+
+
+def create_deduped_temp_table(
+    connection: Connection,
+    schema: str,
+    source_table: str,
+    primary_keys: list[str],
+    order_by_fields: list[str],
+) -> None:
+    """
+    Function to deduplicate data in a source table using `QUALIFY ROW_NUMBER()`
+    and store it in a temporary table.
+
+    Args:
+        connection (Connection): The connection to the Snowflake Database.
+
+        schema (str): The schema for the source and temporary tables.
+
+        source_table (str): The name of the source table to deduplicate.
+
+        primary_keys (list[str]): Columns to use for deduplication.
+
+        order_by_fields (list[str])): Field to use for deduplication priority in ORDER BY.
+
+
+    Returns:
+        None, but creates a temporary deduplicated table in Snowflake.
+    """
+    temp_table = f"temp_{source_table}"
+    primary_key_columns = ", ".join(primary_keys)
+    order_by_field_columns = ", ".join(order_by_fields)
+
+    dedup_sql = f"""\
+    CREATE TEMPORARY TABLE {schema}.{temp_table} AS
+    SELECT *
+    FROM {schema}.{source_table}
+    QUALIFY ROW_NUMBER() OVER (
+        PARTITION BY {primary_key_columns}
+        ORDER BY {order_by_field_columns}
+    ) = 1;"""
+    try:
+        print(f"Executing: {dedup_sql}")
+        connection.execute(statement=dedup_sql)
+
+        print(f"Deduplicated data stored in {schema}.{temp_table} successfully.")
+
+    except Exception as e:
+        raise Exception(
+            f"Error occurred while deduplicating data in {schema}.{source_table}: {e}"
+        )
 
 
 def load_snowflake_table_from_s3(
@@ -315,7 +371,7 @@ def check_snowflake_table_count(
         raise e(f"Error Occurred while checking {object_name}, {e}")
 
 
-def set_session_tag(connection: Connection, query_tag: str):
+def set_session_tag(connection: Connection, query_tag: str) -> None:
     """
     Function to set a Session Tag in Snowflake. This is useful for
     tracking queries in the Snowflake and querying the history.
@@ -333,3 +389,141 @@ def set_session_tag(connection: Connection, query_tag: str):
         connection.execute(sql)
     except BaseException as e:
         print(f"Error Occurred while executing '{sql}', {e}")
+
+
+def unload_to_s3(
+    connection: Connection,
+    s3_stage: str,
+    s3_prefix: str,
+    database_name: str,
+    table_name: str,
+    schema_name: str,
+    file_format: str,
+    limit: int | None = None,
+) -> None:
+    """
+    Function to store a query's results into S3
+
+    Args:
+        connection (Connection): The connection to the Snowflake Database
+
+        s3_stage (str): The S3 Stage to store the results in
+
+        s3_prefix (str): The S3 Prefix to store the results in
+
+        database_name (str): The name of the database
+
+        table_name (str): The name of the table
+
+        schema_name (str): The name of the schema
+
+        file_format (str): The file format to store the results in
+
+        limit (int): The limit to apply to the query
+
+    Returns:
+        None, but stores the results of the query in S3
+    """
+    # this forces it to load into an actual directory at the file path,
+    # and not just into whichever file path was given
+    if not s3_prefix.endswith("/"):
+        s3_prefix += "/"
+
+    if limit:
+        limit = f"limit {limit}"
+
+    query = f"""\
+    copy into @{s3_stage}/{s3_prefix}
+    from (
+        select *
+        from {database_name}.{schema_name}.{table_name}
+        {limit}
+    )
+    file_format = {file_format};"""
+
+    connection.execute(statement=query)
+    pass
+
+
+def merge_from_s3_to_snowflake(
+    connection: Connection,
+    stage: str,
+    schema: str,
+    table: str,
+    s3_prefix: str,
+    file_format: str,
+    primary_keys: list[str] | None = None,
+    order_by_fields: list[str] | None = None,
+    truncate_table: bool = False,
+) -> None:
+    """
+    Function to load data from S3 to Snowflake, optionally deduplicate, and merge it into a target table.
+
+    Args:
+        connection (SQLAlchemy): The connection to the Snowflake Database
+
+        stage (str): The stage in Snowflake that points to the S3 URL
+
+        schema (str): The schema to load the data into
+
+        table (str): The name of the table to load
+
+        s3_prefix (str): The S3 Prefix to load the data from
+
+        file_format (str): The file format to use
+
+        primary_keys (list[str]): Columns to use for deduplication (optional)
+
+        order_by_fields (list[str]): Fields to order by for deduplication (optional)
+
+        truncate_table (bool): Whether to truncate the table before loading (optional)
+
+    Returns:
+        None, but performs the following operations:
+        - Creates/loads the Snowflake table from S3 data
+        - Deduplicates the data
+        - Optionally merges data into a target table
+    """
+    loading_schema = "staging"
+    temp_table = f"temp_{table}"
+
+    # Step 1: Build Snowflake Table in staging from S3 (if not already created)
+    build_snowflake_table_from_s3(
+        connection=connection,
+        stage=stage,
+        schema=loading_schema,
+        table=table,
+        s3_prefix=s3_prefix,
+        file_format=file_format,
+    )
+
+    # Step 2: Load the Snowflake Table from S3
+    load_snowflake_table_from_s3(
+        connection=connection,
+        stage=stage,
+        schema=loading_schema,
+        table=table,
+        s3_prefix=s3_prefix,
+        file_format=file_format,
+        truncate_table=truncate_table,
+    )
+
+    # Step 3: Deduplicate Data if primary keys and order_by_fields are provided
+    create_deduped_temp_table(
+        connection=connection,
+        schema=loading_schema,
+        source_table=table,
+        primary_keys=primary_keys,
+        order_by_fields=order_by_fields,
+    )
+
+
+    # Step 4: Perform Merge
+    merge_snowflake_source_into_target(
+        connection=connection,
+        source_schema=loading_schema,
+        source_table=temp_table,
+        target_schema=schema,
+        target_table=table,
+        primary_keys=primary_keys,
+    )

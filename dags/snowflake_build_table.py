@@ -21,7 +21,7 @@ from include.snowflake_utils import (
     catchup=False,
     max_active_runs=1,
     default_args=DEFAULT_ARGS,
-    tags=["example"],
+    tags=["snowflake"],
     params={
         "schema_name": Param(
             default="test_schema",
@@ -38,13 +38,20 @@ from include.snowflake_utils import (
             default="s3://jyablonski-test-bucket123",
             type="string",
             title="S3 Stage",
-            description="S3 Stage to Load Data to",
+            description="S3 Stage to referencew",
             enum=["@NBA_ELT_STAGE_PROD"],
         ),
         "s3_file_prefix": Param(
             type="string",
             title="S3 File Prefix",
-            description="S3 File Prefix to Load Data to",
+            description="S3 File Prefix to Build Table from",
+        ),
+        "file_format": Param(
+            default="test_schema.parquet_format_tf",
+            type="string",
+            title="File Format",
+            description="File Format to use",
+            enum=["test_schema.parquet_format_tf"],
         ),
         "load_table_afterwards": Param(
             default=True,
@@ -70,11 +77,11 @@ def snowflake_build_table_pipeline():
             table=context["params"]["table_name"],
             stage=context["params"]["s3_stage"],
             s3_prefix=context["params"]["s3_file_prefix"],
+            file_format=context["params"]["file_format"],
         )
 
         if context["params"]["load_table_afterwards"]:
             s3_prefix = context["params"]["s3_file_prefix"]
-            file_format = get_file_format(s3_prefix=s3_prefix)
 
             load_snowflake_table_from_s3(
                 connection=connection,
@@ -82,7 +89,7 @@ def snowflake_build_table_pipeline():
                 table=context["params"]["table_name"],
                 stage=context["params"]["s3_stage"],
                 s3_prefix=s3_prefix,
-                file_format=file_format,
+                file_format=context["params"]["file_format"],
             )
 
     build_table_task()

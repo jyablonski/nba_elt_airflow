@@ -12,14 +12,14 @@ from include.snowflake_utils import (
 
 
 @dag(
-    "snowflake_test",
+    "snowflake_load_test",
     # schedule_interval="0 0 12 1 4/6 ? *",
     schedule_interval=get_schedule_interval(None),
     start_date=datetime(2023, 9, 23, 15, 0, 0),
     catchup=False,
     max_active_runs=1,
     default_args=DEFAULT_ARGS,
-    tags=["example"],
+    tags=["snowflake"],
 )
 def snowflake_test_pipeline():
     @task()

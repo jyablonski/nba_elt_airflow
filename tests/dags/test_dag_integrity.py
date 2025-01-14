@@ -1,6 +1,7 @@
+from contextlib import contextmanager
 import os
 import logging
-from contextlib import contextmanager
+from unittest.mock import patch
 
 import pytest
 from airflow.models import DagBag
@@ -10,6 +11,8 @@ from include.utils import get_schedule_interval
 APPROVED_TAGS = {
     "example",
     "nba_elt_project",
+    "manual",
+    "snowflake",
     "template",
     "test",
 }
@@ -55,14 +58,17 @@ def get_dags():
     return [(k, v, strip_path_prefix(v.fileloc)) for k, v in dag_bag.dags.items()]
 
 
+# the fuckass ecs operator is complete dogshit and executes aws api calls
+# while parsing the dag instead of ,,, drumroll ... when it actually runs
+@patch("include.aws_utils.create_ecs_task_operator")
 @pytest.mark.parametrize(
     "rel_path,rv", get_import_errors(), ids=[x[0] for x in get_import_errors()]
 )
-def test_file_imports(rel_path, rv):
+def test_file_imports(mock_create_ecs_task_operator, rel_path, rv):
     """Test for import errors on a file"""
+    mock_create_ecs_task_operator.return_value = None  # Mock the operator
     if rel_path and rv:
         raise Exception(f"{rel_path} failed to import with message \n {rv}")
-
 
 @pytest.mark.parametrize(
     "dag_id,dag,fileloc", get_dags(), ids=[x[2] for x in get_dags()]
