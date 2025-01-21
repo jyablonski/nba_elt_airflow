@@ -21,18 +21,11 @@ SNOWFLAKE_PARAMS = {
         description="S3 Stage to Load Data to",
         enum=["NBA_ELT_STAGE_PROD"],
     ),
+    "file_format": Param(
+        default="test_schema.parquet_format_tf",
+        type="string",
+        title="File Format",
+        description="File Format to use",
+        enum=["test_schema.parquet_format_tf"],
+    ),
 }
-
-# TODO: finish params for snowflake dags
-# Custom params specific to this DAG
-# custom_params = {
-#     "snowflake_table": Param(
-#         default="custom_table",
-#         type="string",
-#         title="Custom Table Name",
-#         description="Table Name specific to this DAG",
-#     )
-# }
-
-# # Combine shared params with custom params
-# dag_params = {**SNOWFLAKE_PARAMS, **custom_params}
