@@ -18,12 +18,12 @@ except:
 # }
 
 
-def log_results(results: tuple[Any, ...], statement_type: str) -> None:
+def log_results(results: list[tuple[Any, ...]], statement_type: str) -> None:
     """
-    Logs the results of Snowflake Copy / Merge statements into a readable dictionary.
+    Logs the results of Snowflake Copy / Merge statements in a more concise and high-level format.
 
     Parameters:
-        results (tuple): The tuple output from the Snowflake command.
+        results (list of tuples): The list of tuples output from the Snowflake command.
 
         statement_type (str): Type of Snowflake Statement (COPY INTO, MERGE, etc.)
 
@@ -31,8 +31,6 @@ def log_results(results: tuple[Any, ...], statement_type: str) -> None:
         None, but logs the formatted results.
     """
     if statement_type == "COPY":
-        # these are the column names returned by copy into statements
-        # https://docs.snowflake.com/en/sql-reference/sql/copy-into-table
         column_names = [
             "file",
             "status",
@@ -53,8 +51,40 @@ def log_results(results: tuple[Any, ...], statement_type: str) -> None:
     else:
         raise ValueError(f"Statement Type {statement_type} not supported")
 
-    formatted_results = dict(zip(column_names, results))
-    print(f"Formatted Results: {formatted_results}")
+    # initialize counters for aggregated values
+    total_files = len(results)
+    total_rows_parsed = 0
+    total_rows_loaded = 0
+    total_errors_seen = 0
+    files_with_errors = []
+
+    for result in results:
+        formatted_result = dict(zip(column_names, result))
+        total_rows_parsed += formatted_result["rows_parsed"]
+        total_rows_loaded += formatted_result["rows_loaded"]
+        total_errors_seen += formatted_result["error_seen"]
+
+        if formatted_result["error_seen"] > 0:
+            files_with_errors.append(formatted_result["file"])
+
+    # create a high-level summary to show total files processed,
+    # rows parsed, rows loaded, and errors seen
+    summary = {
+        "total_files": total_files,
+        "total_rows_parsed": total_rows_parsed,
+        "total_rows_loaded": total_rows_loaded,
+        "total_errors_seen": total_errors_seen,
+        "files_with_errors": files_with_errors,
+    }
+
+    print(f"High-Level Summary: {summary}")
+
+    # optionally log individual file details if desired
+    for idx, result in enumerate(results):
+        formatted_result = dict(zip(column_names, result))
+        print(
+            f"Result {idx + 1}: {formatted_result['file']} - Status: {formatted_result['status']}, Rows Parsed: {formatted_result['rows_parsed']}, Rows Loaded: {formatted_result['rows_loaded']}, Errors: {formatted_result['error_seen']}"
+        )
 
     return None
 
@@ -200,7 +230,7 @@ def load_snowflake_table_from_s3(
     s3_prefix: str,
     file_format: str,
     truncate_table: bool = False,
-) -> str:
+) -> None:
     """
     Function to load a table in Snowflake based on a File in S3
 
@@ -222,23 +252,19 @@ def load_snowflake_table_from_s3(
     Returns:
         None, but loads the table in Snowflake as specified
     """
-    sql_truncate = ""
+    # Truncate the table if requested
     if truncate_table:
-        sql_truncate = f"""
-        truncate table {schema}.{table};
-        """
+        truncate_sql = f"TRUNCATE TABLE {schema}.{table};"
+        connection.execute(statement=truncate_sql)
 
-    sql = f"""
-        {sql_truncate}
-        copy into {schema}.{table}
-        from {stage}/{s3_prefix}
-        file_format = '{file_format}'
-        match_by_column_name = 'CASE_INSENSITIVE';
+    load_sql = f"""\
+        COPY INTO {schema}.{table}
+        FROM @{stage}/{s3_prefix}
+        FILE_FORMAT = '{file_format}'
+        MATCH_BY_COLUMN_NAME = 'CASE_INSENSITIVE';"""
 
-    """
-
-    print(f"Executing {sql}")
-    results = connection.execute(statement=sql).fetchall()[0]
+    print(f"Executing SQL: \n{load_sql}")
+    results = connection.execute(statement=load_sql).fetchall()
     log_results(results=results, statement_type="COPY")
 
     return None
@@ -516,7 +542,6 @@ def merge_from_s3_to_snowflake(
         primary_keys=primary_keys,
         order_by_fields=order_by_fields,
     )
-
 
     # Step 4: Perform Merge
     merge_snowflake_source_into_target(
