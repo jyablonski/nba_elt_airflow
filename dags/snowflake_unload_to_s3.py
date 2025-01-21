@@ -4,7 +4,7 @@ from airflow.models.param import Param
 
 
 from include.common import DEFAULT_ARGS
-from include.snowflake_params import SNOWFLAKE_PARAMS
+from include.snowflake_params import COMMON_SNOWFLAKE_PARAMS
 from include.snowflake_utils import get_snowflake_conn, unload_to_s3
 from include.utils import get_schedule_interval
 
@@ -31,7 +31,7 @@ unload_params = {
 }
 
 
-dag_params = {**SNOWFLAKE_PARAMS, **unload_params}
+dag_params = {**COMMON_SNOWFLAKE_PARAMS, **unload_params}
 
 
 @dag(

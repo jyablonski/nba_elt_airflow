@@ -1,7 +1,7 @@
 from airflow.models.param import Param
 
 # Shared parameters for reuse
-SNOWFLAKE_PARAMS = {
+COMMON_SNOWFLAKE_PARAMS = {
     "snowflake_schema": Param(
         default="test_schema",
         type="string",

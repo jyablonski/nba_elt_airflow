@@ -6,7 +6,7 @@ from airflow.providers.snowflake.hooks.snowflake import SnowflakeHook
 
 from include.common import DEFAULT_ARGS
 from include.utils import get_schedule_interval
-from include.snowflake_params import SNOWFLAKE_PARAMS
+from include.snowflake_params import COMMON_SNOWFLAKE_PARAMS
 from include.snowflake_utils import (
     build_snowflake_table_from_s3,
     load_snowflake_table_from_s3,
@@ -26,7 +26,7 @@ build_params = {
     ),
 }
 
-dag_params = {**SNOWFLAKE_PARAMS, **build_params}
+dag_params = {**COMMON_SNOWFLAKE_PARAMS, **build_params}
 
 
 @dag(
