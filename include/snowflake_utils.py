@@ -145,7 +145,7 @@ def build_snowflake_table_from_s3(
         SELECT ARRAY_AGG(OBJECT_CONSTRUCT(*))
         FROM TABLE(
             INFER_SCHEMA(
-            LOCATION=>'{file_location}',
+            LOCATION=>'@{file_location}',
             FILE_FORMAT=>'{file_format}'
             )
         )
@@ -222,6 +222,10 @@ def create_deduped_temp_table(
         )
 
 
+# Snowflake tracks which files it has copied over from S3 to Snowflake,
+# and will NOT re-load files that have already been loaded without the
+# `FORCE` option. but, if you truncate a table it basically wipes this
+# and you can re-load the same files again, even without `FORCE`
 def load_snowflake_table_from_s3(
     connection: Connection,
     stage: str,
@@ -421,7 +425,6 @@ def unload_to_s3(
     connection: Connection,
     s3_stage: str,
     s3_prefix: str,
-    database_name: str,
     table_name: str,
     schema_name: str,
     file_format: str,
@@ -436,8 +439,6 @@ def unload_to_s3(
         s3_stage (str): The S3 Stage to store the results in
 
         s3_prefix (str): The S3 Prefix to store the results in
-
-        database_name (str): The name of the database
 
         table_name (str): The name of the table
 
@@ -462,11 +463,12 @@ def unload_to_s3(
     copy into @{s3_stage}/{s3_prefix}
     from (
         select *
-        from {database_name}.{schema_name}.{table_name}
+        from {schema_name}.{table_name}
         {limit}
     )
     file_format = {file_format};"""
 
+    print(f"Executing SQL: \n{query}")
     connection.execute(statement=query)
     pass
 

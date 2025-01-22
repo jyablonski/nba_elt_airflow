@@ -16,7 +16,8 @@ build_params = {
     "s3_file_prefix": Param(
         type="string",
         title="S3 File Prefix",
-        description="S3 File Prefix to Build Table from",
+        description="S3 File Prefix to Build Table from. "
+        "Example: `snowflake_table_loading/data1.parquet`",
     ),
     "load_table_afterwards": Param(
         default=True,
@@ -52,8 +53,8 @@ def snowflake_build_table_pipeline():
 
         build_snowflake_table_from_s3(
             connection=connection,
-            schema=context["params"]["schema_name"],
-            table=context["params"]["table_name"],
+            schema=context["params"]["snowflake_schema"],
+            table=context["params"]["snowflake_table"],
             stage=context["params"]["s3_stage"],
             s3_prefix=context["params"]["s3_file_prefix"],
             file_format=context["params"]["file_format"],
@@ -64,8 +65,8 @@ def snowflake_build_table_pipeline():
 
             load_snowflake_table_from_s3(
                 connection=connection,
-                schema=context["params"]["schema_name"],
-                table=context["params"]["table_name"],
+                schema=context["params"]["snowflake_schema"],
+                table=context["params"]["snowflake_table"],
                 stage=context["params"]["s3_stage"],
                 s3_prefix=s3_prefix,
                 file_format=context["params"]["file_format"],

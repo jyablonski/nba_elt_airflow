@@ -9,12 +9,6 @@ from include.snowflake_utils import get_snowflake_conn, unload_to_s3
 from include.utils import get_schedule_interval
 
 unload_params = {
-    "snowflake_database": Param(
-        default="production",
-        type="string",
-        title="Database Name",
-        description="Enter a Database",
-    ),
     "s3_folder_prefix": Param(
         type="string",
         title="S3 Folder Prefix",
@@ -58,7 +52,6 @@ def pipeline():
             connection=conn,
             s3_stage=context["params"]["s3_stage"],
             s3_prefix=context["params"]["s3_folder_prefix"],
-            database_name=context["params"]["snowflake_database"],
             schema_name=context["params"]["snowflake_schema"],
             table_name=context["params"]["snowflake_table"],
             file_format=context["params"]["file_format"],

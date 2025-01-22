@@ -7,6 +7,7 @@ COMMON_SNOWFLAKE_PARAMS = {
         type="string",
         title="Schema Name",
         description="Enter a Schema",
+        enum=["test_schema", "source", "experimental", "marts"],
     ),
     "snowflake_table": Param(
         default="test_table",
