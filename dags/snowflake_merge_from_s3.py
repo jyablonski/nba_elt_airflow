@@ -7,12 +7,12 @@ from include.common import DEFAULT_ARGS
 from include.utils import get_schedule_interval
 from include.snowflake_utils import (
     get_snowflake_conn,
-    merge_snowflake_source_into_target,
+    merge_from_s3_to_snowflake,
 )
 
 
 @dag(
-    "snowflake_load_test",
+    "snowflake_merge_test",
     schedule_interval=get_schedule_interval(None),
     start_date=datetime(2023, 9, 23, 15, 0, 0),
     catchup=False,
@@ -20,24 +20,27 @@ from include.snowflake_utils import (
     default_args=DEFAULT_ARGS,
     tags=["snowflake"],
 )
-def snowflake_test_pipeline():
+def snowflake_merge_test_pipeline():
     @task()
-    def build_table_task(
+    def merge_task(
         **context: dict,
     ):
         conn = get_snowflake_conn("snowflake_conn")
 
-        # TODO: Finish Merge later
-        merge_snowflake_source_into_target(
+        print("starting dag")
+        merge_from_s3_to_snowflake(
             connection=conn,
-            source_schema="test_schema",
-            source_table="merge_test",
-            target_schema="test_schema",
-            target_table="merge_target",
+            stage="NBA_ELT_STAGE_PROD",
+            schema="source",
+            table="test_merge_function",
+            s3_prefix="snowflake_table_loading/month=01/",
+            file_format="test_schema.parquet_format_tf",
             primary_keys=["id"],
+            order_by_fields=["created_at"],
+            target_table_timestamp_col="created_at",
         )
 
-    build_table_task()
+    merge_task()
 
 
-dag = snowflake_test_pipeline()
+dag = snowflake_merge_test_pipeline()

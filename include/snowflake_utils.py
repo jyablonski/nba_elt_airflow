@@ -8,6 +8,10 @@ try:
 except:
     from exceptions import SnowflakeCheckError
 
+# msut have parameter
+# ALTER ACCOUNT SET QUOTED_IDENTIFIERS_IGNORE_CASE = TRUE;
+
+# airflow conn stuff because it's unintuitive
 # conn stuff
 # {
 #   "account": "qp11074.us-east-2.aws",
@@ -87,6 +91,32 @@ def log_results(results: list[tuple[Any, ...]], statement_type: str) -> None:
         )
 
     return None
+
+
+def log_merge_results(results: list[tuple[int, int]]) -> None:
+    """
+    Logs the results of Snowflake MERGE statements.
+
+    Args:
+        results (list of tuples): The list of tuples output from the Snowflake MERGE command.
+
+        Each tuple contains (number_of_rows_inserted, number_of_rows_updated).
+
+    Returns:
+        None, but logs the formatted results.
+    """
+    if len(results) != 1:
+        raise ValueError(
+            "Unexpected result format for MERGE statement. Expected a single tuple."
+        )
+
+    number_of_rows_inserted, number_of_rows_updated = results[0]
+    summary = {
+        "rows_inserted": number_of_rows_inserted,
+        "rows_updated": number_of_rows_updated,
+    }
+
+    print(f"MERGE Summary: {summary}")
 
 
 def get_file_format(s3_prefix: str) -> str:
@@ -174,10 +204,13 @@ def build_snowflake_table_from_s3(
 
 def create_deduped_temp_table(
     connection: Connection,
-    schema: str,
+    source_schema: str,
     source_table: str,
+    target_table: str,
+    target_table_schema: str,
     primary_keys: list[str],
     order_by_fields: list[str],
+    target_table_timestamp_col: str | None = None,
 ) -> None:
     """
     Function to deduplicate data in a source table using `QUALIFY ROW_NUMBER()`
@@ -186,14 +219,22 @@ def create_deduped_temp_table(
     Args:
         connection (Connection): The connection to the Snowflake Database.
 
-        schema (str): The schema for the source and temporary tables.
+        source_schema (str): The schema to create the temporary table in,
+            typically `staging`
 
         source_table (str): The name of the source table to deduplicate.
 
+        target_table (str): The name of the target table to merge into.
+
+        target_table_schema (str): The schema of the target table.
+
         primary_keys (list[str]): Columns to use for deduplication.
 
-        order_by_fields (list[str])): Field to use for deduplication priority in ORDER BY.
+        order_by_fields (list[str])): Field to use in the `QUALIFY ROW_NUMBER()`
+            clause for deduplication.
 
+        target_table_timestamp_col (str): The timestamp column to use
+            for data filtering
 
     Returns:
         None, but creates a temporary deduplicated table in Snowflake.
@@ -202,23 +243,36 @@ def create_deduped_temp_table(
     primary_key_columns = ", ".join(primary_keys)
     order_by_field_columns = ", ".join(order_by_fields)
 
+    # Construct the WHERE clause conditionally
+    where_clause = ""
+    if target_table_timestamp_col:
+        where_clause = f"""
+        WHERE src.{target_table_timestamp_col} > (
+            SELECT MAX(tgt.{target_table_timestamp_col})
+            FROM {target_table_schema}.{target_table} tgt
+        )
+        """
+
+    # Build the SQL query
     dedup_sql = f"""\
-    CREATE TEMPORARY TABLE {schema}.{temp_table} AS
+    CREATE TEMPORARY TABLE {source_schema}.{temp_table} AS
     SELECT *
-    FROM {schema}.{source_table}
+    FROM {source_schema}.{source_table} src
+    {where_clause}
     QUALIFY ROW_NUMBER() OVER (
         PARTITION BY {primary_key_columns}
-        ORDER BY {order_by_field_columns}
+        ORDER BY {order_by_field_columns} DESC
     ) = 1;"""
+
     try:
-        print(f"Executing: {dedup_sql}")
+        print(f"Executing SQL: \n{dedup_sql}")
         connection.execute(statement=dedup_sql)
 
-        print(f"Deduplicated data stored in {schema}.{temp_table} successfully.")
+        print(f"Deduplicated data stored in {source_schema}.{temp_table} successfully.")
 
     except Exception as e:
         raise Exception(
-            f"Error occurred while deduplicating data in {schema}.{source_table}: {e}"
+            f"Error occurred while deduplicating data in {source_schema}.{source_table}: {e}"
         )
 
 
@@ -349,8 +403,9 @@ def merge_snowflake_source_into_target(
         """
 
         print(f"Executing {sql}")
-        results = connection.execute(statement=sql).fetchall()[0]
-        log_results(results=results, statement_type="MERGE")
+        results = connection.execute(statement=sql).fetchall()
+        print(results)
+        log_merge_results(results=results)
         print(
             f"Merge Successful for {source_schema}.{source_table} into {target_schema}.{target_table}"
         )
@@ -472,7 +527,8 @@ def unload_to_s3(
     connection.execute(statement=query)
     pass
 
-
+# TODO: add metadata fields onto the build table function
+# and add an update timestamp onto the merge function
 def merge_from_s3_to_snowflake(
     connection: Connection,
     stage: str,
@@ -482,6 +538,7 @@ def merge_from_s3_to_snowflake(
     file_format: str,
     primary_keys: list[str] | None = None,
     order_by_fields: list[str] | None = None,
+    target_table_timestamp_col: str | None = None,
     truncate_table: bool = False,
 ) -> None:
     """
@@ -504,6 +561,9 @@ def merge_from_s3_to_snowflake(
 
         order_by_fields (list[str]): Fields to order by for deduplication (optional)
 
+        target_table_timestamp_col (str): Fields to filter the deduped data by
+            checking the max value in the target table
+
         truncate_table (bool): Whether to truncate the table before loading (optional)
 
     Returns:
@@ -515,6 +575,7 @@ def merge_from_s3_to_snowflake(
     loading_schema = "staging"
     temp_table = f"temp_{table}"
 
+    print("starting build")
     # Step 1: Build Snowflake Table in staging from S3 (if not already created)
     build_snowflake_table_from_s3(
         connection=connection,
@@ -525,7 +586,8 @@ def merge_from_s3_to_snowflake(
         file_format=file_format,
     )
 
-    # Step 2: Load the Snowflake Table from S3
+    print("starting staging load")
+    # Step 2: Load the Staging Table w/ data from S3
     load_snowflake_table_from_s3(
         connection=connection,
         stage=stage,
@@ -536,16 +598,23 @@ def merge_from_s3_to_snowflake(
         truncate_table=truncate_table,
     )
 
-    # Step 3: Deduplicate Data if primary keys and order_by_fields are provided
+    print("starting de-dupe")
+    # Step 3: Create a new Temp Table in Staging to De-duplicate Data
+    # to prepare the merge statement (which requires unique rows in the source)
     create_deduped_temp_table(
         connection=connection,
-        schema=loading_schema,
+        source_schema="staging",
         source_table=table,
+        target_table=table,
+        target_table_schema=schema,
+        target_table_timestamp_col=target_table_timestamp_col,
         primary_keys=primary_keys,
         order_by_fields=order_by_fields,
     )
 
-    # Step 4: Perform Merge
+    print("starting merge")
+    # Step 4: Perform Merge of the Source Table (the temp one we just
+    # created) into the Target Table
     merge_snowflake_source_into_target(
         connection=connection,
         source_schema=loading_schema,
