@@ -54,6 +54,7 @@ def log_results_copy(results: list[tuple[Any, ...]]) -> None:
     total_errors_seen = 0
     files_with_errors = []
 
+    # TODO: if you do a copy statement with 0 processed file you dont get shit
     for result in results:
         formatted_result = dict(zip(column_names, result))
         total_rows_parsed += formatted_result["rows_parsed"]
@@ -175,16 +176,16 @@ def build_snowflake_table_from_s3(
     """
 
     try:
-        print(f"Executing {sql}")
+        print(f"Executing SQL: \n{sql}")
         # it returns a list of tuples, so we need to get the first element of the first tuple
         results = connection.execute(statement=sql).fetchall()[0][0]
 
         print(results)
 
-        if results != f"Table {table.upper()} successfully created.":
-            raise BaseException(
-                f"Error Occurred while building {schema}.{table} for file {file_location}, table not created"
-            )
+        # if results != f"Table {table.upper()} successfully created.":
+        #     raise BaseException(
+        #         f"Error Occurred while building {schema}.{table} for file {file_location}, table not created"
+        #     )
     except BaseException as e:
         # Instead of raising e with a message, you can raise a new exception or modify the original
         raise Exception(
@@ -315,7 +316,7 @@ def load_snowflake_table_from_s3(
 
     print(f"Executing SQL: \n{load_sql}")
     results = connection.execute(statement=load_sql).fetchall()
-    log_results_copy(results=results, statement_type="COPY")
+    log_results_copy(results=results)
 
     return None
 
@@ -517,6 +518,7 @@ def unload_to_s3(
     print(f"Executing SQL: \n{query}")
     connection.execute(statement=query)
     pass
+
 
 # TODO: add metadata fields onto the build table function
 # and add an update timestamp onto the merge function
