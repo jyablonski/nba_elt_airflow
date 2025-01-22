@@ -22,7 +22,7 @@ except:
 # }
 
 
-def log_results(results: list[tuple[Any, ...]], statement_type: str) -> None:
+def log_results_copy(results: list[tuple[Any, ...]]) -> None:
     """
     Logs the results of Snowflake Copy / Merge statements in a more concise and high-level format.
 
@@ -34,26 +34,18 @@ def log_results(results: list[tuple[Any, ...]], statement_type: str) -> None:
     Returns:
         None, but logs the formatted results.
     """
-    if statement_type == "COPY":
-        column_names = [
-            "file",
-            "status",
-            "rows_parsed",
-            "rows_loaded",
-            "error_limit",
-            "error_seen",
-            "first_error",
-            "first_error_line",
-            "first_error_character",
-            "first_error_column_name",
-        ]
-    elif statement_type == "MERGE":
-        column_names = [
-            "number_of_rows_inserted",
-            "number_of_rows_updated",
-        ]
-    else:
-        raise ValueError(f"Statement Type {statement_type} not supported")
+    column_names = [
+        "file",
+        "status",
+        "rows_parsed",
+        "rows_loaded",
+        "error_limit",
+        "error_seen",
+        "first_error",
+        "first_error_line",
+        "first_error_character",
+        "first_error_column_name",
+    ]
 
     # initialize counters for aggregated values
     total_files = len(results)
@@ -93,7 +85,7 @@ def log_results(results: list[tuple[Any, ...]], statement_type: str) -> None:
     return None
 
 
-def log_merge_results(results: list[tuple[int, int]]) -> None:
+def log_results_merge(results: list[tuple[int, int]]) -> None:
     """
     Logs the results of Snowflake MERGE statements.
 
@@ -323,7 +315,7 @@ def load_snowflake_table_from_s3(
 
     print(f"Executing SQL: \n{load_sql}")
     results = connection.execute(statement=load_sql).fetchall()
-    log_results(results=results, statement_type="COPY")
+    log_results_copy(results=results, statement_type="COPY")
 
     return None
 
@@ -402,10 +394,9 @@ def merge_snowflake_source_into_target(
             VALUES ({insert_values});
         """
 
-        print(f"Executing {sql}")
+        print(f"Executing SQL: \n{sql}")
         results = connection.execute(statement=sql).fetchall()
-        print(results)
-        log_merge_results(results=results)
+        log_results_merge(results=results)
         print(
             f"Merge Successful for {source_schema}.{source_table} into {target_schema}.{target_table}"
         )
