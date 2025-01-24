@@ -5,7 +5,7 @@ from sqlalchemy.engine.base import Connection
 
 try:
     from .exceptions import SnowflakeCheckError
-except:
+except:  # noqa: E722
     from exceptions import SnowflakeCheckError
 
 # msut have parameter
@@ -353,7 +353,6 @@ def merge_snowflake_source_into_target(
     target_table = target_table.upper()
 
     try:
-
         # pull columns from the target table; that's the source of truth
         # we need these to build insert / update clauses for the merge
         get_cols_query = connection.execute(

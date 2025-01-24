@@ -1,5 +1,4 @@
 from datetime import datetime
-import sys
 
 from airflow.decorators import dag, task
 import boto3
@@ -27,7 +26,7 @@ def s3_check_test():
         file_name = "manifest1.json"
 
         try:
-            client = boto3.client(f"s3")
+            client = boto3.client("s3")
             check_s3_file_exists(
                 client=client,
                 bucket="nba-elt-dbt-ci",
@@ -36,7 +35,7 @@ def s3_check_test():
 
         except S3PrefixCheckFail:
             print(
-                f"File not found, assuming there was no data for today.  exiting out ..."
+                "File not found, assuming there was no data for today.  exiting out ..."
             )
             return
 

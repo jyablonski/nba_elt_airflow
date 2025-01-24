@@ -1,4 +1,4 @@
-from datetime import datetime, timedelta
+from datetime import datetime
 import pkg_resources
 
 from airflow.decorators import dag, task

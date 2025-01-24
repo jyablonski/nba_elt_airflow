@@ -37,7 +37,7 @@ def postgres_chunk_pipeline():
     def write_data_to_s3(
         **context: dict,
     ):
-        run_config = context["ti"].xcom_pull(task_ids="generate_run_config")
+        # run_config = context["ti"].xcom_pull(task_ids="generate_run_config")
         date = context["data_interval_end"].date()
         table_name = "aws_boxscores_source"
         conn = create_pg_sqlalchemy_conn(postgres_conn="nba_database")

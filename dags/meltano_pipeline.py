@@ -1,4 +1,4 @@
-from datetime import datetime, timedelta
+from datetime import datetime
 import os
 
 from airflow import DAG
@@ -7,20 +7,9 @@ from airflow.operators.bash import BashOperator
 from airflow.operators.empty import EmptyOperator
 
 from include.common import DEFAULT_ARGS
-from include.utils import get_schedule_interval, jacobs_slack_alert
+from include.utils import get_schedule_interval
 
 # dbt test failure WILL fail the task, and fail the dag.
-
-JACOBS_DEFAULT_ARGS = {
-    "owner": "jacob",
-    "depends_on_past": False,
-    "email": ["jyablonski9@gmail.com"],
-    "email_on_failure": True,
-    "email_on_retry": True,
-    "retries": 1,
-    "retry_delay": timedelta(minutes=1),
-    "on_failure_callback": jacobs_slack_alert,
-}
 
 os.environ["AWS_DEFAULT_REGION"] = "us-east-1"
 
@@ -37,7 +26,7 @@ def jacobs_meltano_task(dag: DAG) -> BashOperator:
     return BashOperator(
         task_id=task_id,
         dag=dag,
-        bash_command=f"meltano elt tap-gitlab target-postgres --job_id=gitlab-to-postgres",
+        bash_command="meltano elt tap-gitlab target-postgres --job_id=gitlab-to-postgres",
     )
 
 
@@ -63,12 +52,10 @@ def create_dag() -> DAG:
     """
     xxx
     """
-    schedule_interval = "0 11 * * *"
-
     dag = DAG(
         "meltano_pipeline_qa",
         catchup=False,
-        default_args=JACOBS_DEFAULT_ARGS,
+        default_args=DEFAULT_ARGS,
         schedule_interval=get_schedule_interval(
             None
         ),  # change to none when testing / schedule_interval | None
