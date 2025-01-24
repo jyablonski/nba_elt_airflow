@@ -1,4 +1,4 @@
-""" Python Test DAG"""
+"""Python Test DAG"""
 
 from datetime import datetime
 
@@ -170,27 +170,6 @@ def nba_rest_api_scrape_dag():
 
     @task()
     def scrape_team_ratings(
-        base_api_endpoint: str, task_endpoint: str, bucket: str, **context: dict
-    ):
-        date = context["data_interval_end"].strftime("%Y-%m-%d")
-        file_path = f"rest_api_scrapes/{task_endpoint}/{task_endpoint}-{date}"
-
-        game_types = scrape_endpoint(
-            endpoint=task_endpoint,
-            context=context,
-            base_api_endpoint=base_api_endpoint,
-        )
-
-        write_to_s3(
-            dataframe=game_types,
-            s3_bucket=bucket,
-            s3_path=file_path,
-        )
-
-        pass
-
-    @task()
-    def scrape_transactions(
         base_api_endpoint: str, task_endpoint: str, bucket: str, **context: dict
     ):
         date = context["data_interval_end"].strftime("%Y-%m-%d")

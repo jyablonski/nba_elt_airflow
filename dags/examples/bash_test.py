@@ -24,7 +24,7 @@ def bash_test_pipeline():
     def test_task(
         **context: dict,
     ):
-        print(f"hi")
+        print("hi")
 
     @task()
     def bash_task():

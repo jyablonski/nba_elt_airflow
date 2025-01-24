@@ -22,7 +22,7 @@ def test_check_s3_file_exists():
             bucket=bucket_name,
             file_prefix=f"{bucket_name}-file.txt",
         )
-        == True
+        is True
     )
 
     # assert it raises a failure when it checks a file that doesn't exist
@@ -55,14 +55,14 @@ def test_write_to_s3_success():
         s3_path=file_path,
     )
 
-    assert write_test == True
+    assert write_test is True
 
 
 # get some dumbass mf error about no such bucket exists, im over it
 @pytest.mark.filterwarnings("ignore::pytest.PytestUnraisableExceptionWarning")
 @mock_aws
 def test_write_to_s3_fail():
-    client = boto3.client("s3", region_name="us-east-1")
+    # client = boto3.client("s3", region_name="us-east-1")
     bucket_name = "jyablonski_write_to_s3_bucket_fail"
 
     file_path = "test.parquet"
@@ -75,7 +75,7 @@ def test_write_to_s3_fail():
     )
 
     with pytest.raises(TypeError):
-        write_test = write_to_s3(
+        write_to_s3(
             dataframe=df,
             s3_bucket=bucket_name,
             s3_path=file_path,

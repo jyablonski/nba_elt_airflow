@@ -10,7 +10,7 @@ from include.utils import get_instance_type
 
 try:
     from .exceptions import S3PrefixCheckFail
-except:
+except:  # noqa: E722
     from exceptions import S3PrefixCheckFail
 
 

@@ -3,7 +3,6 @@ import os
 
 from airflow.settings import Session
 from airflow.models.connection import Connection
-from airflow.providers.smtp.hooks.smtp import SmtpHook
 from airflow.providers.slack.hooks.slack_webhook import SlackWebhookHook
 from airflow.providers.slack.operators.slack_webhook import SlackWebhookOperator
 from airflow.providers.discord.operators.discord_webhook import DiscordWebhookOperator
@@ -14,7 +13,7 @@ from airflow.providers.pagerduty.notifications.pagerduty import (
 
 try:
     from .exceptions import NoConnectionExists
-except:
+except:  # noqa: E722
     from exceptions import NoConnectionExists
 
 SLACK_CONN_ID = "slack"
@@ -158,7 +157,7 @@ def jacobs_slack_alert(slack_webhook_conn_id: str = "slack") -> None:
         ti = context["task_instance"]
         slack_msg = f"""
                 :red_circle: Task Failed. 
-            *Exception*: {context['exception']}
+            *Exception*: {context["exception"]}
             *Task*: {ti.task_id}
             *Dag*: {ti.dag_id} 
             *Owner*: {ti.task.owner}
@@ -249,7 +248,7 @@ def jacobs_discord_alert(context):
     # print(ti)
     discord_msg = f"""
             :red_circle: Task Failed. 
-            *Exception*: {context['exception']}
+            *Exception*: {context["exception"]}
             *Task*: {ti.task_id}
             *Dag*: {ti.dag_id} 
             *Owner*: {discord_owner_ping(ti.task.owner)}

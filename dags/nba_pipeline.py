@@ -1,5 +1,4 @@
-from datetime import datetime, timedelta
-import os
+from datetime import datetime
 
 from airflow.decorators import dag
 from airflow.models import Variable
@@ -34,7 +33,7 @@ def pipeline():
             task_id="ingestion_pipeline",
             aws_conn_id="aws_ecs",
             cluster=ecs_cluster,
-            task_definition=f"jacobs_webscrape_task_",
+            task_definition="jacobs_webscrape_task_",
             launch_type="FARGATE",
             overrides={
                 "containerOverrides": [

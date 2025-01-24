@@ -1,11 +1,11 @@
-from datetime import date, datetime, timedelta
+from datetime import datetime
 
 from airflow.decorators import dag, task
 from airflow.models.param import Param
 from airflow.providers.postgres.hooks.postgres import PostgresHook
 
 from include.common import DEFAULT_ARGS
-from include.utils import get_schedule_interval, jacobs_slack_alert
+from include.utils import get_schedule_interval
 
 # from airflow.providers.common.sql.hooks.sql import DbApiHook
 #
