@@ -32,12 +32,12 @@ def snowflake_merge_test_pipeline():
             connection=conn,
             stage="NBA_ELT_STAGE_PROD",
             schema="source",
-            table="test_merge_function",
-            s3_prefix="snowflake_table_loading/month=01/",
+            table="orders_load_test",
+            s3_prefix="snowflake_load_testing_v2/",
             file_format="test_schema.parquet_format_tf",
-            primary_keys=["id"],
-            order_by_fields=["created_at"],
-            target_table_timestamp_col="created_at",
+            primary_keys=["o_orderkey"],
+            order_by_fields=["o_orderdate"],
+            target_table_timestamp_col="metadata_ingest_time",
         )
 
     merge_task()
