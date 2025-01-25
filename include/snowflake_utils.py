@@ -77,11 +77,12 @@ def log_results_copy(results: list[tuple[Any, ...]]) -> None:
     print(f"High-Level Summary: {summary}")
 
     # optionally log individual file details if desired
-    for idx, result in enumerate(results):
-        formatted_result = dict(zip(column_names, result))
-        print(
-            f"Result {idx + 1}: {formatted_result['file']} - Status: {formatted_result['status']}, Rows Parsed: {formatted_result['rows_parsed']}, Rows Loaded: {formatted_result['rows_loaded']}, Errors: {formatted_result['error_seen']}"
-        )
+    # for idx, result in enumerate(results):
+    #     formatted_result = dict(zip(column_names, result))
+    #     print(
+    #         f"Result {idx + 1}: {formatted_result['file']} - Status: {formatted_result['status']}, Rows Parsed: {formatted_result['rows_parsed']}, Rows Loaded: {formatted_result['rows_loaded']}, Errors: {formatted_result['error_seen']}"
+    #     )
+    # Result 1: s3://jyablonski-nba-elt-prod/snowflake_load_testing_v2/data_0_0_15.snappy.parquet - Status: LOADED, Rows Parsed: 319488, Rows Loaded: 319488, Errors: 0
 
     return None
 
@@ -132,6 +133,33 @@ def get_snowflake_conn(conn_id: str = "snowflake_conn") -> Connection:
     return connection
 
 
+def build_snowflake_table_copy(
+    connection: Connection,
+    source_schema: str,
+    source_table: str,
+    target_schema: str,
+    target_table: str,
+) -> None:
+    """
+    Function to build a Snowflake Table if it doesn't
+    already exist. It uses an existing Snowflake Table
+    as a Template for what to build
+    """
+    build_sql = f"""\
+    CREATE TABLE IF NOT EXISTS {target_schema}.{target_table}
+    LIKE {source_schema}.{source_table};"""
+
+    try:
+        results = connection.execute(statement=build_sql).fetchall()
+        print(results)
+    except BaseException as e:
+        raise Exception(
+            f"Error Occurred while building {target_schema}.{target_table}: {str(e)}"
+        ) from e
+
+    return None
+
+
 def build_snowflake_table_from_s3(
     connection: Connection,
     stage: str,
@@ -162,7 +190,7 @@ def build_snowflake_table_from_s3(
     """
     file_location = f"{stage}/{s3_prefix}"
 
-    sql = f"""
+    build_sql = f"""\
     CREATE OR REPLACE TABLE {schema}.{table}
     USING TEMPLATE (
         SELECT ARRAY_AGG(OBJECT_CONSTRUCT(*))
@@ -172,14 +200,20 @@ def build_snowflake_table_from_s3(
             FILE_FORMAT=>'{file_format}'
             )
         )
-    );
-    """
+    );"""
+    alter_table_sql = f"""\
+    ALTER TABLE {schema}.{table} ADD COLUMN
+        metadata_filename varchar,
+        metadata_ingest_time timestamp;"""
 
     try:
-        print(f"Executing SQL: \n{sql}")
+        print(f"Executing SQL: \n{build_sql}")
         # it returns a list of tuples, so we need to get the first element of the first tuple
-        results = connection.execute(statement=sql).fetchall()[0][0]
+        results = connection.execute(statement=build_sql).fetchall()[0][0]
+        print(results)
 
+        print(f"Executing SQL: \n{alter_table_sql}")
+        results = connection.execute(statement=alter_table_sql).fetchall()[0]
         print(results)
 
         # if results != f"Table {table.upper()} successfully created.":
@@ -192,7 +226,7 @@ def build_snowflake_table_from_s3(
             f"Error Occurred while building {schema}.{table} for file {file_location}: {str(e)}"
         ) from e
 
-    return sql
+    return None
 
 
 def create_deduped_temp_table(
@@ -226,8 +260,8 @@ def create_deduped_temp_table(
         order_by_fields (list[str])): Field to use in the `QUALIFY ROW_NUMBER()`
             clause for deduplication.
 
-        target_table_timestamp_col (str): The timestamp column to use
-            for data filtering
+        target_table_timestamp_col (str): Optional timestamp column
+            in the target table to use for data filtering
 
     Returns:
         None, but creates a temporary deduplicated table in Snowflake.
@@ -241,7 +275,7 @@ def create_deduped_temp_table(
     if target_table_timestamp_col:
         where_clause = f"""
         WHERE src.{target_table_timestamp_col} > (
-            SELECT MAX(tgt.{target_table_timestamp_col})
+            SELECT COALESCE(MAX(tgt.{target_table_timestamp_col}), '1900-01-01 00:00:00')
             FROM {target_table_schema}.{target_table} tgt
         )
         """
@@ -306,13 +340,18 @@ def load_snowflake_table_from_s3(
     # Truncate the table if requested
     if truncate_table:
         truncate_sql = f"TRUNCATE TABLE {schema}.{table};"
+        print(f"Executing SQL: \n{truncate_sql}")
         connection.execute(statement=truncate_sql)
 
     load_sql = f"""\
         COPY INTO {schema}.{table}
         FROM @{stage}/{s3_prefix}
         FILE_FORMAT = '{file_format}'
-        MATCH_BY_COLUMN_NAME = 'CASE_INSENSITIVE';"""
+        MATCH_BY_COLUMN_NAME = 'CASE_INSENSITIVE'
+		INCLUDE_METADATA = (
+		    metadata_filename = METADATA$FILENAME,
+            metadata_ingest_time = METADATA$START_SCAN_TIME
+        );"""
 
     print(f"Executing SQL: \n{load_sql}")
     results = connection.execute(statement=load_sql).fetchall()
@@ -512,7 +551,8 @@ def unload_to_s3(
         from {schema_name}.{table_name}
         {limit}
     )
-    file_format = {file_format};"""
+    file_format = {file_format}
+    header = true;"""
 
     print(f"Executing SQL: \n{query}")
     connection.execute(statement=query)
@@ -531,7 +571,6 @@ def merge_from_s3_to_snowflake(
     primary_keys: list[str] | None = None,
     order_by_fields: list[str] | None = None,
     target_table_timestamp_col: str | None = None,
-    truncate_table: bool = False,
 ) -> None:
     """
     Function to load data from S3 to Snowflake, optionally deduplicate, and merge it into a target table.
@@ -556,8 +595,6 @@ def merge_from_s3_to_snowflake(
         target_table_timestamp_col (str): Fields to filter the deduped data by
             checking the max value in the target table
 
-        truncate_table (bool): Whether to truncate the table before loading (optional)
-
     Returns:
         None, but performs the following operations:
         - Creates/loads the Snowflake table from S3 data
@@ -567,18 +604,16 @@ def merge_from_s3_to_snowflake(
     loading_schema = "staging"
     temp_table = f"temp_{table}"
 
-    print("starting build")
     # Step 1: Build Snowflake Table in staging from S3 (if not already created)
-    build_snowflake_table_from_s3(
+    print("starting build")
+    build_snowflake_table_copy(
         connection=connection,
-        stage=stage,
-        schema=loading_schema,
-        table=table,
-        s3_prefix=s3_prefix,
-        file_format=file_format,
+        source_schema=loading_schema,
+        source_table=table,
+        target_schema=loading_schema,
+        target_table=table,
     )
 
-    print("starting staging load")
     # Step 2: Load the Staging Table w/ data from S3
     load_snowflake_table_from_s3(
         connection=connection,
@@ -587,10 +622,9 @@ def merge_from_s3_to_snowflake(
         table=table,
         s3_prefix=s3_prefix,
         file_format=file_format,
-        truncate_table=truncate_table,
+        truncate_table=True,
     )
 
-    print("starting de-dupe")
     # Step 3: Create a new Temp Table in Staging to De-duplicate Data
     # to prepare the merge statement (which requires unique rows in the source)
     create_deduped_temp_table(
@@ -604,7 +638,6 @@ def merge_from_s3_to_snowflake(
         order_by_fields=order_by_fields,
     )
 
-    print("starting merge")
     # Step 4: Perform Merge of the Source Table (the temp one we just
     # created) into the Target Table
     merge_snowflake_source_into_target(
@@ -615,3 +648,11 @@ def merge_from_s3_to_snowflake(
         target_table=table,
         primary_keys=primary_keys,
     )
+
+    # Step 5: Truncate the Staging Table
+    truncate_sql = f"TRUNCATE TABLE {loading_schema}.{table};"
+    print(f"Executing SQL: \n{truncate_sql}")
+    connection.execute(statement=truncate_sql)
+
+    print(f"Ingestion Complete for {table}")
+    return None
