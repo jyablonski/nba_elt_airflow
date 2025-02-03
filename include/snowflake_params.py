@@ -19,7 +19,7 @@ COMMON_SNOWFLAKE_PARAMS = {
         default="NBA_ELT_STAGE_PROD",
         type="string",
         title="S3 Stage",
-        description="S3 Stage to Load Data to",
+        description="S3 Stage to reference",
         enum=["NBA_ELT_STAGE_PROD"],
     ),
     "file_format": Param(
@@ -27,6 +27,10 @@ COMMON_SNOWFLAKE_PARAMS = {
         type="string",
         title="File Format",
         description="File Format to use",
-        enum=["test_schema.parquet_format_tf"],
+        enum=[
+            "test_schema.parquet_format_tf",
+            "test_schema.csv_format_tf",
+            "test_schema.json_format_tf",
+        ],
     ),
 }

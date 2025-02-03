@@ -7,3 +7,4 @@ ENV AIRFLOW__CORE__TEST_CONNECTION=Enabled \
     # "variables_lookup_pattern": "^airflow_",
     AIRFLOW__SECRETS__BACKEND_KWARGS='{"variables_prefix": "/airflow/variables", "connections_prefix": "/airflow/connections"}' \
     AIRFLOW__SECRETS__CACHE_TTL_SECONDS=1800
+    # PYTHONPATH="${PYTHONPATH}:/usr/local/airflow/operators"
