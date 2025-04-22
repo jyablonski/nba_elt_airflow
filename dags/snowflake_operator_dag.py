@@ -21,7 +21,7 @@ from plugins.snowflake_load_operator import LoadSnowflakeFromS3Operator
 @dag(
     "snowflake_operator_dag",
     schedule=get_schedule_interval(None),
-    start_date=datetime(2023, 7, 1),
+    start_date=datetime(2025, 1, 1),
     catchup=False,
     default_args=DEFAULT_ARGS,
     tags=["snowflake", "manual"],
@@ -36,6 +36,8 @@ def pipeline():
         s3_prefix="boxscores/validated/year=2025/month=01",
         file_format="production.test_schema.parquet_format_tf",
         truncate_table=False,
+        # ingestion_start_date="2025-01-01",
+        # ingestion_end_date="2025-01-07",
     )
 
     @task()
