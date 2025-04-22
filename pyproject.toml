@@ -16,6 +16,7 @@ apache-airflow-providers-pagerduty = "^3.8.0"
 apache-airflow-providers-snowflake = "^5.7.1"
 awswrangler = "^3.9.1"
 moto = "^5.0.16"
+airflow-parse-bench = "^1.0.1"
 
 
 [tool.poetry.group.dev.dependencies]

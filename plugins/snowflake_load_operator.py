@@ -1,0 +1,57 @@
+from airflow.models import BaseOperator
+from airflow.providers.snowflake.hooks.snowflake import SnowflakeHook
+from typing import Optional
+
+from include.snowflake_utils import get_snowflake_conn, log_results_copy
+
+
+class LoadSnowflakeFromS3Operator(BaseOperator):
+    def __init__(
+        self,
+        snowflake_conn_id: str,
+        stage: str,
+        schema: str,
+        table: str,
+        s3_prefix: str,
+        file_format: str,
+        truncate_table: bool = False,
+        **kwargs,
+    ):
+        super().__init__(**kwargs)
+        self.snowflake_conn_id = snowflake_conn_id
+        self.stage = stage
+        self.schema = schema
+        self.table = table
+        self.s3_prefix = s3_prefix
+        self.file_format = file_format
+        self.truncate_table = truncate_table
+
+    def execute(self, context) -> None:
+        conn = get_snowflake_conn(conn_id=self.snowflake_conn_id)
+
+        try:
+            if self.truncate_table:
+                truncate_sql = f"TRUNCATE TABLE {self.schema}.{self.table};"
+                self.log.info(f"Executing SQL: {truncate_sql}")
+                conn.execute(truncate_sql)
+
+            load_sql = f"""\
+                COPY INTO {self.schema}.{self.table}
+                FROM @{self.stage}/{self.s3_prefix}
+                FILE_FORMAT = '{self.file_format}'
+                MATCH_BY_COLUMN_NAME = 'CASE_INSENSITIVE'
+                INCLUDE_METADATA = (
+                    metadata_filename = METADATA$FILENAME,
+                    metadata_ingest_time = METADATA$START_SCAN_TIME
+                );
+            """
+
+            self.log.info(f"Executing SQL: {load_sql}")
+
+            results = conn.execute(statement=load_sql).fetchall()
+            log_results_copy(results=results)
+
+            return None
+
+        finally:
+            conn.close()
