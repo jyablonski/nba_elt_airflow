@@ -6,6 +6,10 @@ from include.snowflake_utils import get_snowflake_conn, log_results_copy
 
 
 class LoadSnowflakeFromS3Operator(BaseOperator):
+    # this is required to properly render their jinja values,
+    # not the jinja string itself
+    template_fields = ("ingestion_start_date", "ingestion_end_date")
+
     def __init__(
         self,
         snowflake_conn_id: str,
@@ -34,6 +38,7 @@ class LoadSnowflakeFromS3Operator(BaseOperator):
 
     def execute(self, context) -> None:
         conn = get_snowflake_conn(conn_id=self.snowflake_conn_id)
+        print(self.ingestion_end_date, self.ingestion_start_date)
 
         try:
             if self.truncate_table:

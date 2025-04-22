@@ -23,6 +23,25 @@ from plugins.snowflake_load_operator import LoadSnowflakeFromS3Operator
     schedule=get_schedule_interval(None),
     start_date=datetime(2025, 1, 1),
     catchup=False,
+    params={
+        "start_date": Param(
+            default=None,
+            type=["null", "string"],
+            format="date",
+            title="Start Date",
+            description="Please select an optional date",
+            nullable=True,
+        ),
+        "end_date": Param(
+            default=None,
+            type=["null", "string"],
+            format="date",
+            title="End Date",
+            description="Please select an optional date",
+            nullable=True,
+        ),
+    },
+    render_template_as_native_obj=True,
     default_args=DEFAULT_ARGS,
     tags=["snowflake", "manual"],
 )
@@ -36,8 +55,8 @@ def pipeline():
         s3_prefix="boxscores/validated/year=2025/month=01",
         file_format="production.test_schema.parquet_format_tf",
         truncate_table=False,
-        # ingestion_start_date="2025-01-01",
-        # ingestion_end_date="2025-01-07",
+        ingestion_start_date="{{ dag_run.conf.get('start_date', data_interval_end) }}",
+        ingestion_end_date="{{ dag_run.conf.get('end_date', data_interval_end) }}",
     )
 
     @task()
