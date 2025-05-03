@@ -15,6 +15,8 @@ from include.utils import get_schedule_interval
     max_active_runs=1,
     default_args=DEFAULT_ARGS,
     tags=["snowflake"],
+    # this is needed when using the SQLExecuteQueryOperator
+    # so it can find the script
     template_searchpath="/usr/local/airflow/dags/sql",
 )
 def clone_db_pipeline():

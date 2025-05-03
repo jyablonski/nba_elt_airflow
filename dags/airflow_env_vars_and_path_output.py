@@ -24,6 +24,11 @@ def airflow_env_vars_pipeline():
     @task()
     def practice_task(**context):
         print(f"PYTHONPATH: {sys.path}")
+
+        # current working directory is at:
+        # `/usr/local/airflow`
+        # pass in template searchpath absolute path like so:
+        # template_searchpath="/usr/local/airflow/dags/sql",
         print(f"Current working directory: {os.getcwd()}")
         print(f"DAG file path: {__file__}")
         print("DAG folder contents:")
