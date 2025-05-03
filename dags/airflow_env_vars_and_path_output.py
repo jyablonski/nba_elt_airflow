@@ -36,6 +36,10 @@ def airflow_env_vars_pipeline():
             for f in files:
                 print(os.path.join(root, f))
 
+        print("\n=== Environment Variables ===")
+        for key, value in os.environ.items():
+            print(f"{key}={value}")
+
     practice_task()
 
 
