@@ -46,8 +46,8 @@ def test_log_results_copy(results, expected_summary):
     with patch("builtins.print") as mock_print:
         log_results_copy(results=results)
 
-        # Check if the high-level summary was printed
-        mock_print.assert_any_call(f"High-Level Summary: {expected_summary}")
+        # Check if the summary was printed
+        mock_print.assert_any_call(f"Ingestion Operator Summary: {expected_summary}")
 
 
 # Test cases for log_results_merge
@@ -160,8 +160,8 @@ def test_load_snowflake_table_from_s3(
     )
 
     executed_sql = mock_connection.execute.call_args.kwargs["statement"].strip()
-    assert (
-        expected_sql_partial in executed_sql
-    ), f"SQL does not contain expected partial statement: {expected_sql_partial}"
+    assert expected_sql_partial in executed_sql, (
+        f"SQL does not contain expected partial statement: {expected_sql_partial}"
+    )
 
     mock_log_results_copy.assert_called_once_with(results=[("mocked_result",)])
