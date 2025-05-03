@@ -2,7 +2,7 @@ use database production;
 use role accountadmin;
 
 
-create database development clone production;
+create or replace database development clone production;
 
 -- Step 1: Revoke all privileges on the DEVELOPMENT database
 REVOKE ALL PRIVILEGES ON DATABASE DEVELOPMENT FROM ROLE airflow_role_dev;
@@ -72,6 +72,3 @@ GRANT INSERT, UPDATE, DELETE ON ALL TABLES IN SCHEMA DEVELOPMENT.MARTS TO ROLE a
 GRANT USAGE ON SCHEMA DEVELOPMENT.STAGING TO ROLE airflow_role_dev;
 GRANT USAGE ON SCHEMA DEVELOPMENT.STAGING TO ROLE dbt_role_dev;
 GRANT USAGE ON SCHEMA DEVELOPMENT.STAGING TO ROLE metabase_role_dev;
-
--- STAGING only had admin via airflow in prod, no write roles
--- No table grants needed unless you want to allow reading/writing
