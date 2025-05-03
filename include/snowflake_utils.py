@@ -3,6 +3,7 @@ from typing import Any
 from airflow.providers.snowflake.hooks.snowflake import SnowflakeHook
 from sqlalchemy.engine.base import Connection
 
+
 try:
     from .exceptions import SnowflakeCheckError
 except:  # noqa: E722
@@ -47,6 +48,12 @@ def log_results_copy(results: list[tuple[Any, ...]]) -> None:
         "first_error_column_name",
     ]
 
+    if results[0][0] == "Copy executed with 0 files processed.":
+        print(
+            f"No Files were loaded; check the S3 Prefix or verify that the records haven't already been ingested"
+        )
+        return None
+
     # initialize counters for aggregated values
     total_files = len(results)
     total_rows_parsed = 0
@@ -74,7 +81,7 @@ def log_results_copy(results: list[tuple[Any, ...]]) -> None:
         "files_with_errors": files_with_errors,
     }
 
-    print(f"High-Level Summary: {summary}")
+    print(f"Ingestion Operator Summary: {summary}")
 
     # optionally log individual file details if desired
     # for idx, result in enumerate(results):

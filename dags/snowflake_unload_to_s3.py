@@ -38,7 +38,6 @@ dag_params = {**COMMON_SNOWFLAKE_PARAMS, **unload_params}
     tags=["snowflake", "manual"],
 )
 def pipeline():
-
     @task()
     def unload_task(**context):
         conn = get_snowflake_conn(conn_id="snowflake_conn")

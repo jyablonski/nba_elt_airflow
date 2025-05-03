@@ -70,6 +70,7 @@ def test_file_imports(mock_create_ecs_task_operator, rel_path, rv):
     if rel_path and rv:
         raise Exception(f"{rel_path} failed to import with message \n {rv}")
 
+
 @pytest.mark.parametrize(
     "dag_id,dag,fileloc", get_dags(), ids=[x[2] for x in get_dags()]
 )
@@ -90,9 +91,9 @@ def test_dag_retries(dag_id, dag, fileloc):
     test if a DAG has retries set
     """
     dag_retries = 0
-    assert (
-        dag.default_args.get("retries", None) >= dag_retries
-    ), f"{dag_id} in {fileloc} does not have retries not set to {dag_retries}."
+    assert dag.default_args.get("retries", None) >= dag_retries, (
+        f"{dag_id} in {fileloc} does not have retries not set to {dag_retries}."
+    )
 
 
 @pytest.mark.parametrize(
@@ -104,9 +105,9 @@ def test_dag_schedule_interval_enabled(dag_id, dag, fileloc):
     """
     schedule_interval_check = get_schedule_interval(dag.schedule_interval)
 
-    assert (
-        dag.schedule_interval == schedule_interval_check
-    ), f"{dag_id} in {fileloc} does not have the Schedule Interval Function Attached to manage Scheduling"
+    assert dag.schedule_interval == schedule_interval_check, (
+        f"{dag_id} in {fileloc} does not have the Schedule Interval Function Attached to manage Scheduling"
+    )
 
 
 @pytest.mark.parametrize(
@@ -116,6 +117,6 @@ def test_dag_slack_callback_enabled(dag_id, dag, fileloc):
     """
     test if a DAG has the Slack Callback set if a Task fails
     """
-    assert "alert" or "notification" in str(
-        dag.default_args["on_failure_callback"]
-    ), f"{dag_id} in {fileloc} has no Slack Alert Attached"
+    assert "alert" or "notification" in str(dag.default_args["on_failure_callback"]), (
+        f"{dag_id} in {fileloc} has no Slack Alert Attached"
+    )
