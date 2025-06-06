@@ -2,7 +2,7 @@ from datetime import datetime
 import os
 
 from airflow import DAG
-from airflow.operators.email import EmailOperator
+from airflow.providers.smtp.operators.smtp import EmailOperator
 from airflow.operators.bash import BashOperator
 from airflow.operators.empty import EmptyOperator
 
@@ -56,7 +56,7 @@ def create_dag() -> DAG:
         "meltano_pipeline_qa",
         catchup=False,
         default_args=DEFAULT_ARGS,
-        schedule_interval=get_schedule_interval(
+        schedule=get_schedule_interval(
             None
         ),  # change to none when testing / schedule_interval | None
         start_date=datetime(2022, 3, 21),

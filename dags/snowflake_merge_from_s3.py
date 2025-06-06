@@ -13,7 +13,7 @@ from include.snowflake_utils import (
 
 @dag(
     "snowflake_merge_test",
-    schedule_interval=get_schedule_interval(None),
+    schedule=get_schedule_interval(None),
     start_date=datetime(2023, 9, 23, 15, 0, 0),
     catchup=False,
     max_active_runs=1,

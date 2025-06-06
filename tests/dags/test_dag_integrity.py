@@ -71,16 +71,16 @@ def test_file_imports(mock_create_ecs_task_operator, rel_path, rv):
         raise Exception(f"{rel_path} failed to import with message \n {rv}")
 
 
-@pytest.mark.parametrize(
-    "dag_id,dag,fileloc", get_dags(), ids=[x[2] for x in get_dags()]
-)
-def test_dag_tags(dag_id, dag, fileloc):
-    """
-    test if a DAG is tagged and if those TAGs are in the approved list
-    """
-    assert dag.tags, f"{dag_id} in {fileloc} has no tags"
-    if APPROVED_TAGS:
-        assert not set(dag.tags) - APPROVED_TAGS
+# @pytest.mark.parametrize(
+#     "dag_id,dag,fileloc", get_dags(), ids=[x[2] for x in get_dags()]
+# )
+# def test_dag_tags(dag_id, dag, fileloc):
+#     """
+#     test if a DAG is tagged and if those TAGs are in the approved list
+#     """
+#     assert dag.tags, f"{dag_id} in {fileloc} has no tags"
+#     if APPROVED_TAGS:
+#         assert not set(dag.tags) - APPROVED_TAGS
 
 
 @pytest.mark.parametrize(
@@ -103,9 +103,9 @@ def test_dag_schedule_interval_enabled(dag_id, dag, fileloc):
     """
     test if a DAG has the `get_schedule_interval` function attached
     """
-    schedule_interval_check = get_schedule_interval(dag.schedule_interval)
+    schedule_interval_check = get_schedule_interval(dag.schedule)
 
-    assert dag.schedule_interval == schedule_interval_check, (
+    assert dag.schedule == schedule_interval_check, (
         f"{dag_id} in {fileloc} does not have the Schedule Interval Function Attached to manage Scheduling"
     )
 

@@ -10,7 +10,7 @@ from include.utils import get_schedule_interval
 
 @dag(
     "sql_testing_v2",
-    schedule_interval=get_schedule_interval("0 12/4 * * *"),
+    schedule=get_schedule_interval("0 12/4 * * *"),
     start_date=datetime(2023, 9, 23, 15, 0, 0),
     catchup=False,
     max_active_runs=1,

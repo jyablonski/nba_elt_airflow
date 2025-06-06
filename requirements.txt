@@ -4,6 +4,7 @@ apache-airflow-providers-postgres
 apache-airflow-providers-slack
 apache-airflow-providers-pagerduty
 apache-airflow-providers-snowflake
+apache-airflow-providers-smtp
 awswrangler
 moto
 polars

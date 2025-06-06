@@ -11,7 +11,7 @@ ID_DEFAULT = "10, 11, 12"
 
 @dag(
     "multi_load_test",
-    schedule_interval=get_schedule_interval("0 12,16,20 * * *"),
+    schedule=get_schedule_interval("0 12,16,20 * * *"),
     # schedule=UnevenIntervalsTimetable(),
     start_date=datetime(2023, 9, 23, 15, 0, 0),
     catchup=False,

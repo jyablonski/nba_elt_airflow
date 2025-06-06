@@ -32,8 +32,8 @@ dag_params = {**COMMON_SNOWFLAKE_PARAMS, **build_params}
 
 @dag(
     "snowflake_build_table",
-    # schedule_interval="0 0 12 1 4/6 ? *",
-    schedule_interval=get_schedule_interval(None),
+    # schedule="0 0 12 1 4/6 ? *",
+    schedule=get_schedule_interval(None),
     start_date=datetime(2023, 9, 23, 15, 0, 0),
     catchup=False,
     max_active_runs=1,

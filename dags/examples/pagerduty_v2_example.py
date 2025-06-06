@@ -8,7 +8,7 @@ from include.utils import get_schedule_interval, read_dag_docs
 
 @dag(
     "pagerduty_v2_example",
-    schedule_interval=get_schedule_interval(None),
+    schedule=get_schedule_interval(None),
     start_date=datetime(2023, 9, 23, 15, 0, 0),
     doc_md=read_dag_docs("pagerduty_v2_example"),
     catchup=True,
