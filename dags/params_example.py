@@ -9,7 +9,7 @@ from include.utils import get_schedule_interval, read_dag_docs
 
 @dag(
     "params_example",
-    schedule_interval=get_schedule_interval("*/2 * * * *"),
+    schedule=get_schedule_interval("*/2 * * * *"),
     start_date=datetime(2024, 2, 1),
     catchup=False,
     max_active_runs=1,

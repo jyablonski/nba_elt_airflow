@@ -103,9 +103,9 @@ def test_dag_schedule_interval_enabled(dag_id, dag, fileloc):
     """
     test if a DAG has the `get_schedule_interval` function attached
     """
-    schedule_interval_check = get_schedule_interval(dag.schedule_interval)
+    schedule_interval_check = get_schedule_interval(dag.schedule)
 
-    assert dag.schedule_interval == schedule_interval_check, (
+    assert dag.schedule == schedule_interval_check, (
         f"{dag_id} in {fileloc} does not have the Schedule Interval Function Attached to manage Scheduling"
     )
 

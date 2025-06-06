@@ -9,12 +9,12 @@ from include.utils import get_schedule_interval, loop_through_days
 
 @dag(
     "backfill_params_test_v2",
-    schedule_interval=get_schedule_interval("*/2 * * * *"),
+    schedule=get_schedule_interval("*/2 * * * *"),
     start_date=datetime(2023, 9, 23, 15, 0, 0),
     catchup=True,
     max_active_runs=1,
     default_args=DEFAULT_ARGS,
-    params={"start_date": (datetime.now().date() - timedelta(days=1))},
+    params={"start_date": (datetime.now().date() - timedelta(days=1)).isoformat()},
     render_template_as_native_obj=True,
     tags=["example"],
 )

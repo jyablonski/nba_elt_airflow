@@ -1,5 +1,6 @@
-FROM quay.io/astronomer/astro-runtime:12.6.0
+FROM astrocrpublic.azurecr.io/runtime:3.0-1
 
+# https://www.astronomer.io/docs/astro/runtime-image-architecture/
 ENV AIRFLOW__CORE__TEST_CONNECTION=Enabled \
     AIRFLOW__ASTRONOMER__UPDATE_CHECK_INTERVAL=0 \
     AIRFLOW_CONN_MY_POSTGRES_CONN=postgresql://user:password@localhost:5432/mydb \

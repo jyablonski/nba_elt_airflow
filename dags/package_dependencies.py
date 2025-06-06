@@ -24,7 +24,7 @@ from include.utils import (
 
 @dag(
     "package_dependencies",
-    schedule_interval=get_schedule_interval("*/2 * * * *"),
+    schedule=get_schedule_interval("*/2 * * * *"),
     start_date=datetime(2023, 4, 1),
     catchup=True,
     max_active_runs=1,

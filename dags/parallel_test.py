@@ -17,14 +17,12 @@ from airflow.decorators import dag, task
 from include.common import DEFAULT_ARGS
 from include.utils import (
     get_schedule_interval,
-    start_log_block,
-    end_log_block,
 )
 
 
 @dag(
     "parallel_test",
-    schedule_interval=get_schedule_interval("*/2 * * * *"),
+    schedule=get_schedule_interval("*/2 * * * *"),
     start_date=datetime(2023, 4, 1),
     catchup=True,
     max_active_runs=1,
